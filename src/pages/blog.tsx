@@ -20,7 +20,7 @@ export default ({ path }: Props) => (
               <Link key={index} to={`/topics?topic=${tag}`} className="my-1">
                 <span
                   className={
-                    'py-1 px-4 text-sm font-semibold tracking-widest rounded-full cursor-pointer transition duration-200 ease-in-out bg-dblue-100 text-dblue-700 hover:bg-dblue-200 dk:bg-blue-900 dk:text-dblue-100 dk-hover:bg-blue-700' +
+                    'py-1 px-4 text-sm font-semibold tracking-widest rounded-full cursor-pointer transition duration-200 ease-in-out bg-green-100 text-green-700 hover:bg-green-200 dk:bg-blue-900 dk:text-green-100 dk-hover:bg-blue-700' +
                     (index >= 1 ? ' ml-4' : '')
                   }
                 >

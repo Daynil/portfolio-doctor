@@ -21,6 +21,41 @@ body {
   background: hsl(0, 0%, 60%);
 }
 
+h1 {
+  @apply text-4xl mb-8 font-bold;
+}
+
+h2 {
+  @apply text-2xl mt-12 mb-6 font-bold;
+}
+
+p {
+  @apply mb-6 leading-relaxed;
+}
+
+ul {
+  @apply list-disc list-inside mb-6;
+}
+
+.btn {
+  @apply font-bold py-2 px-4 rounded;
+}
+
+.btn-green {
+  @apply bg-green-500 text-white;
+}
+.btn-green:hover {
+  @apply bg-green-700;
+}
+
+.form-input:hover {
+  @apply outline-none border-green-500;
+}
+
+.form-label {
+  @apply text-sm mb-2 text-gray-600 font-bold tracking-wider;
+}
+
 @tailwind components;
 /*! purgecss end ignore */
 

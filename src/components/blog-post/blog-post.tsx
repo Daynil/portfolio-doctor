@@ -23,7 +23,7 @@ const BlogPost = (props: Props) => {
   //       <Link key={index} to={`/topics?topic=${tag}`} className="my-1">
   //         <span
   //           className={
-  //             'py-1 px-4 ml-4 text-sm font-semibold tracking-widest rounded-full cursor-pointer transition duration-200 ease-in-out bg-dblue-100 text-dblue-700 hover:bg-dblue-200 dk:bg-blue-900 dk:text-dblue-100 dk-hover:bg-blue-700'
+  //             'py-1 px-4 ml-4 text-sm font-semibold tracking-widest rounded-full cursor-pointer transition duration-200 ease-in-out bg-green-100 text-green-700 hover:bg-green-200 dk:bg-blue-900 dk:text-green-100 dk-hover:bg-blue-700'
   //           }
   //         >
   //           {tag}
@@ -69,8 +69,8 @@ const BlogPost = (props: Props) => {
   //           target="_blank"
   //           className="flex flex-row mt-12"
   //         >
-  //           <TwitterIcon className="text-dblue-500 hover:text-dblue-300 transition-colors ease-in-out duration-300 w-24" />
-  //           <span className="ml-4 p-4 bg-dblue-200 dk:bg-dblue-800 text-dblue-800 dk:text-dblue-200 text-2xl rounded-md">
+  //           <TwitterIcon className="text-green-500 hover:text-green-300 transition-colors ease-in-out duration-300 w-24" />
+  //           <span className="ml-4 p-4 bg-green-200 dk:bg-green-800 text-green-800 dk:text-green-200 text-2xl rounded-md">
   //             Found this article useful? Please click share it to spread the
   //             word!! 🎉
   //           </span>

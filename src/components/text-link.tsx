@@ -32,7 +32,7 @@ export default function TextLink({
     );
 
   return (
-    <span className="border-b-2 border-dblue-500 text-gray-900 dk:text-gray-300 dk-hover:text-dblue-500 hover:text-dblue-500 hover:border-transparent transition duration-200 ease-in-out">
+    <span className="border-b-2 border-green-500 text-gray-900 dk:text-gray-300 dk-hover:text-green-500 hover:text-green-500 hover:border-transparent transition duration-200 ease-in-out">
       {link}
     </span>
   );
