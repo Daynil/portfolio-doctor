@@ -1,0 +1,27 @@
+/*! purgecss start ignore */
+@tailwind base;
+
+body {
+  overflow-x: hidden;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(0, 0%, 45%);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(0, 0%, 60%);
+}
+
+@tailwind components;
+/*! purgecss end ignore */
+
+@tailwind utilities;

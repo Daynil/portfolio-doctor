@@ -1,0 +1,19 @@
+/* Markdown output styling */
+/*! purgecss start ignore */
+h1 {
+  @apply text-4xl mb-8 font-bold;
+}
+
+h2 {
+  @apply text-2xl mt-12 mb-6 font-bold;
+}
+
+p {
+  @apply mb-6 leading-relaxed;
+}
+
+ul {
+  @apply list-disc list-inside mb-6;
+}
+
+/*! purgecss end ignore */
