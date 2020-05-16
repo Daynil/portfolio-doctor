@@ -2,7 +2,7 @@ import {
   CyclePortfolio,
   PortfolioOptions,
   WithdrawalMethod
-} from '../portfolio-calc/portfolio-calc';
+} from './portfolio-calc';
 
 describe('portfolio cycle calculations', () => {
   const minimalOptions: PortfolioOptions = {
