@@ -4,25 +4,25 @@ import {
   WithdrawalMethod
 } from './portfolio-calc';
 
-describe('portfolio cycle calculations', () => {
-  const minimalOptions: PortfolioOptions = {
-    investmentExpenseRatio: 1,
-    equitiesRatio: 1,
-    simulationYearsLength: 1,
-    startBalance: 1,
-    withdrawalMethod: WithdrawalMethod.Nominal,
-    withdrawal: { staticAmount: 1 }
-  };
+const minimalOptions: PortfolioOptions = {
+  investmentExpenseRatio: 1,
+  equitiesRatio: 1,
+  simulationYearsLength: 1,
+  startBalance: 1,
+  withdrawalMethod: WithdrawalMethod.Nominal,
+  withdrawal: { staticAmount: 1 }
+};
 
-  const starterOptions: PortfolioOptions = {
-    startBalance: 1000000,
-    equitiesRatio: 0.9,
-    investmentExpenseRatio: 0.0025,
-    simulationYearsLength: 60,
-    withdrawalMethod: WithdrawalMethod.Nominal,
-    withdrawal: { staticAmount: 40000 }
-  };
+const starterOptions: PortfolioOptions = {
+  startBalance: 1000000,
+  equitiesRatio: 0.9,
+  investmentExpenseRatio: 0.0025,
+  simulationYearsLength: 60,
+  withdrawalMethod: WithdrawalMethod.Nominal,
+  withdrawal: { staticAmount: 40000 }
+};
 
+describe('basic functionality test', () => {
   test('gets year index', () => {
     const portfolioDefaultStart = new CyclePortfolio({ ...minimalOptions });
     const portfolioCustomStart = new CyclePortfolio({
@@ -50,7 +50,24 @@ describe('portfolio cycle calculations', () => {
     expect(portfolioDefault.getMaxSimulationCycles()).toEqual(145);
     expect(portfolioRange.getMaxSimulationCycles()).toEqual(18);
   });
+});
 
+describe('full cycle portfolio tests', () => {
+  test('calculates a 3 year cycle length portfolio', () => {
+    const portfolio = new CyclePortfolio({
+      ...starterOptions,
+      simulationYearsLength: 3,
+      startYear: 2013
+    });
+    const data = portfolio.crunchAllCyclesData();
+    console.log(data);
+    const endingBalance =
+      data.portfolioLifecyclesData[0].stats.balance.endingInflAdj;
+    expect(endingBalance).toEqual(1103529.27);
+  });
+});
+
+describe('single full cycle tests', () => {
   test('calculates single cycle of portfolio data no spend adjustments', () => {
     const portfolio = new CyclePortfolio({
       ...starterOptions,

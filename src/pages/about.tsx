@@ -17,7 +17,7 @@ const About = ({ path }: Props) => (
     </p>
     <p>
       Written and created by{' '}
-      <TextLink href="https://dlibin.net">Danny Libin</TextLink>
+      <TextLink href="https://dlibin.net">Danny Libin</TextLink>.
     </p>
   </Layout>
 );

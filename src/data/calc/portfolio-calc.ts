@@ -3,10 +3,10 @@ import marketData from '../data.json';
 
 export interface MarketYearData {
   year: number;
-  price: number;
-  dividend: number;
+  equitiesPrice: number;
+  equitiesDividend: number;
+  inflationIndex: number;
   fixedIncomeInterest: number;
-  cpi: number;
 }
 
 export interface CycleYearData {
@@ -239,7 +239,8 @@ export class CyclePortfolio {
       (yearData) => yearData.year === cycleStartYear
     );
 
-    const firstYearCPI = this.marketYearData[cycleStartYearIndex].cpi;
+    const firstYearCPI = this.marketYearData[cycleStartYearIndex]
+      .inflationIndex;
 
     for (
       let currYearIndex = cycleStartYearIndex;
@@ -630,7 +631,7 @@ export class CyclePortfolio {
     let cumulativeInflation: number;
 
     if (isFirstYear) cumulativeInflation = 1;
-    else cumulativeInflation = dataCurrYear.cpi / startYearCpi;
+    else cumulativeInflation = dataCurrYear.inflationIndex / startYearCpi;
 
     const portfolioInfAdjStart = startingBalance / cumulativeInflation;
 
@@ -643,11 +644,12 @@ export class CyclePortfolio {
 
     const equities = yearStartSubtotal * this.options.equitiesRatio;
     const equitiesGrowth =
-      ((dataEndYear.price - dataCurrYear.price) / dataCurrYear.price) *
+      ((dataEndYear.equitiesPrice - dataCurrYear.equitiesPrice) /
+        dataCurrYear.equitiesPrice) *
       equities;
 
     const dividendsGrowth =
-      (dataCurrYear.dividend / dataCurrYear.price) * equities;
+      (dataCurrYear.equitiesDividend / dataCurrYear.equitiesPrice) * equities;
 
     const bonds = yearStartSubtotal * (1 - this.options.equitiesRatio);
     const bondsGrowth = (dataCurrYear.fixedIncomeInterest / 100) * bonds;
