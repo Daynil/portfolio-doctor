@@ -1,6 +1,8 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import Layout from '../components/layout';
 import SEO from '../components/seo';
+import { MarketYearData } from '../data/calc/portfolio-calc';
+import { parseCSVFileToJSON } from '../data/data-helpers';
 
 type Props = {
   path: string;
@@ -8,10 +10,10 @@ type Props = {
 
 export default function UploadData({ path }: Props) {
   const fileInput = useRef<HTMLInputElement>(null);
+  const [readData, setReadData] = useState<MarketYearData[]>(null);
 
-  function handleFileInput(f) {
-    console.log(fileInput.current.files[0].name);
-    console.log(URL.createObjectURL(fileInput.current.files[0]));
+  async function handleFileInput(f) {
+    setReadData(await parseCSVFileToJSON(fileInput.current.files[0]));
   }
 
   return (
@@ -43,6 +45,12 @@ export default function UploadData({ path }: Props) {
         onChange={(f) => handleFileInput(f)}
         ref={fileInput}
       />
+      <div>{JSON.stringify(readData)}</div>
+      {/* <div>
+        {!readData
+          ? null
+          : readData.map((dataRow, i) => <div key={i}>dataRow</div>)}
+      </div> */}
     </Layout>
   );
 }
