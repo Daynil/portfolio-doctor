@@ -35,7 +35,7 @@ describe('data helpers', () => {
         fixedIncomeInterest: 2.58
       }
     ];
-    expect(parseCSVStringToJSON(dataString, true)).toEqual(expected);
+    expect(parseCSVStringToJSON(dataString)).toEqual(expected);
   });
 
   test('data string CSVs parsed without headers', () => {
@@ -71,7 +71,7 @@ describe('data helpers', () => {
         fixedIncomeInterest: 2.58
       }
     ];
-    expect(parseCSVStringToJSON(dataString)).toEqual(expected);
+    expect(parseCSVStringToJSON(dataString, false)).toEqual(expected);
   });
 
   test('data string CSVs parsed without headers discards trailing newline', () => {
@@ -107,6 +107,6 @@ describe('data helpers', () => {
         fixedIncomeInterest: 2.58
       }
     ];
-    expect(parseCSVStringToJSON(dataString)).toEqual(expected);
+    expect(parseCSVStringToJSON(dataString, false)).toEqual(expected);
   });
 });

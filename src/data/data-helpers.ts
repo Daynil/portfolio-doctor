@@ -20,9 +20,10 @@ export async function parseCSVFileToJSON(
   return parseCSVStringToJSON(csvString, true);
 }
 
+// TODO: error handling here, mostly handling invalid string values
 export function parseCSVStringToJSON(
   csvString: string,
-  headers = false
+  headers = true
 ): MarketYearData[] {
   const rows = csvString.split(/\r\n|\n|\r/);
   // Toss the header

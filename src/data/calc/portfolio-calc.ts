@@ -1,5 +1,4 @@
 import { max, mean, median, min } from '../../utilities/math';
-import marketData from '../data.json';
 
 export interface MarketYearData {
   year: number;
@@ -152,9 +151,6 @@ export interface PortfolioOptions {
   startBalance: number;
   investmentExpenseRatio: number;
   equitiesRatio: number;
-  startYear?: number;
-  endYear?: number;
-  startMonth?: number;
   withdrawalMethod: WithdrawalMethod;
   withdrawal: WithdrawalOptions;
 }
@@ -167,18 +163,10 @@ export interface WithdrawalOptions {
 }
 
 export class CyclePortfolio {
-  marketYearData: MarketYearData[];
-
-  constructor(public options: PortfolioOptions) {
-    if (!this.options.startMonth) this.options.startMonth = 1;
-    this.marketYearData = marketData[this.options.startMonth];
-
-    if (!this.options.startYear)
-      this.options.startYear = this.marketYearData[0].year;
-    if (!this.options.endYear)
-      this.options.endYear = this.marketYearData[
-        this.marketYearData.length - 1
-      ].year;
+  constructor(
+    public marketYearData: MarketYearData[],
+    public options: PortfolioOptions
+  ) {
     switch (this.options.withdrawalMethod) {
       case WithdrawalMethod.Nominal:
       case WithdrawalMethod.InflationAdjusted:
@@ -393,7 +381,7 @@ export class CyclePortfolio {
   }
 
   crunchSingleCycleData(): CycleData {
-    return this.crunchCycle(this.options.startYear);
+    return this.crunchCycle(this.marketYearData[0].year);
   }
 
   /**
@@ -403,15 +391,14 @@ export class CyclePortfolio {
     portfolioLifecyclesData: CycleData[];
     portfolioStats: PortfolioStats;
   } {
-    const lastYearIndex = this.getYearIndex(this.options.endYear);
     const lastPossibleStartYear =
-      this.marketYearData[lastYearIndex].year -
+      this.marketYearData[this.marketYearData.length - 1].year -
       this.options.simulationYearsLength;
 
     const allCyclesData: CycleData[] = [];
 
     for (
-      let cycleStartYear = this.options.startYear;
+      let cycleStartYear = this.marketYearData[0].year;
       cycleStartYear <= lastPossibleStartYear;
       cycleStartYear++
     ) {
@@ -529,10 +516,10 @@ export class CyclePortfolio {
     const balancesMin = min(balances);
     const balancesMax = max(balances);
     portfolioStats.balance.min.year =
-      this.options.startYear + balancesMin.index;
+      this.marketYearData[0].year + balancesMin.index;
     portfolioStats.balance.min.balance = balancesMin.value;
     portfolioStats.balance.max.year =
-      this.options.startYear + balancesMax.index;
+      this.marketYearData[0].year + balancesMax.index;
     portfolioStats.balance.max.balance = balancesMax.value;
 
     const balancesInflationAdjusted = cycleDataStats.map(
@@ -543,11 +530,11 @@ export class CyclePortfolio {
     portfolioStats.balance.averageInflAdj = mean(balancesInflationAdjusted);
     portfolioStats.balance.medianInflAdj = median(balancesInflationAdjusted);
     portfolioStats.balance.min.yearInflAdj =
-      this.options.startYear + balancesInflationAdjustedMin.index;
+      this.marketYearData[0].year + balancesInflationAdjustedMin.index;
     portfolioStats.balance.min.balanceInflAdj =
       balancesInflationAdjustedMin.value;
     portfolioStats.balance.max.yearInflAdj =
-      this.options.startYear + balancesInflationAdjustedMax.index;
+      this.marketYearData[0].year + balancesInflationAdjustedMax.index;
     portfolioStats.balance.max.balanceInflAdj =
       balancesInflationAdjustedMax.value;
 
@@ -715,17 +702,25 @@ export class CyclePortfolio {
   }
 
   getYearIndex(year: number) {
-    return year - this.options.startYear;
+    return year - this.marketYearData[0].year;
   }
 
   getMaxSimulationCycles(): number {
     const lastPossibleStartYear =
-      this.options.endYear - this.options.simulationYearsLength;
+      this.marketYearData[this.marketYearData.length - 1].year -
+      this.options.simulationYearsLength;
     // Add 1 to include start year
-    return lastPossibleStartYear - this.options.startYear + 1;
+    return lastPossibleStartYear - this.marketYearData[0].year + 1;
   }
 }
 
-export function getMaxSimulationLength(): number {
-  return marketData[1].length - 1;
+export function getYearIndex(
+  marketData: MarketYearData[],
+  year: number
+): number {
+  return year - marketData[0].year;
+}
+
+export function getMaxSimulationLength(marketData: MarketYearData[]): number {
+  return marketData.length - 1;
 }

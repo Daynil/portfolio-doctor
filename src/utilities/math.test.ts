@@ -1,4 +1,4 @@
-import { clamp, max, mean, median, min } from '../utilities/math';
+import { clamp, max, mean, median, min, round } from '../utilities/math';
 
 describe('math helpers', () => {
   test('gets median', () => {
@@ -32,5 +32,15 @@ describe('math helpers', () => {
     expect(clamp(num, 0, 20)).toEqual(num);
     expect(clamp(num, 11, 20)).toEqual(11);
     expect(clamp(num, 0, 9)).toEqual(9);
+  });
+
+  test('rounds values', () => {
+    expect(round(10.92589, 0)).toEqual(11);
+    expect(round(10.12589, 0)).toEqual(10);
+    expect(round(10.12589, 1)).toEqual(10.1);
+    expect(round(10.12589, 2)).toEqual(10.13);
+    expect(round(10.12589, 3)).toEqual(10.126);
+    expect(round(10.12589, 4)).toEqual(10.1259);
+    expect(round(10.12589, 5)).toEqual(10.12589);
   });
 });

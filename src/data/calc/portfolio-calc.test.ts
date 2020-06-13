@@ -1,5 +1,10 @@
+import { readFileSync } from 'fs';
+import { round } from '../../utilities/math';
+import { parseCSVStringToJSON } from '../data-helpers';
 import {
   CyclePortfolio,
+  getYearIndex,
+  MarketYearData,
   PortfolioOptions,
   WithdrawalMethod
 } from './portfolio-calc';
@@ -22,29 +27,47 @@ const starterOptions: PortfolioOptions = {
   withdrawal: { staticAmount: 40000 }
 };
 
+let fullMarketYearData: MarketYearData[];
+
+beforeAll(async () => {
+  const csvString = readFileSync(require.resolve('../jan-shiller-data.csv'), {
+    encoding: 'utf8'
+  });
+  fullMarketYearData = parseCSVStringToJSON(csvString);
+});
+
 describe('basic functionality test', () => {
   test('gets year index', () => {
-    const portfolioDefaultStart = new CyclePortfolio({ ...minimalOptions });
-    const portfolioCustomStart = new CyclePortfolio({
-      ...minimalOptions,
-      startYear: 1872
+    const portfolioDefaultStart = new CyclePortfolio(fullMarketYearData, {
+      ...minimalOptions
+    });
+    const slicedMarket = fullMarketYearData.slice(119, 140);
+    const portfolioCustomStart = new CyclePortfolio(slicedMarket, {
+      ...minimalOptions
     });
 
     expect(portfolioDefaultStart.getYearIndex(1871)).toEqual(0);
     expect(portfolioDefaultStart.getYearIndex(1875)).toEqual(4);
-    expect(portfolioCustomStart.getYearIndex(1875)).toEqual(3);
+    expect(portfolioCustomStart.getYearIndex(2005)).toEqual(15);
+    expect(getYearIndex(slicedMarket, 2005)).toEqual(15);
   });
 
   test('gets max simulation cycles', () => {
-    const portfolioDefault = new CyclePortfolio({
+    const longTestData = fullMarketYearData.slice(
+      0,
+      getYearIndex(fullMarketYearData, 2018) + 1
+    );
+    const portfolioDefault = new CyclePortfolio(longTestData, {
       ...minimalOptions,
       simulationYearsLength: 3
     });
-    const portfolioRange = new CyclePortfolio({
+    const shortTestData = fullMarketYearData.slice(
+      getYearIndex(fullMarketYearData, 1990),
+      getYearIndex(fullMarketYearData, 2010) + 1
+    );
+    const portfolioRange = new CyclePortfolio(shortTestData, {
       ...minimalOptions,
-      simulationYearsLength: 3,
-      startYear: 1990,
-      endYear: 2010
+      simulationYearsLength: 3
     });
 
     expect(portfolioDefault.getMaxSimulationCycles()).toEqual(145);
@@ -54,46 +77,67 @@ describe('basic functionality test', () => {
 
 describe('full cycle portfolio tests', () => {
   test('calculates a 3 year cycle length portfolio', () => {
-    const portfolio = new CyclePortfolio({
+    const testSlice = fullMarketYearData.slice(
+      getYearIndex(fullMarketYearData, 2013),
+      getYearIndex(fullMarketYearData, 2018) + 1
+    );
+    const portfolio = new CyclePortfolio(testSlice, {
       ...starterOptions,
-      simulationYearsLength: 3,
-      startYear: 2013
+      simulationYearsLength: 3
     });
     const data = portfolio.crunchAllCyclesData();
-    console.log(data);
-    const endingBalance =
-      data.portfolioLifecyclesData[0].stats.balance.endingInflAdj;
-    expect(endingBalance).toEqual(1103529.27);
+    expect(
+      round(data.portfolioLifecyclesData[0].stats.balance.endingInflAdj, 4)
+    ).toEqual(1176082.0295);
+    expect(
+      round(data.portfolioLifecyclesData[1].stats.balance.endingInflAdj, 4)
+    ).toEqual(1127076.1635);
+    expect(
+      round(data.portfolioLifecyclesData[2].stats.balance.endingInflAdj, 4)
+    ).toEqual(1194007.547);
   });
 });
 
 describe('single full cycle tests', () => {
   test('calculates single cycle of portfolio data no spend adjustments', () => {
-    const portfolio = new CyclePortfolio({
+    const longTestData = fullMarketYearData.slice(
+      0,
+      getYearIndex(fullMarketYearData, 2018) + 1
+    );
+
+    const portfolio = new CyclePortfolio(longTestData, {
       ...starterOptions,
       withdrawalMethod: WithdrawalMethod.Nominal
     });
 
     const data = portfolio.crunchSingleCycleData();
 
-    expect(data.stats.balance.ending).toEqual(17904102.0747708);
-    expect(data.stats.balance.endingInflAdj).toEqual(13050165.103791);
+    expect(round(data.stats.balance.ending, 4)).toEqual(17904102.0748);
+    expect(round(data.stats.balance.endingInflAdj, 4)).toEqual(13050165.1038);
   });
 
   test('calculates single cycle of portfolio data inflation-adjusted spend', () => {
-    const portfolio = new CyclePortfolio({
+    const longTestData = fullMarketYearData.slice(
+      0,
+      getYearIndex(fullMarketYearData, 2018) + 1
+    );
+    const portfolio = new CyclePortfolio(longTestData, {
       ...starterOptions,
       withdrawalMethod: WithdrawalMethod.InflationAdjusted
     });
 
     const data = portfolio.crunchSingleCycleData();
 
-    expect(data.stats.balance.ending).toEqual(25319083.05280004);
-    expect(data.stats.balance.endingInflAdj).toEqual(18454888.870480653);
+    expect(round(data.stats.balance.ending, 4)).toEqual(25319083.0553);
+    expect(round(data.stats.balance.endingInflAdj, 4)).toEqual(18454888.8723);
   });
 
   test('calculates single cycle of portfolio data inflation-adjusted percent portfolio spend', () => {
-    const portfolio = new CyclePortfolio({
+    const longTestData = fullMarketYearData.slice(
+      0,
+      getYearIndex(fullMarketYearData, 2018) + 1
+    );
+    const portfolio = new CyclePortfolio(longTestData, {
       ...starterOptions,
       withdrawalMethod: WithdrawalMethod.PercentPortfolio,
       withdrawal: { percentage: 0.04 }
@@ -101,12 +145,16 @@ describe('single full cycle tests', () => {
 
     const data = portfolio.crunchSingleCycleData();
 
-    expect(data.stats.balance.ending).toEqual(4707693.475645029);
-    expect(data.stats.balance.endingInflAdj).toEqual(3431402.3042674037);
+    expect(round(data.stats.balance.ending, 4)).toEqual(4707693.4756);
+    expect(round(data.stats.balance.endingInflAdj, 4)).toEqual(3431402.3043);
   });
 
   test('calculates single cycle of portfolio data inflation-adjusted percent portfolio spend clamped', () => {
-    const portfolio = new CyclePortfolio({
+    const longTestData = fullMarketYearData.slice(
+      0,
+      getYearIndex(fullMarketYearData, 2018) + 1
+    );
+    const portfolio = new CyclePortfolio(longTestData, {
       ...starterOptions,
       withdrawalMethod: WithdrawalMethod.PercentPortfolioClamped,
       withdrawal: { percentage: 0.04, floor: 30000, ceiling: 60000 }
@@ -114,8 +162,8 @@ describe('single full cycle tests', () => {
 
     const data = portfolio.crunchSingleCycleData();
 
-    expect(data.stats.balance.ending).toEqual(16092611.98511732);
-    expect(data.stats.balance.endingInflAdj).toEqual(11729783.626119956);
+    expect(round(data.stats.balance.ending, 4)).toEqual(16092611.9878);
+    expect(round(data.stats.balance.endingInflAdj, 4)).toEqual(11729783.6281);
   });
 
   // TODO add tests for stats using excel to test results
