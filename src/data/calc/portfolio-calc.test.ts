@@ -3,6 +3,7 @@ import { round } from '../../utilities/math';
 import { parseCSVStringToJSON } from '../data-helpers';
 import {
   CyclePortfolio,
+  getMaxSimulationLength,
   getYearIndex,
   MarketYearData,
   PortfolioOptions,
@@ -187,10 +188,8 @@ describe('full cycle portfolio tests', () => {
       2015
     );
   });
-});
 
-describe('single full cycle tests', () => {
-  test('calculates single cycle of portfolio data no spend adjustments', () => {
+  test('calculates max length single cycle nominal withdrawal', () => {
     const longTestData = fullMarketYearData.slice(
       0,
       getYearIndex(fullMarketYearData, 2018) + 1
@@ -198,62 +197,129 @@ describe('single full cycle tests', () => {
 
     const portfolio = new CyclePortfolio(longTestData, {
       ...starterOptions,
+      simulationYearsLength: getMaxSimulationLength(longTestData),
       withdrawalMethod: WithdrawalMethod.Nominal
     });
 
     const data = portfolio.crunchSingleCycleData();
 
-    expect(round(data.stats.balance.ending, 4)).toEqual(17904102.0748);
-    expect(round(data.stats.balance.endingInflAdj, 4)).toEqual(13050165.1038);
+    // We need to apply a tiny error tolerance due to tiny fractional number handling differences with excel
+    const percentErrorTolerance = 0.00000000001;
+    const expectedEnding = 39773480353.0365;
+    const expectedEndingInflAdj = 2041431119.6567;
+
+    expect(round(data.stats.balance.ending, 4)).toBeGreaterThanOrEqual(
+      expectedEnding - expectedEnding * percentErrorTolerance
+    );
+    expect(round(data.stats.balance.ending, 4)).toBeLessThanOrEqual(
+      expectedEnding + expectedEnding * percentErrorTolerance
+    );
+    expect(round(data.stats.balance.endingInflAdj, 4)).toBeGreaterThanOrEqual(
+      expectedEndingInflAdj - expectedEnding * percentErrorTolerance
+    );
+    expect(round(data.stats.balance.endingInflAdj, 4)).toBeLessThanOrEqual(
+      expectedEndingInflAdj + expectedEnding * percentErrorTolerance
+    );
   });
 
-  test('calculates single cycle of portfolio data inflation-adjusted spend', () => {
+  test('calculates max length single cycle inflation adjusted withdrawal', () => {
     const longTestData = fullMarketYearData.slice(
       0,
       getYearIndex(fullMarketYearData, 2018) + 1
     );
+
     const portfolio = new CyclePortfolio(longTestData, {
       ...starterOptions,
+      simulationYearsLength: getMaxSimulationLength(longTestData),
       withdrawalMethod: WithdrawalMethod.InflationAdjusted
     });
 
     const data = portfolio.crunchSingleCycleData();
 
-    expect(round(data.stats.balance.ending, 4)).toEqual(25319083.0553);
-    expect(round(data.stats.balance.endingInflAdj, 4)).toEqual(18454888.8723);
+    // We need to apply a tiny error tolerance due to tiny fractional number handling differences with excel
+    const percentErrorTolerance = 0.00000000001;
+    const expectedEnding = 56148384301.9503;
+    const expectedEndingInflAdj = 2881896630.9971;
+
+    expect(round(data.stats.balance.ending, 4)).toBeGreaterThanOrEqual(
+      expectedEnding - expectedEnding * percentErrorTolerance
+    );
+    expect(round(data.stats.balance.ending, 4)).toBeLessThanOrEqual(
+      expectedEnding + expectedEnding * percentErrorTolerance
+    );
+    expect(round(data.stats.balance.endingInflAdj, 4)).toBeGreaterThanOrEqual(
+      expectedEndingInflAdj - expectedEnding * percentErrorTolerance
+    );
+    expect(round(data.stats.balance.endingInflAdj, 4)).toBeLessThanOrEqual(
+      expectedEndingInflAdj + expectedEnding * percentErrorTolerance
+    );
   });
 
-  test('calculates single cycle of portfolio data inflation-adjusted percent portfolio spend', () => {
+  test('calculates max length single cycle percent withdrawal', () => {
     const longTestData = fullMarketYearData.slice(
       0,
       getYearIndex(fullMarketYearData, 2018) + 1
     );
+
     const portfolio = new CyclePortfolio(longTestData, {
       ...starterOptions,
+      simulationYearsLength: getMaxSimulationLength(longTestData),
       withdrawalMethod: WithdrawalMethod.PercentPortfolio,
       withdrawal: { percentage: 0.04 }
     });
 
     const data = portfolio.crunchSingleCycleData();
 
-    expect(round(data.stats.balance.ending, 4)).toEqual(4707693.4756);
-    expect(round(data.stats.balance.endingInflAdj, 4)).toEqual(3431402.3043);
+    // We need to apply a tiny error tolerance due to tiny fractional number handling differences with excel
+    const percentErrorTolerance = 0.00000000001;
+    const expectedEnding = 312889323.3471;
+    const expectedEndingInflAdj = 16059494.8197;
+
+    expect(round(data.stats.balance.ending, 4)).toBeGreaterThanOrEqual(
+      expectedEnding - expectedEnding * percentErrorTolerance
+    );
+    expect(round(data.stats.balance.ending, 4)).toBeLessThanOrEqual(
+      expectedEnding + expectedEnding * percentErrorTolerance
+    );
+    expect(round(data.stats.balance.endingInflAdj, 4)).toBeGreaterThanOrEqual(
+      expectedEndingInflAdj - expectedEnding * percentErrorTolerance
+    );
+    expect(round(data.stats.balance.endingInflAdj, 4)).toBeLessThanOrEqual(
+      expectedEndingInflAdj + expectedEnding * percentErrorTolerance
+    );
   });
 
-  test('calculates single cycle of portfolio data inflation-adjusted percent portfolio spend clamped', () => {
+  test('calculates max length single cycle clamped percent withdrawal', () => {
     const longTestData = fullMarketYearData.slice(
       0,
       getYearIndex(fullMarketYearData, 2018) + 1
     );
+
     const portfolio = new CyclePortfolio(longTestData, {
       ...starterOptions,
+      simulationYearsLength: getMaxSimulationLength(longTestData),
       withdrawalMethod: WithdrawalMethod.PercentPortfolioClamped,
       withdrawal: { percentage: 0.04, floor: 30000, ceiling: 60000 }
     });
 
     const data = portfolio.crunchSingleCycleData();
 
-    expect(round(data.stats.balance.ending, 4)).toEqual(16092611.9878);
-    expect(round(data.stats.balance.endingInflAdj, 4)).toEqual(11729783.6281);
+    // We need to apply a tiny error tolerance due to tiny fractional number handling differences with excel
+    const percentErrorTolerance = 0.00000000001;
+    const expectedEnding = 33505765577.3321;
+    const expectedEndingInflAdj = 1719731638.528;
+
+    expect(round(data.stats.balance.ending, 4)).toBeGreaterThanOrEqual(
+      expectedEnding - expectedEnding * percentErrorTolerance
+    );
+    expect(round(data.stats.balance.ending, 4)).toBeLessThanOrEqual(
+      expectedEnding + expectedEnding * percentErrorTolerance
+    );
+    expect(round(data.stats.balance.endingInflAdj, 4)).toBeGreaterThanOrEqual(
+      expectedEndingInflAdj - expectedEnding * percentErrorTolerance
+    );
+    expect(round(data.stats.balance.endingInflAdj, 4)).toBeLessThanOrEqual(
+      expectedEndingInflAdj + expectedEnding * percentErrorTolerance
+    );
   });
 });
