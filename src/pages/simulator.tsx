@@ -1,10 +1,11 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Layout from '../components/layout';
 import { PortfolioData, PortfolioGraph } from '../components/portfolio-graph';
 import SEO from '../components/seo';
 import {
   CyclePortfolio,
   getMaxSimulationLength,
+  MarketYearData,
   PortfolioOptions,
   WithdrawalMethod,
   WithdrawalOptions
@@ -21,6 +22,7 @@ type Props = {
 
 export default function Simulator({ path }: Props) {
   const [portfolio, setPortfolio] = useState<PortfolioData>(null);
+  const [data, setData] = useState<MarketYearData[]>([]);
   const [inputErr, setInputErr] = useState('');
   const [withdrawalMethod, setWithdrawalMethod] = useState<WithdrawalMethod>(
     WithdrawalMethod.InflationAdjusted
@@ -33,6 +35,10 @@ export default function Simulator({ path }: Props) {
   const refWithdrawalMin = useRef<HTMLInputElement>(null);
   const refWithdrawalMax = useRef<HTMLInputElement>(null);
   const refSimLength = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    // TODO get data parsed from csv file with fetch?
+  }, []);
 
   function calculatePortfolio() {
     let withdrawal: WithdrawalOptions;
@@ -92,10 +98,10 @@ export default function Simulator({ path }: Props) {
       setInputErr('Minimum investment expense ratio is 0%.');
       return;
     } else if (
-      portfolioOptions.simulationYearsLength > getMaxSimulationLength()
+      portfolioOptions.simulationYearsLength > getMaxSimulationLength(data)
     ) {
       setInputErr(
-        `Maximium simulation length is ${getMaxSimulationLength()} years.`
+        `Maximium simulation length is ${getMaxSimulationLength(data)} years.`
       );
       return;
     } else if (portfolioOptions.simulationYearsLength < 5) {
@@ -105,12 +111,13 @@ export default function Simulator({ path }: Props) {
 
     setInputErr('');
 
-    const curPortfolio = new CyclePortfolio(portfolioOptions);
+    const curPortfolio = new CyclePortfolio(data, portfolioOptions);
     const portfolioData = curPortfolio.crunchAllCyclesData();
     setPortfolio({
       lifecyclesData: portfolioData.portfolioLifecyclesData,
       stats: portfolioData.portfolioStats,
-      options: curPortfolio.options
+      options: curPortfolio.options,
+      startYear: data[0].year
     });
   }
 
@@ -412,7 +419,7 @@ export default function Simulator({ path }: Props) {
                 type="number"
                 defaultValue={60}
                 min={5}
-                max={getMaxSimulationLength()}
+                max={getMaxSimulationLength(data)}
                 ref={refSimLength}
               />
             </div>

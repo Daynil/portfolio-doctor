@@ -706,10 +706,8 @@ export class CyclePortfolio {
     if (isFirstYear) cumulativeInflation = 1;
     else cumulativeInflation = dataCurrYear.inflationIndex / startYearCpi;
 
-    const portfolioInfAdjStart = startingBalance / cumulativeInflation;
-
     const withdrawalData = this.calculateWithdrawal(
-      portfolioInfAdjStart,
+      startingBalance,
       cumulativeInflation
     );
 
@@ -737,7 +735,7 @@ export class CyclePortfolio {
       year: 0,
       cumulativeInflation,
       balanceStart: startingBalance,
-      balanceInfAdjStart: portfolioInfAdjStart,
+      balanceInfAdjStart: startingBalance / cumulativeInflation,
       withdrawal: withdrawalData.actual,
       withdrawalInfAdjust: withdrawalData.infAdj,
       equities,
@@ -752,7 +750,7 @@ export class CyclePortfolio {
   }
 
   calculateWithdrawal(
-    portfolioInfAdjStart: number,
+    portfolioStart: number,
     cumulativeInflation: number
   ): {
     actual: number;
@@ -761,27 +759,30 @@ export class CyclePortfolio {
     const withdrawal = {} as { actual: number; infAdj: number };
     switch (this.options.withdrawalMethod) {
       case WithdrawalMethod.Nominal:
-        withdrawal.infAdj = this.options.withdrawal.staticAmount;
-        withdrawal.actual = withdrawal.infAdj;
+        withdrawal.actual = this.options.withdrawal.staticAmount;
+        // In withdrawal's case, inflation adjusted means value in todays dollars
+        withdrawal.infAdj = withdrawal.actual / cumulativeInflation;
         break;
       case WithdrawalMethod.InflationAdjusted:
-        withdrawal.infAdj = this.options.withdrawal.staticAmount;
-        withdrawal.actual = withdrawal.infAdj * cumulativeInflation;
+        withdrawal.actual =
+          this.options.withdrawal.staticAmount * cumulativeInflation;
+        withdrawal.infAdj = withdrawal.actual / cumulativeInflation;
         break;
       case WithdrawalMethod.PercentPortfolio:
-        withdrawal.infAdj =
-          this.options.withdrawal.percentage * portfolioInfAdjStart;
-        withdrawal.actual = withdrawal.infAdj * cumulativeInflation;
+        withdrawal.actual = this.options.withdrawal.percentage * portfolioStart;
+        withdrawal.infAdj = withdrawal.actual / cumulativeInflation;
         break;
       case WithdrawalMethod.PercentPortfolioClamped:
-        const infAdjSpendRaw =
-          this.options.withdrawal.percentage * portfolioInfAdjStart;
-        if (infAdjSpendRaw < this.options.withdrawal.floor) {
-          withdrawal.infAdj = this.options.withdrawal.floor;
-        } else if (infAdjSpendRaw > this.options.withdrawal.ceiling) {
-          withdrawal.infAdj = this.options.withdrawal.ceiling;
-        } else withdrawal.infAdj = infAdjSpendRaw;
-        withdrawal.actual = withdrawal.infAdj * cumulativeInflation;
+        let infAdjSpend =
+          this.options.withdrawal.percentage *
+          (portfolioStart / cumulativeInflation);
+        if (infAdjSpend < this.options.withdrawal.floor) {
+          infAdjSpend = this.options.withdrawal.floor;
+        } else if (infAdjSpend > this.options.withdrawal.ceiling) {
+          infAdjSpend = this.options.withdrawal.ceiling;
+        }
+        withdrawal.actual = infAdjSpend * cumulativeInflation;
+        withdrawal.infAdj = infAdjSpend;
         break;
     }
     return withdrawal;

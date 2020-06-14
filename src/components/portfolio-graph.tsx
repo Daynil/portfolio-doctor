@@ -17,6 +17,7 @@ export interface PortfolioData {
   lifecyclesData: CycleData[];
   stats: PortfolioStats;
   options: PortfolioOptions;
+  startYear: number;
 }
 
 type LineData = { x: number; y: number; withdrawal: number };
@@ -59,7 +60,8 @@ const height = 600 - margin.top - margin.bottom;
 export function PortfolioGraph({
   lifecyclesData,
   stats,
-  options
+  options,
+  startYear
 }: PortfolioData) {
   const refSvg = useRef<SVGSVGElement>(null);
   const refGyAxis = useRef<SVGGElement>(null);
@@ -79,7 +81,7 @@ export function PortfolioGraph({
   // Format data for d3 chart consumption
   const chartData: ChartData[] = lifecyclesData.map((cycle, i) => {
     return {
-      startYear: options.startYear + i,
+      startYear: startYear + i,
       values: cycle.yearData.map((year, i) => ({
         x: i,
         y: year.balanceInfAdjEnd,
