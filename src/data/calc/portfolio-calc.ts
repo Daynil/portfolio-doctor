@@ -85,55 +85,115 @@ export interface PortfolioStats {
   numFailures: number;
   numSuccesses: number;
   successRate: number;
+  /**
+   * The average total investment expenses paid over the course of each cycle
+   */
   investmentExpenses: {
     average: number;
     median: number;
   };
+  /**
+   * The average total equities price change over the course of each cycle
+   */
   equitiesPriceChange: {
     average: number;
     median: number;
   };
+  /**
+   * The average total dividiends paid over the course of each cycle
+   */
   equitiesDividendsPaid: {
     average: number;
     median: number;
   };
+  /**
+   * The average total fixed income interest paid over the course of each cycle
+   */
   fixedIncomeInterestPaid: {
     average: number;
     median: number;
   };
   balance: {
+    /**
+     * The average of the ending balances for each cycle
+     */
     average: number;
+    /**
+     * The average of the inflation adjusted ending balances for each cycle
+     */
     averageInflAdj: number;
+    /**
+     * The median of the ending balances for each cycle
+     */
     median: number;
+    /**
+     * The median of the inflation adjusted ending balances for each cycle
+     */
     medianInflAdj: number;
+    /**
+     * The cycle with the lowest ending balance
+     */
     min: {
+      /** The cycle's start year */
       year: number;
       balance: number;
+      /** The cycle's start year */
       yearInflAdj: number;
       balanceInflAdj: number;
     };
+    /**
+     * The cycle with the highest ending balance
+     */
     max: {
+      /** The cycle's start year */
       year: number;
       balance: number;
+      /** The cycle's start year */
       yearInflAdj: number;
       balanceInflAdj: number;
     };
   };
   withdrawals: {
+    /**
+     * The average withdrawal across all cycles
+     */
     average: number;
+    /**
+     * The average inflation adjusted withdrawal across all cycles
+     */
     averageInflAdj: number;
+    /**
+     * The median withdrawal across all cycles
+     */
     median: number;
+    /**
+     * The median inflation adjusted withdrawal across all cycles
+     */
     medianInflAdj: number;
+    /**
+     * The cycle with the lowest withdrawal
+     */
     min: {
-      year: number;
+      cycleStartYear: number;
+      yearInCycle: number;
+      /** The withdrawl amount */
       amount: number;
-      yearInflAdj: number;
+      cycleStartYearInflAdj: number;
+      yearInCycleInflAdj: number;
+      /** The inflation adjusted withdrawl amount */
       amountInflAdj: number;
     };
+    /**
+     * The cycle with the highest withdrawal
+     */
     max: {
-      year: number;
+      cycleStartYear: number;
+      yearInCycle: number;
+      /** The withdrawl amount */
       amount: number;
-      yearInflAdj: number;
+      cycleStartYearInflAdj: number;
+      yearInCycleInflAdj: number;
+      /** The inflation adjusted withdrawl amount */
       amountInflAdj: number;
     };
   };
@@ -456,15 +516,19 @@ export class CyclePortfolio {
         median: 0,
         medianInflAdj: 0,
         min: {
-          year: 0,
+          cycleStartYear: 0,
+          yearInCycle: 0,
           amount: 0,
-          yearInflAdj: 0,
+          cycleStartYearInflAdj: 0,
+          yearInCycleInflAdj: 0,
           amountInflAdj: 0
         },
         max: {
-          year: 0,
+          cycleStartYear: 0,
+          yearInCycle: 0,
           amount: 0,
-          yearInflAdj: 0,
+          cycleStartYearInflAdj: 0,
+          yearInCycleInflAdj: 0,
           amountInflAdj: 0
         }
       }
@@ -555,20 +619,26 @@ export class CyclePortfolio {
       cycleDataStats.map((stats) => stats.withdrawals.medianInflAdj)
     );
 
-    const withdrawalsMinsYears = cycleDataStats.map(
-      (stats) => stats.withdrawals.min.year
-    );
+    const withdrawalsMinsYears = cycleDataStats.map((stats, statIndex) => ({
+      cycleStartYear: this.marketYearData[statIndex].year,
+      yearInCycle: stats.withdrawals.min.year
+    }));
     const withdrawalsMinsVals = cycleDataStats.map(
       (stats) => stats.withdrawals.min.amount
     );
     const withdrawalsMinsMin = min(withdrawalsMinsVals);
 
     portfolioStats.withdrawals.min.amount = withdrawalsMinsMin.value;
-    portfolioStats.withdrawals.min.year =
-      withdrawalsMinsYears[withdrawalsMinsMin.index];
+    portfolioStats.withdrawals.min.cycleStartYear =
+      withdrawalsMinsYears[withdrawalsMinsMin.index].cycleStartYear;
+    portfolioStats.withdrawals.min.yearInCycle =
+      withdrawalsMinsYears[withdrawalsMinsMin.index].yearInCycle;
 
     const withdrawalsMinsInflAdjYears = cycleDataStats.map(
-      (stats) => stats.withdrawals.min.yearInflAdj
+      (stats, statIndex) => ({
+        cycleStartYear: this.marketYearData[statIndex].year,
+        yearInCycle: stats.withdrawals.min.yearInflAdj
+      })
     );
     const withdrawalsMinsInflAdjVals = cycleDataStats.map(
       (stats) => stats.withdrawals.min.amountInflAdj
@@ -577,23 +647,33 @@ export class CyclePortfolio {
 
     portfolioStats.withdrawals.min.amountInflAdj =
       withdrawalsMinsInflAdjMin.value;
-    portfolioStats.withdrawals.min.yearInflAdj =
-      withdrawalsMinsInflAdjYears[withdrawalsMinsInflAdjMin.index];
+    portfolioStats.withdrawals.min.cycleStartYearInflAdj =
+      withdrawalsMinsInflAdjYears[
+        withdrawalsMinsInflAdjMin.index
+      ].cycleStartYear;
+    portfolioStats.withdrawals.min.yearInCycleInflAdj =
+      withdrawalsMinsInflAdjYears[withdrawalsMinsInflAdjMin.index].yearInCycle;
 
-    const withdrawalsMaxesYears = cycleDataStats.map(
-      (stats) => stats.withdrawals.max.year
-    );
+    const withdrawalsMaxesYears = cycleDataStats.map((stats, statIndex) => ({
+      cycleStartYear: this.marketYearData[statIndex].year,
+      yearInCycle: stats.withdrawals.max.year
+    }));
     const withdrawalsMaxesVals = cycleDataStats.map(
       (stats) => stats.withdrawals.max.amount
     );
     const withdrawalsMaxesMax = max(withdrawalsMaxesVals);
 
     portfolioStats.withdrawals.max.amount = withdrawalsMaxesMax.value;
-    portfolioStats.withdrawals.max.year =
-      withdrawalsMaxesYears[withdrawalsMaxesMax.index];
+    portfolioStats.withdrawals.max.cycleStartYear =
+      withdrawalsMaxesYears[withdrawalsMaxesMax.index].cycleStartYear;
+    portfolioStats.withdrawals.max.yearInCycle =
+      withdrawalsMaxesYears[withdrawalsMaxesMax.index].yearInCycle;
 
     const withdrawalsMaxesInflAdjYears = cycleDataStats.map(
-      (stats) => stats.withdrawals.max.yearInflAdj
+      (stats, statIndex) => ({
+        cycleStartYear: this.marketYearData[statIndex].year,
+        yearInCycle: stats.withdrawals.max.yearInflAdj
+      })
     );
     const withdrawalsMaxesInflAdjVals = cycleDataStats.map(
       (stats) => stats.withdrawals.max.amountInflAdj
@@ -602,8 +682,14 @@ export class CyclePortfolio {
 
     portfolioStats.withdrawals.max.amountInflAdj =
       withdrawalsMaxesInflAdjMax.value;
-    portfolioStats.withdrawals.max.yearInflAdj =
-      withdrawalsMaxesInflAdjYears[withdrawalsMaxesInflAdjMax.index];
+    portfolioStats.withdrawals.max.cycleStartYearInflAdj =
+      withdrawalsMaxesInflAdjYears[
+        withdrawalsMaxesInflAdjMax.index
+      ].cycleStartYear;
+    portfolioStats.withdrawals.max.yearInCycleInflAdj =
+      withdrawalsMaxesInflAdjYears[
+        withdrawalsMaxesInflAdjMax.index
+      ].yearInCycle;
 
     return portfolioStats;
   }
