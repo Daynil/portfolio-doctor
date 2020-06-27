@@ -76,7 +76,7 @@ describe('basic functionality test', () => {
   });
 });
 
-describe('full cycle portfolio tests', () => {
+describe('full cycle portfolio tests against excel data', () => {
   test('calculates a 3 year cycle length portfolio with correct portfolio stats', () => {
     const testSlice = fullMarketYearData.slice(
       getYearIndex(fullMarketYearData, 2013),
@@ -320,6 +320,43 @@ describe('full cycle portfolio tests', () => {
     );
     expect(round(data.stats.balance.endingInflAdj, 4)).toBeLessThanOrEqual(
       expectedEndingInflAdj + expectedEnding * percentErrorTolerance
+    );
+  });
+
+  test('calculates max length single cycle clamped percent withdrawal edge test', () => {
+    const longTestData = fullMarketYearData.slice(
+      0,
+      getYearIndex(fullMarketYearData, 2018) + 1
+    );
+
+    const portfolio = new CyclePortfolio(longTestData, {
+      startBalance: 800000,
+      investmentExpenseRatio: 0.019,
+      equitiesRatio: 0.75,
+      simulationYearsLength: getMaxSimulationLength(longTestData),
+      withdrawalMethod: WithdrawalMethod.PercentPortfolioClamped,
+      withdrawal: { percentage: 0.07, floor: 20000, ceiling: 50000 }
+    });
+
+    const data = portfolio.crunchSingleCycleData();
+
+    // We need to apply a tiny error tolerance due to tiny fractional number handling differences with excel
+    const percentErrorTolerance = 0.00000000001;
+    const expectedEnding = -295131798.2325;
+    const expectedEndingInflAdj = -15148064.2872;
+
+    // Note, testing negative numbers, reverse tolerance operation (+/-)
+    expect(round(data.stats.balance.ending, 4)).toBeGreaterThanOrEqual(
+      expectedEnding + expectedEnding * percentErrorTolerance
+    );
+    expect(round(data.stats.balance.ending, 4)).toBeLessThanOrEqual(
+      expectedEnding - expectedEnding * percentErrorTolerance
+    );
+    expect(round(data.stats.balance.endingInflAdj, 4)).toBeGreaterThanOrEqual(
+      expectedEndingInflAdj + expectedEnding * percentErrorTolerance
+    );
+    expect(round(data.stats.balance.endingInflAdj, 4)).toBeLessThanOrEqual(
+      expectedEndingInflAdj - expectedEnding * percentErrorTolerance
     );
   });
 });
