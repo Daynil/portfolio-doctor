@@ -10,6 +10,7 @@ import {
   WithdrawalMethod,
   WithdrawalOptions
 } from '../data/calc/portfolio-calc';
+import { parseCSVStringToJSON } from '../data/data-helpers';
 import {
   commaNumToNum,
   numToCommaNum,
@@ -38,6 +39,11 @@ export default function Simulator({ path }: Props) {
 
   useEffect(() => {
     // TODO get data parsed from csv file with fetch?
+    const getStarterData = async () => {
+      const csvString = await (await fetch('/jan-shiller-data.csv')).text();
+      setData(parseCSVStringToJSON(csvString));
+    };
+    getStarterData();
   }, []);
 
   function calculatePortfolio() {

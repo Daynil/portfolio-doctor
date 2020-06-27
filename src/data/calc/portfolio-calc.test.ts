@@ -31,9 +31,12 @@ const starterOptions: PortfolioOptions = {
 let fullMarketYearData: MarketYearData[];
 
 beforeAll(async () => {
-  const csvString = readFileSync(require.resolve('../jan-shiller-data.csv'), {
-    encoding: 'utf8'
-  });
+  const csvString = readFileSync(
+    require.resolve('../../../static/jan-shiller-data.csv'),
+    {
+      encoding: 'utf8'
+    }
+  );
   fullMarketYearData = parseCSVStringToJSON(csvString);
 });
 
