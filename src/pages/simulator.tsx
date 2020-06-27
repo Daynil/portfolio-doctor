@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
-import Layout from '../components/layout';
+import React, { useContext, useEffect, useRef, useState } from 'react';
+import Layout, { DatasetContext } from '../components/layout';
 import { PortfolioData, PortfolioGraph } from '../components/portfolio-graph';
 import SEO from '../components/seo';
 import {
@@ -37,14 +37,18 @@ export default function Simulator({ path }: Props) {
   const refWithdrawalMax = useRef<HTMLInputElement>(null);
   const refSimLength = useRef<HTMLInputElement>(null);
 
+  const { preferredDataset, storedDatasetPaths } = useContext(DatasetContext);
+  const datasetPath = storedDatasetPaths.find(
+    (d) => d.datasetName === preferredDataset
+  ).datasetPath;
+
   useEffect(() => {
-    // TODO get data parsed from csv file with fetch?
-    const getStarterData = async () => {
-      const csvString = await (await fetch('/jan-shiller-data.csv')).text();
+    const getData = async () => {
+      const csvString = await (await fetch(datasetPath)).text();
       setData(parseCSVStringToJSON(csvString));
     };
-    getStarterData();
-  }, []);
+    getData();
+  }, [datasetPath]);
 
   function calculatePortfolio() {
     let withdrawal: WithdrawalOptions;
