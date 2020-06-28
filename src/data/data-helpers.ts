@@ -165,7 +165,7 @@ export function parseCSVStringToJSON(
 //   writeFileSync(destCSVPath, csvString);
 // }
 
-function loadFile(file: File): Promise<string> {
+export function loadFile(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(reader.result as string);

@@ -18,8 +18,10 @@ export function useLocalStorage(key: string, defaultValue: any) {
         existingStored = JSON.parse(existingStored);
         initialStored = existingStored;
         setUsedDefault(false);
+        console.log('in existing ' + key, existingStored);
       } catch (e) {} // If parse error, fall back to defaults
     }
+    console.log('stored ' + key, initialStored);
     return initialStored;
   });
   const updateStored = (value) => {
@@ -45,37 +47,17 @@ export function usePreferredDataset(
   return { preferredDataset: stored, setPreferredDataset: updateStored };
 }
 
-export type StoredDatasetPath = { datasetName: string; datasetPath: string };
+export type StoredDataset = { name: string; csvString: string };
 
-export function useStoredDatasetPaths(
-  defaultDatasetPaths: StoredDatasetPath[]
+export function useStoredDatasets(
+  defaultDatasets: StoredDataset[]
 ): {
-  storedDatasetPaths: StoredDatasetPath[];
-  setStoredDatasetPaths: (value: StoredDatasetPath[]) => void;
+  storedDatasets: StoredDataset[];
+  setStoredDatasets: (value: StoredDataset[]) => void;
 } {
   const { stored, updateStored } = useLocalStorage(
-    'storedDatasetPaths',
-    defaultDatasetPaths
+    'storedDatasets',
+    defaultDatasets
   );
-  return { storedDatasetPaths: stored, setStoredDatasetPaths: updateStored };
+  return { storedDatasets: stored, setStoredDatasets: updateStored };
 }
-
-/**
- * Check local storage for existing site dark mode preference first.
- * If none exists, check for system color scheme preference.
- * Fall back to developer default.
- */
-// export function useDarkMode(
-//   darkDefault: boolean
-// ): { darkMode: boolean; setDarkMode: (value: boolean) => void } {
-//   const { stored, updateStored, usedDefault } = useLocalStorage(
-//     'darkMode',
-//     darkDefault
-//   );
-//   // On first render, only check user-preferred scheme if default value was used
-//   useEffect(() => {
-//     if (usedDefault)
-//       updateStored(window.matchMedia('(prefers-color-scheme: dark)').matches);
-//   }, []);
-//   return { darkMode: stored, setDarkMode: updateStored };
-// }

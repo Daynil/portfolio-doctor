@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import Layout, { DatasetContext } from '../components/layout';
+import Layout from '../components/layout';
 import { PortfolioData, PortfolioGraph } from '../components/portfolio-graph';
 import SEO from '../components/seo';
 import {
@@ -10,6 +10,7 @@ import {
   WithdrawalMethod,
   WithdrawalOptions
 } from '../data/calc/portfolio-calc';
+import { DatasetContext } from '../data/data-context';
 import { parseCSVStringToJSON } from '../data/data-helpers';
 import {
   commaNumToNum,
@@ -37,18 +38,23 @@ export default function Simulator({ path }: Props) {
   const refWithdrawalMax = useRef<HTMLInputElement>(null);
   const refSimLength = useRef<HTMLInputElement>(null);
 
-  const { preferredDataset, storedDatasetPaths } = useContext(DatasetContext);
-  const datasetPath = storedDatasetPaths.find(
-    (d) => d.datasetName === preferredDataset
-  ).datasetPath;
+  const { preferredDataset, storedDatasets } = useContext(DatasetContext);
 
   useEffect(() => {
-    const getData = async () => {
-      const csvString = await (await fetch(datasetPath)).text();
-      setData(parseCSVStringToJSON(csvString));
-    };
-    getData();
-  }, [datasetPath]);
+    const datasetString = storedDatasets.find(
+      (d) => d.name === preferredDataset
+    ).csvString;
+
+    setData(parseCSVStringToJSON(datasetString));
+  }, []);
+
+  // useEffect(() => {
+  //   const getData = async () => {
+  //     const csvString = await (await fetch(datasetString)).text();
+  //     setData(parseCSVStringToJSON(csvString));
+  //   };
+  //   getData();
+  // }, [datasetString]);
 
   function calculatePortfolio() {
     let withdrawal: WithdrawalOptions;
