@@ -1,8 +1,8 @@
-import React, { useContext, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import Layout from '../components/layout';
 import SEO from '../components/seo';
 import { MarketYearData } from '../data/calc/portfolio-calc';
-import { DatasetContext } from '../data/data-context';
+import { DatasetContext, defaultDatasetName } from '../data/data-context';
 import { loadFile, parseCSVStringToJSON } from '../data/data-helpers';
 
 type Props = {
@@ -11,15 +11,66 @@ type Props = {
 
 export default function UploadData({ path }: Props) {
   const fileInput = useRef<HTMLInputElement>(null);
-  const [readData, setReadData] = useState<MarketYearData[]>(null);
+
   const [inputErr, setInputErr] = useState('');
 
   const {
     preferredDataset,
     setPreferredDataset,
     storedDatasets,
-    setStoredDatasets
+    setStoredDatasets,
+    defaultDatasetCSVStringCache
   } = useContext(DatasetContext);
+
+  function getDataset(datasetName: string): MarketYearData[] {
+    if (datasetName === defaultDatasetName) {
+      console.log(defaultDatasetCSVStringCache);
+      if (!defaultDatasetCSVStringCache) return [];
+      return parseCSVStringToJSON(defaultDatasetCSVStringCache);
+    } else {
+      return parseCSVStringToJSON(
+        storedDatasets.find((d) => d.name === datasetName).csvString
+      );
+    }
+  }
+
+  const [readData, setReadData] = useState<MarketYearData[]>();
+
+  // When preferred dataset has changed
+  useEffect(() => {
+    setReadData(getDataset(preferredDataset));
+  }, [preferredDataset]);
+
+  // When default dataset first loads
+  useEffect(() => {
+    if (preferredDataset === defaultDatasetName) {
+      setReadData(getDataset(defaultDatasetName));
+    }
+  }, [defaultDatasetCSVStringCache]);
+
+  const [selectedDatasetName, setSelectedDatasetName] = useState(
+    defaultDatasetName
+  );
+
+  function handleSetActive() {
+    setPreferredDataset(selectedDatasetName);
+  }
+
+  function handleRemoveDataset() {
+    const selectedDatasetIdx = storedDatasets.findIndex(
+      (d) => d.name === selectedDatasetName
+    );
+
+    if (selectedDatasetName === preferredDataset) {
+      setPreferredDataset(defaultDatasetName);
+    }
+
+    setSelectedDatasetName(defaultDatasetName);
+
+    storedDatasets.splice(selectedDatasetIdx, 1);
+
+    setStoredDatasets(storedDatasets);
+  }
 
   async function handleAddFile() {
     const uploadedFile = fileInput.current.files[0];
@@ -50,9 +101,10 @@ export default function UploadData({ path }: Props) {
       }
     ];
 
-    setPreferredDataset(uploadedFile.name);
     setStoredDatasets(newDatasets);
     setReadData(parseCSVStringToJSON(fileData));
+    setPreferredDataset(uploadedFile.name);
+    fileInput.current.value = '';
 
     setInputErr('');
   }
@@ -85,6 +137,7 @@ export default function UploadData({ path }: Props) {
           name="preferredDataset"
           id="preferredDataset"
           className="form-input"
+          onChange={(e) => setSelectedDatasetName(e.target.value)}
         >
           {storedDatasets.map((dataset, i) => (
             <option key={i} value={dataset.name}>
@@ -93,8 +146,20 @@ export default function UploadData({ path }: Props) {
           ))}
         </select>
         <div className="flex mt-4">
-          <button className="btn btn-green">Set Active</button>
-          <button className="btn btn-green ml-4">Remove</button>
+          <button
+            className="btn btn-green"
+            disabled={preferredDataset === selectedDatasetName}
+            onClick={() => handleSetActive()}
+          >
+            Set Active
+          </button>
+          <button
+            className="btn btn-green ml-4"
+            disabled={selectedDatasetName === defaultDatasetName}
+            onClick={() => handleRemoveDataset()}
+          >
+            Remove
+          </button>
         </div>
       </div>
       <div className="flex flex-col mt-8">
@@ -126,7 +191,9 @@ export default function UploadData({ path }: Props) {
       </div>
       <div className="flex flex-col mt-8">
         <label className="form-label">Currently Active Dataset</label>
-        <div className="text-lg font-bold">{preferredDataset}</div>
+        <div className="text-lg font-bold text-green-500">
+          {preferredDataset}
+        </div>
         <div className="mt-4">{JSON.stringify(readData)}</div>
       </div>
       {/* <div>

@@ -41,6 +41,10 @@ ul {
   @apply font-bold py-2 px-4 rounded;
 }
 
+.btn:disabled {
+  @apply opacity-50 cursor-not-allowed;
+}
+
 .btn-green {
   @apply bg-green-500 text-white;
 }

@@ -10,7 +10,7 @@ import {
   WithdrawalMethod,
   WithdrawalOptions
 } from '../data/calc/portfolio-calc';
-import { DatasetContext } from '../data/data-context';
+import { DatasetContext, defaultDatasetName } from '../data/data-context';
 import { parseCSVStringToJSON } from '../data/data-helpers';
 import {
   commaNumToNum,
@@ -38,23 +38,23 @@ export default function Simulator({ path }: Props) {
   const refWithdrawalMax = useRef<HTMLInputElement>(null);
   const refSimLength = useRef<HTMLInputElement>(null);
 
-  const { preferredDataset, storedDatasets } = useContext(DatasetContext);
+  const {
+    preferredDataset,
+    storedDatasets,
+    defaultDatasetCSVStringCache
+  } = useContext(DatasetContext);
 
   useEffect(() => {
-    const datasetString = storedDatasets.find(
-      (d) => d.name === preferredDataset
-    ).csvString;
+    if (preferredDataset === defaultDatasetName) {
+      setData(parseCSVStringToJSON(defaultDatasetCSVStringCache));
+    } else {
+      const datasetString = storedDatasets.find(
+        (d) => d.name === preferredDataset
+      ).csvString;
 
-    setData(parseCSVStringToJSON(datasetString));
+      setData(parseCSVStringToJSON(datasetString));
+    }
   }, []);
-
-  // useEffect(() => {
-  //   const getData = async () => {
-  //     const csvString = await (await fetch(datasetString)).text();
-  //     setData(parseCSVStringToJSON(csvString));
-  //   };
-  //   getData();
-  // }, [datasetString]);
 
   function calculatePortfolio() {
     let withdrawal: WithdrawalOptions;

@@ -18,10 +18,8 @@ export function useLocalStorage(key: string, defaultValue: any) {
         existingStored = JSON.parse(existingStored);
         initialStored = existingStored;
         setUsedDefault(false);
-        console.log('in existing ' + key, existingStored);
       } catch (e) {} // If parse error, fall back to defaults
     }
-    console.log('stored ' + key, initialStored);
     return initialStored;
   });
   const updateStored = (value) => {
@@ -30,7 +28,7 @@ export function useLocalStorage(key: string, defaultValue: any) {
   };
   useEffect(() => {
     window.localStorage.setItem(key, JSON.stringify(stored));
-  }, [stored]);
+  }, [JSON.stringify(stored)]);
   return { stored, updateStored, usedDefault };
 }
 

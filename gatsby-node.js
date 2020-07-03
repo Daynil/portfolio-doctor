@@ -59,12 +59,26 @@ const fs = require('fs');
 //   }
 // };
 
-// For debugging purposes
 /** @type { import("gatsby").GatsbyNode["onCreateWebpackConfig"] } */
-exports.onCreateWebpackConfig = ({ actions }) => {
+exports.onCreateWebpackConfig = ({ stage, actions }) => {
+  // For debugging purposes
   if (process.env.NODE_ENV === 'development') {
     actions.setWebpackConfig({
       devtool: 'eval-source-map'
+    });
+  }
+  /**
+   * First: $ yarn add --dev @hot-loader/react-dom
+   * Fixes react hot loader warning
+   * https://github.com/gatsbyjs/gatsby/issues/11934
+   */
+  if (stage.startsWith('develop')) {
+    actions.setWebpackConfig({
+      resolve: {
+        alias: {
+          'react-dom': '@hot-loader/react-dom'
+        }
+      }
     });
   }
 };
