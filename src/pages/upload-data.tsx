@@ -1,3 +1,4 @@
+import * as accounting from 'accounting';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import Layout from '../components/layout';
 import SEO from '../components/seo';
@@ -123,11 +124,21 @@ export default function UploadData({ path }: Props) {
         column is as follows:
       </p>
       <ul>
-        <li>Year: YYYY integer</li>
-        <li>Equities Price: float</li>
-        <li>Dividend Per Equity Share: float</li>
-        <li>Inflation Index: float</li>
-        <li>Fixed Income Interest: float</li>
+        <li>
+          <b>Year:</b> YYYY integer
+        </li>
+        <li>
+          <b>Equities Price:</b> float
+        </li>
+        <li>
+          <b>Dividend Per Equity Share:</b> float
+        </li>
+        <li>
+          <b>Inflation Index:</b> float
+        </li>
+        <li>
+          <b>Fixed Income Interest:</b> float, in percent
+        </li>
       </ul>
       <div className="flex flex-col mt-8">
         <label className="form-label" htmlFor="preferredDataset">
@@ -194,13 +205,44 @@ export default function UploadData({ path }: Props) {
         <div className="text-lg font-bold text-green-500">
           {preferredDataset}
         </div>
-        <div className="mt-4">{JSON.stringify(readData)}</div>
       </div>
-      {/* <div>
-        {!readData
-          ? null
-          : readData.map((dataRow, i) => <div key={i}>dataRow</div>)}
-      </div> */}
+      <div>
+        <table className="mt-4 border-collapse">
+          <tr className="bg-green-500 text-white text-right">
+            <th className="p-2">Year</th>
+            <th className="p-2">Equities Price</th>
+            <th className="p-2">Dividend Per Equity Share</th>
+            <th className="p-2">Inflation Index</th>
+            <th className="p-2">Fixed Income Interest</th>
+          </tr>
+          {!readData
+            ? null
+            : readData.map((dataRow, i) => {
+                return (
+                  <tr
+                    key={i + 1}
+                    className="group transition-colors even:bg-gray-200"
+                  >
+                    <td className="group-hover:bg-gray-400 duration-200 text-right">
+                      {dataRow.year}
+                    </td>
+                    <td className="group-hover:bg-gray-400 duration-200 text-right">
+                      {accounting.formatMoney(dataRow.equitiesPrice)}
+                    </td>
+                    <td className="group-hover:bg-gray-400 duration-200 text-right">
+                      {accounting.formatMoney(dataRow.equitiesDividend)}
+                    </td>
+                    <td className="group-hover:bg-gray-400 duration-200 text-right">
+                      {accounting.formatNumber(dataRow.inflationIndex, 3)}
+                    </td>
+                    <td className="group-hover:bg-gray-400 duration-200 text-right">
+                      {accounting.formatNumber(dataRow.fixedIncomeInterest, 2)}%
+                    </td>
+                  </tr>
+                );
+              })}
+        </table>
+      </div>
     </Layout>
   );
 }

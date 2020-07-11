@@ -34,7 +34,15 @@ module.exports = {
   },
   variants: {
     borderColor: ['responsive', 'hover', 'focus', 'dark', 'dark-hover'],
-    backgroundColor: ['responsive', 'hover', 'focus', 'dark', 'dark-hover'],
+    backgroundColor: [
+      'responsive',
+      'hover',
+      'focus',
+      'even',
+      'group-hover',
+      'dark',
+      'dark-hover'
+    ],
     textColor: ['responsive', 'hover', 'focus', 'dark', 'dark-hover']
   },
   plugins: [
