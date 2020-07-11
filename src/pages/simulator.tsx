@@ -46,7 +46,8 @@ export default function Simulator({ path }: Props) {
 
   useEffect(() => {
     if (preferredDataset === defaultDatasetName) {
-      setData(parseCSVStringToJSON(defaultDatasetCSVStringCache));
+      if (defaultDatasetCSVStringCache)
+        setData(parseCSVStringToJSON(defaultDatasetCSVStringCache));
     } else {
       const datasetString = storedDatasets.find(
         (d) => d.name === preferredDataset
@@ -54,7 +55,7 @@ export default function Simulator({ path }: Props) {
 
       setData(parseCSVStringToJSON(datasetString));
     }
-  }, []);
+  }, [defaultDatasetCSVStringCache]);
 
   function calculatePortfolio() {
     let withdrawal: WithdrawalOptions;
@@ -371,8 +372,9 @@ export default function Simulator({ path }: Props) {
                 <div className="flex items-center">
                   <input
                     id="fixed"
-                    className="form-radio text-green-500"
                     type="radio"
+                    // className="form-radio text-green-500"
+                    className="hidden"
                     name="withdrawalMethod"
                     checked={
                       withdrawalMethod === WithdrawalMethod.InflationAdjusted
@@ -381,8 +383,30 @@ export default function Simulator({ path }: Props) {
                       setWithdrawalMethod(WithdrawalMethod.InflationAdjusted)
                     }
                   />
-                  <label className="ml-2 text-sm" htmlFor="fixed">
-                    Fixed
+                  <label
+                    className="flex items-center cursor-pointer"
+                    htmlFor="fixed"
+                  >
+                    <span
+                      tabIndex={0}
+                      className={
+                        'w-5 h-5 rounded-full border border-gray-500 flex items-center justify-center' +
+                        (withdrawalMethod === WithdrawalMethod.InflationAdjusted
+                          ? ' border-green-500'
+                          : ' border-gray-600')
+                      }
+                    >
+                      <span
+                        className={
+                          'w-3 h-3 inline-block rounded-full' +
+                          (withdrawalMethod ===
+                          WithdrawalMethod.InflationAdjusted
+                            ? ' bg-green-500'
+                            : '')
+                        }
+                      ></span>
+                    </span>
+                    <span className="text-sm ml-2">Fixed</span>
                   </label>
                 </div>
                 <div className="flex items-center">

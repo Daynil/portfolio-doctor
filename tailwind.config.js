@@ -28,6 +28,14 @@ module.exports = {
             borderColor: theme('colors.green.500'),
             boxShadow: theme('boxShadow.outline')
           }
+        },
+        radio: {
+          iconColor: theme('colors.green.500'),
+          icon:
+            '<svg fill="#48bb78" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" r="3"/></svg>'
+        },
+        'select, checkbox, radio': {
+          iconColor: theme('colors.green.500')
         }
       }
     })
