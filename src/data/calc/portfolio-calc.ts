@@ -206,6 +206,8 @@ export enum WithdrawalMethod {
   PercentPortfolioClamped
 }
 
+export type SimulationMethod = 'Historical Data' | 'Monte Carlo';
+
 export interface PortfolioOptions {
   simulationYearsLength: number;
   startBalance: number;

@@ -25,7 +25,6 @@ export default function UploadData({ path }: Props) {
 
   function getDataset(datasetName: string): MarketYearData[] {
     if (datasetName === defaultDatasetName) {
-      console.log(defaultDatasetCSVStringCache);
       if (!defaultDatasetCSVStringCache) return [];
       return parseCSVStringToJSON(defaultDatasetCSVStringCache);
     } else {
