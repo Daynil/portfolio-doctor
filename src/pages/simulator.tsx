@@ -50,8 +50,6 @@ export default function Simulator({ path }: Props) {
     defaultDatasetCSVStringCache
   } = useContext(DatasetContext);
 
-  console.log(withdrawalMethod);
-
   useEffect(() => {
     if (preferredDataset === defaultDatasetName) {
       if (defaultDatasetCSVStringCache)
@@ -269,8 +267,8 @@ export default function Simulator({ path }: Props) {
     ? null
     : portfolio.lifecyclesData[0].yearData.map((yearData) => {
         return (
-          <tr key={yearData.year.toString()}>
-            <td>{yearData.year}</td>
+          <tr key={yearData.cycleYear.toString()}>
+            <td>{yearData.cycleYear}</td>
             <td>{numToCurrency(yearData.balanceInfAdjEnd)}</td>
           </tr>
         );

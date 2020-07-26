@@ -9,17 +9,20 @@ export interface MarketYearData {
 }
 
 export interface CycleYearData {
-  year: number;
+  cycleYear: number;
+  cycleStartYear: number;
   cumulativeInflation: number;
   balanceStart: number;
   balanceInfAdjStart: number;
   withdrawal: number;
   withdrawalInfAdjust: number;
+  startSubtotal: number;
   equities: number;
-  bonds: number;
   equitiesGrowth: number;
   dividendsGrowth: number;
+  bonds: number;
   bondsGrowth: number;
+  endSubtotal: number;
   fees: number;
   balanceEnd: number;
   balanceInfAdjEnd: number;
@@ -312,7 +315,11 @@ export class CyclePortfolio {
         currYearIndex === cycleStartYearIndex
       );
 
-      cycleData.yearData.push({ ...yearData, year: currYear });
+      cycleData.yearData.push({
+        ...yearData,
+        cycleYear: currYear,
+        cycleStartYear
+      });
 
       // Add up totals
       const cycleStats = cycleData.stats;
@@ -702,7 +709,7 @@ export class CyclePortfolio {
     dataEndYear: MarketYearData,
     startYearCpi: number,
     isFirstYear: boolean
-  ): CycleYearData {
+  ): Omit<CycleYearData, 'cycleStartYear'> {
     let cumulativeInflation: number;
 
     if (isFirstYear) cumulativeInflation = 1;
@@ -734,17 +741,19 @@ export class CyclePortfolio {
     const portfolioInfAdjEnd = portfolioEnd / cumulativeInflation;
 
     return {
-      year: 0,
+      cycleYear: 0,
       cumulativeInflation,
       balanceStart: startingBalance,
       balanceInfAdjStart: startingBalance / cumulativeInflation,
       withdrawal: withdrawalData.actual,
       withdrawalInfAdjust: withdrawalData.infAdj,
+      startSubtotal: startingBalance - withdrawalData.actual,
       equities,
-      bonds,
       equitiesGrowth,
       dividendsGrowth,
+      bonds,
       bondsGrowth,
+      endSubtotal: portfolioEndSubtotal,
       fees,
       balanceEnd: portfolioEnd,
       balanceInfAdjEnd: portfolioInfAdjEnd
