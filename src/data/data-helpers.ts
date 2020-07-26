@@ -1,6 +1,7 @@
 //import parse from 'csv-parse';
 //import { writeFileSync } from 'fs';
-import { MarketYearData } from './calc/portfolio-calc';
+import { portfolioObjToArr3d } from '../utilities/util';
+import { CycleData, MarketYearData } from './calc/portfolio-calc';
 
 /**
  * Take a CSV File with market data and parse it into JSON to cache data.
@@ -41,6 +42,46 @@ export function parseCSVStringToJSON(
   // Toss the trailing newline if it exists
   if (!parsedRows[parsedRows.length - 1].year) parsedRows.pop();
   return parsedRows;
+}
+
+/**
+ * Create a 3d array string of portfolio data for exportation
+ */
+export function generatePortfolioArrayString(data: CycleData[]): string {
+  //let headerRow: string;
+
+  // For testing, match csv header to our object names, otherwise prettify them for simpler export reading
+  // if (forTesting) {
+  //   headerRow =
+  //     'cycleYear,cycleStartYear,cumulativeInflation,balanceStart,balanceInfAdjStart,withdrawal,withdrawalInfAdjust,startSubtotal,equities,equitiesGrowth,dividendsGrowth,bonds,bondsGrowth,endSubtotal,fees,balanceEnd,balanceInfAdjEnd' +
+  //     lineTerm;
+  // } else {
+  //   headerRow =
+  //     'Year,CumulativeInflation,PortfolioStart,PortfolioInflAdjStart,ActualSpend,InflAdjSpend,Equities,Bonds,EquitiesGrowth,DividendsGrowth,BondsGrowth,Fees,PortfolioEnd,PortfolioInflAdjEnd' +
+  //     lineTerm;
+  // }
+
+  let arrString = '[';
+  const dataArr3d = portfolioObjToArr3d(data);
+
+  for (const cycle of dataArr3d) {
+    arrString += '[';
+    for (const row of cycle) {
+      arrString += '[';
+      for (const col of row) {
+        arrString += col + ',';
+      }
+      // Remove trailing comma and close
+      arrString = arrString.substr(0, arrString.length - 1) + '],';
+    }
+    // Remove trailing comma and close
+    arrString = arrString.substr(0, arrString.length - 1) + '],';
+  }
+  // Remove trailing comma and close
+  arrString = arrString.substr(0, arrString.length - 1) + ']';
+
+  console.log(arrString);
+  return arrString;
 }
 
 // TODO: this should take actual portfolio data to write rather than crunching it within the function.
