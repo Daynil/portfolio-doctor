@@ -127,8 +127,8 @@ export default function Simulator({ path }: Props) {
         `Maximium simulation length is ${getMaxSimulationLength(data)} years.`
       );
       return;
-    } else if (portfolioOptions.simulationYearsLength < 5) {
-      setInputErr('Minimum simulation length is 5 years.');
+    } else if (portfolioOptions.simulationYearsLength < 3) {
+      setInputErr('Minimum simulation length is 3 years.');
       return;
     }
 
@@ -137,13 +137,10 @@ export default function Simulator({ path }: Props) {
     const curPortfolio = new CyclePortfolio(data, portfolioOptions);
     const portfolioData = curPortfolio.crunchAllCyclesData();
 
-    // const resultsArr3d = portfolioObjToArr3d(
-    //   portfolioData.portfolioLifecyclesData
-    // );
-    // const blob = new Blob([JSON.stringify(resultsArr3d)], {
+    // const blob = new Blob([JSON.stringify(portfolioData)], {
     //   type: 'application/json'
     // });
-    // fileSaver.saveAs(blob, 'results.json');
+    // FileSaver.saveAs(blob, 'results.json');
 
     setPortfolio({
       lifecyclesData: portfolioData.portfolioLifecyclesData,

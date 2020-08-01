@@ -1,4 +1,7 @@
-import { max, mean, median, min } from '../../utilities/math';
+import { median, sum } from 'd3-array';
+import { mean } from '../../utilities/math';
+//import { max, mean, median, min } from '../../utilities/math';
+import { pivotPortfolioCycles, YearDataColumns } from '../../utilities/util';
 
 export interface MarketYearData {
   year: number;
@@ -322,131 +325,169 @@ export class CyclePortfolio {
       });
 
       // Add up totals
-      const cycleStats = cycleData.stats;
+      // const cycleStats = cycleData.stats;
 
-      cycleStats.fees += yearData.fees;
-      cycleStats.equitiesGrowth += yearData.equitiesGrowth;
-      cycleStats.dividendsGrowth += yearData.dividendsGrowth;
-      cycleStats.bondsGrowth += yearData.bondsGrowth;
-      cycleStats.balance.total += yearData.balanceEnd;
-      cycleStats.balance.totalInflAdj += yearData.balanceInfAdjEnd;
-      cycleStats.withdrawals.total += yearData.withdrawal;
-      cycleStats.withdrawals.totalInflAdj += yearData.withdrawalInfAdjust;
+      // cycleStats.fees += yearData.fees;
+      // cycleStats.equitiesGrowth += yearData.equitiesGrowth;
+      // cycleStats.dividendsGrowth += yearData.dividendsGrowth;
+      // cycleStats.bondsGrowth += yearData.bondsGrowth;
+      // cycleStats.balance.total += yearData.balanceEnd;
+      // cycleStats.balance.totalInflAdj += yearData.balanceInfAdjEnd;
+      // cycleStats.withdrawals.total += yearData.withdrawal;
+      // cycleStats.withdrawals.totalInflAdj += yearData.withdrawalInfAdjust;
 
-      // Adjust min/max
-      if (!cycleStats.balance.min) {
-        cycleStats.balance.min = {
-          year: currYear,
-          balance: yearData.balanceEnd,
-          yearInflAdj: currYear,
-          balanceInflAdj: yearData.balanceInfAdjEnd
-        };
-      } else {
-        if (yearData.balanceEnd < cycleStats.balance.min.balance) {
-          cycleStats.balance.min.year = currYear;
-          cycleStats.balance.min.balance = yearData.balanceEnd;
-        }
-        if (yearData.balanceInfAdjEnd < cycleStats.balance.min.balanceInflAdj) {
-          cycleStats.balance.min.yearInflAdj = currYear;
-          cycleStats.balance.min.balanceInflAdj = yearData.balanceInfAdjEnd;
-        }
-      }
-      if (!cycleStats.balance.max) {
-        cycleStats.balance.max = {
-          year: currYear,
-          balance: yearData.balanceEnd,
-          yearInflAdj: currYear,
-          balanceInflAdj: yearData.balanceInfAdjEnd
-        };
-      } else {
-        if (yearData.balanceEnd > cycleStats.balance.max.balance) {
-          cycleStats.balance.max.year = currYear;
-          cycleStats.balance.max.balance = yearData.balanceEnd;
-        }
-        if (yearData.balanceInfAdjEnd > cycleStats.balance.max.balanceInflAdj) {
-          cycleStats.balance.max.yearInflAdj = currYear;
-          cycleStats.balance.max.balanceInflAdj = yearData.balanceInfAdjEnd;
-        }
-      }
-      if (!cycleStats.withdrawals.min) {
-        cycleStats.withdrawals.min = {
-          year: currYear,
-          amount: yearData.withdrawal,
-          yearInflAdj: currYear,
-          amountInflAdj: yearData.withdrawalInfAdjust
-        };
-      } else {
-        if (yearData.withdrawal < cycleStats.withdrawals.min.amount) {
-          cycleStats.withdrawals.min.year = currYear;
-          cycleStats.withdrawals.min.amount = yearData.withdrawal;
-        }
-        if (
-          yearData.withdrawalInfAdjust <
-          cycleStats.withdrawals.min.amountInflAdj
-        ) {
-          cycleStats.withdrawals.min.yearInflAdj = currYear;
-          cycleStats.withdrawals.min.amountInflAdj =
-            yearData.withdrawalInfAdjust;
-        }
-      }
-      if (!cycleStats.withdrawals.max) {
-        cycleStats.withdrawals.max = {
-          year: currYear,
-          amount: yearData.withdrawal,
-          yearInflAdj: currYear,
-          amountInflAdj: yearData.withdrawalInfAdjust
-        };
-      } else {
-        if (yearData.withdrawal > cycleStats.withdrawals.max.amount) {
-          cycleStats.withdrawals.max.year = currYear;
-          cycleStats.withdrawals.max.amount = yearData.withdrawal;
-        }
-        if (
-          yearData.withdrawalInfAdjust >
-          cycleStats.withdrawals.max.amountInflAdj
-        ) {
-          cycleStats.withdrawals.max.yearInflAdj = currYear;
-          cycleStats.withdrawals.max.amountInflAdj =
-            yearData.withdrawalInfAdjust;
-        }
-      }
-      if (cycleStats.failureYear === 0 && yearData.balanceEnd <= 0) {
-        cycleStats.failureYear = currYear;
-      }
-      if (
-        currYearIndex ===
-        cycleStartYearIndex + this.options.simulationYearsLength - 1
-      ) {
-        cycleStats.balance.ending = yearData.balanceEnd;
-        cycleStats.balance.endingInflAdj = yearData.balanceInfAdjEnd;
-      }
+      // // Adjust min/max
+      // if (!cycleStats.balance.min) {
+      //   cycleStats.balance.min = {
+      //     year: currYear,
+      //     balance: yearData.balanceEnd,
+      //     yearInflAdj: currYear,
+      //     balanceInflAdj: yearData.balanceInfAdjEnd
+      //   };
+      // } else {
+      //   if (yearData.balanceEnd < cycleStats.balance.min.balance) {
+      //     cycleStats.balance.min.year = currYear;
+      //     cycleStats.balance.min.balance = yearData.balanceEnd;
+      //   }
+      //   if (yearData.balanceInfAdjEnd < cycleStats.balance.min.balanceInflAdj) {
+      //     cycleStats.balance.min.yearInflAdj = currYear;
+      //     cycleStats.balance.min.balanceInflAdj = yearData.balanceInfAdjEnd;
+      //   }
+      // }
+      // if (!cycleStats.balance.max) {
+      //   cycleStats.balance.max = {
+      //     year: currYear,
+      //     balance: yearData.balanceEnd,
+      //     yearInflAdj: currYear,
+      //     balanceInflAdj: yearData.balanceInfAdjEnd
+      //   };
+      // } else {
+      //   if (yearData.balanceEnd > cycleStats.balance.max.balance) {
+      //     cycleStats.balance.max.year = currYear;
+      //     cycleStats.balance.max.balance = yearData.balanceEnd;
+      //   }
+      //   if (yearData.balanceInfAdjEnd > cycleStats.balance.max.balanceInflAdj) {
+      //     cycleStats.balance.max.yearInflAdj = currYear;
+      //     cycleStats.balance.max.balanceInflAdj = yearData.balanceInfAdjEnd;
+      //   }
+      // }
+      // if (!cycleStats.withdrawals.min) {
+      //   cycleStats.withdrawals.min = {
+      //     year: currYear,
+      //     amount: yearData.withdrawal,
+      //     yearInflAdj: currYear,
+      //     amountInflAdj: yearData.withdrawalInfAdjust
+      //   };
+      // } else {
+      //   if (yearData.withdrawal < cycleStats.withdrawals.min.amount) {
+      //     cycleStats.withdrawals.min.year = currYear;
+      //     cycleStats.withdrawals.min.amount = yearData.withdrawal;
+      //   }
+      //   if (
+      //     yearData.withdrawalInfAdjust <
+      //     cycleStats.withdrawals.min.amountInflAdj
+      //   ) {
+      //     cycleStats.withdrawals.min.yearInflAdj = currYear;
+      //     cycleStats.withdrawals.min.amountInflAdj =
+      //       yearData.withdrawalInfAdjust;
+      //   }
+      // }
+      // if (!cycleStats.withdrawals.max) {
+      //   cycleStats.withdrawals.max = {
+      //     year: currYear,
+      //     amount: yearData.withdrawal,
+      //     yearInflAdj: currYear,
+      //     amountInflAdj: yearData.withdrawalInfAdjust
+      //   };
+      // } else {
+      //   if (yearData.withdrawal > cycleStats.withdrawals.max.amount) {
+      //     cycleStats.withdrawals.max.year = currYear;
+      //     cycleStats.withdrawals.max.amount = yearData.withdrawal;
+      //   }
+      //   if (
+      //     yearData.withdrawalInfAdjust >
+      //     cycleStats.withdrawals.max.amountInflAdj
+      //   ) {
+      //     cycleStats.withdrawals.max.yearInflAdj = currYear;
+      //     cycleStats.withdrawals.max.amountInflAdj =
+      //       yearData.withdrawalInfAdjust;
+      //   }
+      // }
+      // if (cycleStats.failureYear === 0 && yearData.balanceEnd <= 0) {
+      //   cycleStats.failureYear = currYear;
+      // }
+      // if (
+      //   currYearIndex ===
+      //   cycleStartYearIndex + this.options.simulationYearsLength - 1
+      // ) {
+      //   cycleStats.balance.ending = yearData.balanceEnd;
+      //   cycleStats.balance.endingInflAdj = yearData.balanceInfAdjEnd;
+      // }
     }
     // Calculate stats
-    const cycleStats = cycleData.stats;
+    // const cycleStats = cycleData.stats;
 
-    cycleStats.balance.average =
-      cycleStats.balance.total / this.options.simulationYearsLength;
-    cycleStats.balance.averageInflAdj =
-      cycleStats.balance.totalInflAdj / this.options.simulationYearsLength;
-    cycleStats.withdrawals.average =
-      cycleStats.withdrawals.total / this.options.simulationYearsLength;
-    cycleStats.withdrawals.averageInflAdj =
-      cycleStats.withdrawals.totalInflAdj / this.options.simulationYearsLength;
+    // cycleStats.balance.average =
+    //   cycleStats.balance.total / this.options.simulationYearsLength;
+    // cycleStats.balance.averageInflAdj =
+    //   cycleStats.balance.totalInflAdj / this.options.simulationYearsLength;
+    // cycleStats.withdrawals.average =
+    //   cycleStats.withdrawals.total / this.options.simulationYearsLength;
+    // cycleStats.withdrawals.averageInflAdj =
+    //   cycleStats.withdrawals.totalInflAdj / this.options.simulationYearsLength;
 
-    cycleStats.balance.median = median(
-      cycleData.yearData.map((yearData) => yearData.balanceEnd)
-    );
-    cycleStats.balance.medianInflAdj = median(
-      cycleData.yearData.map((yearData) => yearData.balanceInfAdjEnd)
-    );
-    cycleStats.withdrawals.median = median(
-      cycleData.yearData.map((yearData) => yearData.withdrawal)
-    );
-    cycleStats.withdrawals.medianInflAdj = median(
-      cycleData.yearData.map((yearData) => yearData.withdrawalInfAdjust)
-    );
+    // cycleStats.balance.median = median(
+    //   cycleData.yearData.map((yearData) => yearData.balanceEnd)
+    // );
+    // cycleStats.balance.medianInflAdj = median(
+    //   cycleData.yearData.map((yearData) => yearData.balanceInfAdjEnd)
+    // );
+    // cycleStats.withdrawals.median = median(
+    //   cycleData.yearData.map((yearData) => yearData.withdrawal)
+    // );
+    // cycleStats.withdrawals.medianInflAdj = median(
+    //   cycleData.yearData.map((yearData) => yearData.withdrawalInfAdjust)
+    // );
 
     return cycleData;
+  }
+
+  crunchAllPortfolioStats(portfolioLifecyclesData: CycleData[]): CycleStats[] {
+    const portfolioYearDataColumns = pivotPortfolioCycles(
+      portfolioLifecyclesData
+    );
+    return portfolioYearDataColumns.map((d) => this.crunchSingleCycleStats(d));
+  }
+
+  crunchSingleCycleStats(cycleYearDataColumns: YearDataColumns): CycleStats {
+    const numYears = cycleYearDataColumns.balanceEnd.length;
+    let stats = {
+      fees: sum(cycleYearDataColumns.fees),
+      equitiesGrowth: sum(cycleYearDataColumns.equitiesGrowth),
+      dividendsGrowth: sum(cycleYearDataColumns.dividendsGrowth),
+      bondsGrowth: sum(cycleYearDataColumns.bondsGrowth),
+      balance: {
+        total: sum(cycleYearDataColumns.balanceEnd),
+        totalInflAdj: sum(cycleYearDataColumns.balanceInfAdjEnd),
+        average: mean(cycleYearDataColumns.balanceEnd),
+        averageInflAdj: mean(cycleYearDataColumns.balanceInfAdjEnd),
+        median: median(cycleYearDataColumns.balanceEnd),
+        medianInflAdj: median(cycleYearDataColumns.balanceInfAdjEnd),
+        ending: cycleYearDataColumns.balanceEnd[numYears - 1],
+        endingInflAdj: cycleYearDataColumns.balanceInfAdjEnd[numYears - 1]
+      },
+      withdrawals: {
+        total: sum(cycleYearDataColumns.withdrawal),
+        totalInflAdj: sum(cycleYearDataColumns.withdrawalInfAdjust),
+        average: mean(cycleYearDataColumns.withdrawal),
+        averageInflAdj: mean(cycleYearDataColumns.withdrawalInfAdjust),
+        median: median(cycleYearDataColumns.withdrawal),
+        medianInflAdj: median(cycleYearDataColumns.withdrawalInfAdjust)
+      },
+      failureYear: 0
+    } as CycleStats;
+
+    return stats;
   }
 
   crunchSingleCycleData(): CycleData {
@@ -476,232 +517,232 @@ export class CyclePortfolio {
 
     return {
       portfolioLifecyclesData: allCyclesData,
-      portfolioStats: this.crunchPortfolioStats(allCyclesData)
+      portfolioStats: {} as PortfolioStats //this.crunchPortfolioStats(allCyclesData)
     };
   }
 
-  crunchPortfolioStats(portfolioData: CycleData[]): PortfolioStats {
-    const portfolioStats: PortfolioStats = {
-      numFailures: 0,
-      numSuccesses: 0,
-      successRate: 0,
-      investmentExpenses: {
-        average: 0,
-        median: 0
-      },
-      equitiesPriceChange: {
-        average: 0,
-        median: 0
-      },
-      equitiesDividendsPaid: {
-        average: 0,
-        median: 0
-      },
-      fixedIncomeInterestPaid: {
-        average: 0,
-        median: 0
-      },
-      balance: {
-        average: 0,
-        averageInflAdj: 0,
-        median: 0,
-        medianInflAdj: 0,
-        min: {
-          year: 0,
-          balance: 0,
-          yearInflAdj: 0,
-          balanceInflAdj: 0
-        },
-        max: {
-          year: 0,
-          balance: 0,
-          yearInflAdj: 0,
-          balanceInflAdj: 0
-        }
-      },
-      withdrawals: {
-        average: 0,
-        averageInflAdj: 0,
-        median: 0,
-        medianInflAdj: 0,
-        min: {
-          cycleStartYear: 0,
-          yearInCycle: 0,
-          amount: 0,
-          cycleStartYearInflAdj: 0,
-          yearInCycleInflAdj: 0,
-          amountInflAdj: 0
-        },
-        max: {
-          cycleStartYear: 0,
-          yearInCycle: 0,
-          amount: 0,
-          cycleStartYearInflAdj: 0,
-          yearInCycleInflAdj: 0,
-          amountInflAdj: 0
-        }
-      }
-    };
+  // crunchPortfolioStats(portfolioData: CycleData[]): PortfolioStats {
+  //   const portfolioStats: PortfolioStats = {
+  //     numFailures: 0,
+  //     numSuccesses: 0,
+  //     successRate: 0,
+  //     investmentExpenses: {
+  //       average: 0,
+  //       median: 0
+  //     },
+  //     equitiesPriceChange: {
+  //       average: 0,
+  //       median: 0
+  //     },
+  //     equitiesDividendsPaid: {
+  //       average: 0,
+  //       median: 0
+  //     },
+  //     fixedIncomeInterestPaid: {
+  //       average: 0,
+  //       median: 0
+  //     },
+  //     balance: {
+  //       average: 0,
+  //       averageInflAdj: 0,
+  //       median: 0,
+  //       medianInflAdj: 0,
+  //       min: {
+  //         year: 0,
+  //         balance: 0,
+  //         yearInflAdj: 0,
+  //         balanceInflAdj: 0
+  //       },
+  //       max: {
+  //         year: 0,
+  //         balance: 0,
+  //         yearInflAdj: 0,
+  //         balanceInflAdj: 0
+  //       }
+  //     },
+  //     withdrawals: {
+  //       average: 0,
+  //       averageInflAdj: 0,
+  //       median: 0,
+  //       medianInflAdj: 0,
+  //       min: {
+  //         cycleStartYear: 0,
+  //         yearInCycle: 0,
+  //         amount: 0,
+  //         cycleStartYearInflAdj: 0,
+  //         yearInCycleInflAdj: 0,
+  //         amountInflAdj: 0
+  //       },
+  //       max: {
+  //         cycleStartYear: 0,
+  //         yearInCycle: 0,
+  //         amount: 0,
+  //         cycleStartYearInflAdj: 0,
+  //         yearInCycleInflAdj: 0,
+  //         amountInflAdj: 0
+  //       }
+  //     }
+  //   };
 
-    const cycleDataStats = portfolioData.map((cycleData) => cycleData.stats);
+  //   const cycleDataStats = portfolioData.map((cycleData) => cycleData.stats);
 
-    portfolioStats.numFailures = cycleDataStats
-      .map((stats) => stats.failureYear)
-      .reduce(
-        (numFailures, failureYear) =>
-          failureYear > 0 ? numFailures + 1 : numFailures,
-        0
-      );
-    portfolioStats.numSuccesses =
-      cycleDataStats.length - portfolioStats.numFailures;
-    portfolioStats.successRate =
-      portfolioStats.numSuccesses / cycleDataStats.length;
+  //   portfolioStats.numFailures = cycleDataStats
+  //     .map((stats) => stats.failureYear)
+  //     .reduce(
+  //       (numFailures, failureYear) =>
+  //         failureYear > 0 ? numFailures + 1 : numFailures,
+  //       0
+  //     );
+  //   portfolioStats.numSuccesses =
+  //     cycleDataStats.length - portfolioStats.numFailures;
+  //   portfolioStats.successRate =
+  //     portfolioStats.numSuccesses / cycleDataStats.length;
 
-    const investmentExpenses = cycleDataStats.map((stats) => stats.fees);
-    portfolioStats.investmentExpenses.average = mean(investmentExpenses);
-    portfolioStats.investmentExpenses.median = median(investmentExpenses);
+  //   const investmentExpenses = cycleDataStats.map((stats) => stats.fees);
+  //   portfolioStats.investmentExpenses.average = mean(investmentExpenses);
+  //   portfolioStats.investmentExpenses.median = median(investmentExpenses);
 
-    const equitiesPriceChanges = cycleDataStats.map(
-      (stats) => stats.equitiesGrowth
-    );
-    portfolioStats.equitiesPriceChange.average = mean(equitiesPriceChanges);
-    portfolioStats.equitiesPriceChange.median = median(equitiesPriceChanges);
+  //   const equitiesPriceChanges = cycleDataStats.map(
+  //     (stats) => stats.equitiesGrowth
+  //   );
+  //   portfolioStats.equitiesPriceChange.average = mean(equitiesPriceChanges);
+  //   portfolioStats.equitiesPriceChange.median = median(equitiesPriceChanges);
 
-    const equitiesDividendsPaid = cycleDataStats.map(
-      (stats) => stats.dividendsGrowth
-    );
-    portfolioStats.equitiesDividendsPaid.average = mean(equitiesDividendsPaid);
-    portfolioStats.equitiesDividendsPaid.median = median(equitiesDividendsPaid);
+  //   const equitiesDividendsPaid = cycleDataStats.map(
+  //     (stats) => stats.dividendsGrowth
+  //   );
+  //   portfolioStats.equitiesDividendsPaid.average = mean(equitiesDividendsPaid);
+  //   portfolioStats.equitiesDividendsPaid.median = median(equitiesDividendsPaid);
 
-    const fixedIncomeInterestPaid = cycleDataStats.map(
-      (stats) => stats.bondsGrowth
-    );
-    portfolioStats.fixedIncomeInterestPaid.average = mean(
-      fixedIncomeInterestPaid
-    );
-    portfolioStats.fixedIncomeInterestPaid.median = median(
-      fixedIncomeInterestPaid
-    );
+  //   const fixedIncomeInterestPaid = cycleDataStats.map(
+  //     (stats) => stats.bondsGrowth
+  //   );
+  //   portfolioStats.fixedIncomeInterestPaid.average = mean(
+  //     fixedIncomeInterestPaid
+  //   );
+  //   portfolioStats.fixedIncomeInterestPaid.median = median(
+  //     fixedIncomeInterestPaid
+  //   );
 
-    const balances = cycleDataStats.map((stats) => stats.balance.ending);
-    portfolioStats.balance.average = mean(balances);
-    portfolioStats.balance.median = median(balances);
-    const balancesMin = min(balances);
-    const balancesMax = max(balances);
-    portfolioStats.balance.min.year =
-      this.marketYearData[0].year + balancesMin.index;
-    portfolioStats.balance.min.balance = balancesMin.value;
-    portfolioStats.balance.max.year =
-      this.marketYearData[0].year + balancesMax.index;
-    portfolioStats.balance.max.balance = balancesMax.value;
+  //   const balances = cycleDataStats.map((stats) => stats.balance.ending);
+  //   portfolioStats.balance.average = mean(balances);
+  //   portfolioStats.balance.median = median(balances);
+  //   const balancesMin = min(balances);
+  //   const balancesMax = max(balances);
+  //   portfolioStats.balance.min.year =
+  //     this.marketYearData[0].year + balancesMin.index;
+  //   portfolioStats.balance.min.balance = balancesMin.value;
+  //   portfolioStats.balance.max.year =
+  //     this.marketYearData[0].year + balancesMax.index;
+  //   portfolioStats.balance.max.balance = balancesMax.value;
 
-    const balancesInflationAdjusted = cycleDataStats.map(
-      (stats) => stats.balance.endingInflAdj
-    );
-    const balancesInflationAdjustedMin = min(balancesInflationAdjusted);
-    const balancesInflationAdjustedMax = max(balancesInflationAdjusted);
-    portfolioStats.balance.averageInflAdj = mean(balancesInflationAdjusted);
-    portfolioStats.balance.medianInflAdj = median(balancesInflationAdjusted);
-    portfolioStats.balance.min.yearInflAdj =
-      this.marketYearData[0].year + balancesInflationAdjustedMin.index;
-    portfolioStats.balance.min.balanceInflAdj =
-      balancesInflationAdjustedMin.value;
-    portfolioStats.balance.max.yearInflAdj =
-      this.marketYearData[0].year + balancesInflationAdjustedMax.index;
-    portfolioStats.balance.max.balanceInflAdj =
-      balancesInflationAdjustedMax.value;
+  //   const balancesInflationAdjusted = cycleDataStats.map(
+  //     (stats) => stats.balance.endingInflAdj
+  //   );
+  //   const balancesInflationAdjustedMin = min(balancesInflationAdjusted);
+  //   const balancesInflationAdjustedMax = max(balancesInflationAdjusted);
+  //   portfolioStats.balance.averageInflAdj = mean(balancesInflationAdjusted);
+  //   portfolioStats.balance.medianInflAdj = median(balancesInflationAdjusted);
+  //   portfolioStats.balance.min.yearInflAdj =
+  //     this.marketYearData[0].year + balancesInflationAdjustedMin.index;
+  //   portfolioStats.balance.min.balanceInflAdj =
+  //     balancesInflationAdjustedMin.value;
+  //   portfolioStats.balance.max.yearInflAdj =
+  //     this.marketYearData[0].year + balancesInflationAdjustedMax.index;
+  //   portfolioStats.balance.max.balanceInflAdj =
+  //     balancesInflationAdjustedMax.value;
 
-    portfolioStats.withdrawals.average = mean(
-      cycleDataStats.map((stats) => stats.withdrawals.average)
-    );
+  //   portfolioStats.withdrawals.average = mean(
+  //     cycleDataStats.map((stats) => stats.withdrawals.average)
+  //   );
 
-    portfolioStats.withdrawals.averageInflAdj = mean(
-      cycleDataStats.map((stats) => stats.withdrawals.averageInflAdj)
-    );
+  //   portfolioStats.withdrawals.averageInflAdj = mean(
+  //     cycleDataStats.map((stats) => stats.withdrawals.averageInflAdj)
+  //   );
 
-    // Median of medians doesn't work, just take the average of medians
-    portfolioStats.withdrawals.median = mean(
-      cycleDataStats.map((stats) => stats.withdrawals.median)
-    );
+  //   // Median of medians doesn't work, just take the average of medians
+  //   portfolioStats.withdrawals.median = mean(
+  //     cycleDataStats.map((stats) => stats.withdrawals.median)
+  //   );
 
-    portfolioStats.withdrawals.medianInflAdj = mean(
-      cycleDataStats.map((stats) => stats.withdrawals.medianInflAdj)
-    );
+  //   portfolioStats.withdrawals.medianInflAdj = mean(
+  //     cycleDataStats.map((stats) => stats.withdrawals.medianInflAdj)
+  //   );
 
-    const withdrawalsMinsYears = cycleDataStats.map((stats, statIndex) => ({
-      cycleStartYear: this.marketYearData[statIndex].year,
-      yearInCycle: stats.withdrawals.min.year
-    }));
-    const withdrawalsMinsVals = cycleDataStats.map(
-      (stats) => stats.withdrawals.min.amount
-    );
-    const withdrawalsMinsMin = min(withdrawalsMinsVals);
+  //   const withdrawalsMinsYears = cycleDataStats.map((stats, statIndex) => ({
+  //     cycleStartYear: this.marketYearData[statIndex].year,
+  //     yearInCycle: stats.withdrawals.min.year
+  //   }));
+  //   const withdrawalsMinsVals = cycleDataStats.map(
+  //     (stats) => stats.withdrawals.min.amount
+  //   );
+  //   const withdrawalsMinsMin = min(withdrawalsMinsVals);
 
-    portfolioStats.withdrawals.min.amount = withdrawalsMinsMin.value;
-    portfolioStats.withdrawals.min.cycleStartYear =
-      withdrawalsMinsYears[withdrawalsMinsMin.index].cycleStartYear;
-    portfolioStats.withdrawals.min.yearInCycle =
-      withdrawalsMinsYears[withdrawalsMinsMin.index].yearInCycle;
+  //   portfolioStats.withdrawals.min.amount = withdrawalsMinsMin.value;
+  //   portfolioStats.withdrawals.min.cycleStartYear =
+  //     withdrawalsMinsYears[withdrawalsMinsMin.index].cycleStartYear;
+  //   portfolioStats.withdrawals.min.yearInCycle =
+  //     withdrawalsMinsYears[withdrawalsMinsMin.index].yearInCycle;
 
-    const withdrawalsMinsInflAdjYears = cycleDataStats.map(
-      (stats, statIndex) => ({
-        cycleStartYear: this.marketYearData[statIndex].year,
-        yearInCycle: stats.withdrawals.min.yearInflAdj
-      })
-    );
-    const withdrawalsMinsInflAdjVals = cycleDataStats.map(
-      (stats) => stats.withdrawals.min.amountInflAdj
-    );
-    const withdrawalsMinsInflAdjMin = min(withdrawalsMinsInflAdjVals);
+  //   const withdrawalsMinsInflAdjYears = cycleDataStats.map(
+  //     (stats, statIndex) => ({
+  //       cycleStartYear: this.marketYearData[statIndex].year,
+  //       yearInCycle: stats.withdrawals.min.yearInflAdj
+  //     })
+  //   );
+  //   const withdrawalsMinsInflAdjVals = cycleDataStats.map(
+  //     (stats) => stats.withdrawals.min.amountInflAdj
+  //   );
+  //   const withdrawalsMinsInflAdjMin = min(withdrawalsMinsInflAdjVals);
 
-    portfolioStats.withdrawals.min.amountInflAdj =
-      withdrawalsMinsInflAdjMin.value;
-    portfolioStats.withdrawals.min.cycleStartYearInflAdj =
-      withdrawalsMinsInflAdjYears[
-        withdrawalsMinsInflAdjMin.index
-      ].cycleStartYear;
-    portfolioStats.withdrawals.min.yearInCycleInflAdj =
-      withdrawalsMinsInflAdjYears[withdrawalsMinsInflAdjMin.index].yearInCycle;
+  //   portfolioStats.withdrawals.min.amountInflAdj =
+  //     withdrawalsMinsInflAdjMin.value;
+  //   portfolioStats.withdrawals.min.cycleStartYearInflAdj =
+  //     withdrawalsMinsInflAdjYears[
+  //       withdrawalsMinsInflAdjMin.index
+  //     ].cycleStartYear;
+  //   portfolioStats.withdrawals.min.yearInCycleInflAdj =
+  //     withdrawalsMinsInflAdjYears[withdrawalsMinsInflAdjMin.index].yearInCycle;
 
-    const withdrawalsMaxesYears = cycleDataStats.map((stats, statIndex) => ({
-      cycleStartYear: this.marketYearData[statIndex].year,
-      yearInCycle: stats.withdrawals.max.year
-    }));
-    const withdrawalsMaxesVals = cycleDataStats.map(
-      (stats) => stats.withdrawals.max.amount
-    );
-    const withdrawalsMaxesMax = max(withdrawalsMaxesVals);
+  //   const withdrawalsMaxesYears = cycleDataStats.map((stats, statIndex) => ({
+  //     cycleStartYear: this.marketYearData[statIndex].year,
+  //     yearInCycle: stats.withdrawals.max.year
+  //   }));
+  //   const withdrawalsMaxesVals = cycleDataStats.map(
+  //     (stats) => stats.withdrawals.max.amount
+  //   );
+  //   const withdrawalsMaxesMax = max(withdrawalsMaxesVals);
 
-    portfolioStats.withdrawals.max.amount = withdrawalsMaxesMax.value;
-    portfolioStats.withdrawals.max.cycleStartYear =
-      withdrawalsMaxesYears[withdrawalsMaxesMax.index].cycleStartYear;
-    portfolioStats.withdrawals.max.yearInCycle =
-      withdrawalsMaxesYears[withdrawalsMaxesMax.index].yearInCycle;
+  //   portfolioStats.withdrawals.max.amount = withdrawalsMaxesMax.value;
+  //   portfolioStats.withdrawals.max.cycleStartYear =
+  //     withdrawalsMaxesYears[withdrawalsMaxesMax.index].cycleStartYear;
+  //   portfolioStats.withdrawals.max.yearInCycle =
+  //     withdrawalsMaxesYears[withdrawalsMaxesMax.index].yearInCycle;
 
-    const withdrawalsMaxesInflAdjYears = cycleDataStats.map(
-      (stats, statIndex) => ({
-        cycleStartYear: this.marketYearData[statIndex].year,
-        yearInCycle: stats.withdrawals.max.yearInflAdj
-      })
-    );
-    const withdrawalsMaxesInflAdjVals = cycleDataStats.map(
-      (stats) => stats.withdrawals.max.amountInflAdj
-    );
-    const withdrawalsMaxesInflAdjMax = max(withdrawalsMaxesInflAdjVals);
+  //   const withdrawalsMaxesInflAdjYears = cycleDataStats.map(
+  //     (stats, statIndex) => ({
+  //       cycleStartYear: this.marketYearData[statIndex].year,
+  //       yearInCycle: stats.withdrawals.max.yearInflAdj
+  //     })
+  //   );
+  //   const withdrawalsMaxesInflAdjVals = cycleDataStats.map(
+  //     (stats) => stats.withdrawals.max.amountInflAdj
+  //   );
+  //   const withdrawalsMaxesInflAdjMax = max(withdrawalsMaxesInflAdjVals);
 
-    portfolioStats.withdrawals.max.amountInflAdj =
-      withdrawalsMaxesInflAdjMax.value;
-    portfolioStats.withdrawals.max.cycleStartYearInflAdj =
-      withdrawalsMaxesInflAdjYears[
-        withdrawalsMaxesInflAdjMax.index
-      ].cycleStartYear;
-    portfolioStats.withdrawals.max.yearInCycleInflAdj =
-      withdrawalsMaxesInflAdjYears[
-        withdrawalsMaxesInflAdjMax.index
-      ].yearInCycle;
+  //   portfolioStats.withdrawals.max.amountInflAdj =
+  //     withdrawalsMaxesInflAdjMax.value;
+  //   portfolioStats.withdrawals.max.cycleStartYearInflAdj =
+  //     withdrawalsMaxesInflAdjYears[
+  //       withdrawalsMaxesInflAdjMax.index
+  //     ].cycleStartYear;
+  //   portfolioStats.withdrawals.max.yearInCycleInflAdj =
+  //     withdrawalsMaxesInflAdjYears[
+  //       withdrawalsMaxesInflAdjMax.index
+  //     ].yearInCycle;
 
-    return portfolioStats;
-  }
+  //   return portfolioStats;
+  // }
 
   private calculateYearData(
     startingBalance: number,
