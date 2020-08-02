@@ -1,8 +1,8 @@
 import * as d3 from 'd3';
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  CycleData,
   CycleStats,
+  CycleYearData,
   PortfolioOptions,
   PortfolioStats
 } from '../data/calc/portfolio-calc';
@@ -14,7 +14,7 @@ import {
 import { clamp } from '../utilities/math';
 
 export interface PortfolioData {
-  lifecyclesData: CycleData[];
+  lifecyclesData: CycleYearData[][];
   stats: PortfolioStats;
   options: PortfolioOptions;
   startYear: number;
@@ -75,19 +75,19 @@ export function PortfolioGraph({
   const [selectedPointData, setSelectedPointData] = useState<PointData>(null);
   const [linePaths, setLinePaths] = useState<D3LineSelection>(null);
 
-  const firstCycleData = lifecyclesData[0].yearData;
-  const xDomain = lifecyclesData[0].yearData.map((d, i) => i + 1);
+  const firstCycleData = lifecyclesData[0];
+  const xDomain = lifecyclesData[0].map((d, i) => i + 1);
 
   // Format data for d3 chart consumption
   const chartData: ChartData[] = lifecyclesData.map((cycle, i) => {
     return {
       startYear: startYear + i,
-      values: cycle.yearData.map((year, i) => ({
+      values: cycle.map((year, i) => ({
         x: i,
         y: year.balanceInfAdjEnd,
         withdrawal: year.withdrawalInfAdjust
       })),
-      stats: cycle.stats
+      stats: stats.cycleStats[i]
     };
   });
 
@@ -104,9 +104,7 @@ export function PortfolioGraph({
     .scaleLinear()
     .domain([
       0,
-      d3.max(lifecyclesData, (d) =>
-        d3.max(d.yearData.map((d) => d.balanceInfAdjEnd))
-      )
+      d3.max(lifecyclesData, (d) => d3.max(d.map((d) => d.balanceInfAdjEnd)))
     ])
     .nice()
     .range([height, 0]);

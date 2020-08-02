@@ -1,28 +1,8 @@
 // import { CycleData } from '../data/calc/portfolio-calc';
 
-import { CycleData } from '../data/calc/portfolio-calc';
+import { CycleYearData } from '../data/calc/portfolio-calc';
 
-// export type CycleYearDataArr = [
-//   number,
-//   number,
-//   number,
-//   number,
-//   number,
-//   number,
-//   number,
-//   number,
-//   number,
-//   number,
-//   number,
-//   number,
-//   number,
-//   number,
-//   number,
-//   number,
-//   number
-// ];
-
-export interface YearDataColumns {
+export interface DataColumns {
   cycleYear: number[];
   cycleStartYear: number[];
   cumulativeInflation: number[];
@@ -42,47 +22,17 @@ export interface YearDataColumns {
   balanceInfAdjEnd: number[];
 }
 
-// export function portfolioObjToArr3d(
-//   portfolioLifecyclesData: CycleData[]
-// ): CycleYearDataArr[][] {
-//   return portfolioLifecyclesData.map((cycleData) => {
-//     return cycleData.yearData.map((obj) => {
-//       // prettier-ignore
-//       const objArr: CycleYearDataArr= [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
-//       objArr[CycleYearDataIdx.cycleYear] = obj.cycleYear;
-//       objArr[CycleYearDataIdx.cycleStartYear] = obj.cycleStartYear;
-//       objArr[CycleYearDataIdx.cumulativeInflation] = obj.cumulativeInflation;
-//       objArr[CycleYearDataIdx.balanceStart] = obj.balanceStart;
-//       objArr[CycleYearDataIdx.balanceInfAdjStart] = obj.balanceInfAdjStart;
-//       objArr[CycleYearDataIdx.withdrawal] = obj.withdrawal;
-//       objArr[CycleYearDataIdx.withdrawalInfAdjust] = obj.withdrawalInfAdjust;
-//       objArr[CycleYearDataIdx.startSubtotal] = obj.startSubtotal;
-//       objArr[CycleYearDataIdx.equities] = obj.equities;
-//       objArr[CycleYearDataIdx.equitiesGrowth] = obj.equitiesGrowth;
-//       objArr[CycleYearDataIdx.dividendsGrowth] = obj.dividendsGrowth;
-//       objArr[CycleYearDataIdx.bonds] = obj.bonds;
-//       objArr[CycleYearDataIdx.bondsGrowth] = obj.bondsGrowth;
-//       objArr[CycleYearDataIdx.endSubtotal] = obj.endSubtotal;
-//       objArr[CycleYearDataIdx.fees] = obj.fees;
-//       objArr[CycleYearDataIdx.balanceEnd] = obj.balanceEnd;
-//       objArr[CycleYearDataIdx.balanceInfAdjEnd] = obj.balanceInfAdjEnd;
-//       return objArr;
-//     });
-//   });
-// }
-
 /**
  * Create an object with an array of each column across all years for each cycle year
+ * i.e. Condenses each cycle's array of cycleYear rows into 1 aggregate row per cycle
+ * Used for cycle-level statistics
  */
 export function pivotPortfolioCycles(
-  portfolioLifecyclesData: CycleData[]
-): YearDataColumns[] {
-  const portfolioYearDataColumns: YearDataColumns[] = [];
-  const dataArrays = portfolioLifecyclesData.map(
-    (lifeCycle) => lifeCycle.yearData
-  );
-  dataArrays.map((cycleData) => {
-    const yearDataColumns: YearDataColumns = {
+  portfolioLifecyclesData: CycleYearData[][]
+): DataColumns[] {
+  const portfolioYearDataColumns: DataColumns[] = [];
+  portfolioLifecyclesData.map((cycleData) => {
+    const yearDataColumns: DataColumns = {
       cycleYear: [],
       cycleStartYear: [],
       cumulativeInflation: [],
@@ -111,4 +61,44 @@ export function pivotPortfolioCycles(
     portfolioYearDataColumns.push(yearDataColumns);
   });
   return portfolioYearDataColumns;
+}
+
+/**
+ * Create an object with an array of each column across all years of all cycle years
+ * i.e. Condenses each cycle's array of cycleYear rows into 1 aggregate row for all cycles
+ * Used to obtain cycle-level statistics of portfolio statistics and portfolio-level averages (average of averages not as accurate)
+ * (e.g. maximum individual withdrawal amount year across all cycles)
+ */
+export function pivotPortfolioCyclesAggregate(
+  portfolioLifecyclesData: CycleYearData[][]
+): DataColumns {
+  const portfolioCycleDataColumns: DataColumns = {
+    cycleYear: [],
+    cycleStartYear: [],
+    cumulativeInflation: [],
+    balanceStart: [],
+    balanceInfAdjStart: [],
+    withdrawal: [],
+    withdrawalInfAdjust: [],
+    startSubtotal: [],
+    equities: [],
+    equitiesGrowth: [],
+    dividendsGrowth: [],
+    bonds: [],
+    bondsGrowth: [],
+    endSubtotal: [],
+    fees: [],
+    balanceEnd: [],
+    balanceInfAdjEnd: []
+  };
+  portfolioLifecyclesData.map((cycleData) => {
+    cycleData.map((yearData) => {
+      for (const key in yearData) {
+        if (yearData.hasOwnProperty(key)) {
+          (portfolioCycleDataColumns[key] as number[]).push(yearData[key]);
+        }
+      }
+    });
+  });
+  return portfolioCycleDataColumns;
 }

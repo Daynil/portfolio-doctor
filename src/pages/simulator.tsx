@@ -135,7 +135,8 @@ export default function Simulator({ path }: Props) {
     setInputErr('');
 
     const curPortfolio = new CyclePortfolio(data, portfolioOptions);
-    const portfolioData = curPortfolio.crunchAllCyclesData();
+    const lifecyclesData = curPortfolio.crunchAllCyclesData();
+    const stats = curPortfolio.crunchAllPortfolioStats(lifecyclesData);
 
     // const blob = new Blob([JSON.stringify(portfolioData)], {
     //   type: 'application/json'
@@ -143,8 +144,8 @@ export default function Simulator({ path }: Props) {
     // FileSaver.saveAs(blob, 'results.json');
 
     setPortfolio({
-      lifecyclesData: portfolioData.portfolioLifecyclesData,
-      stats: portfolioData.portfolioStats,
+      lifecyclesData,
+      stats,
       options: curPortfolio.options,
       startYear: data[0].year
     });
@@ -271,7 +272,7 @@ export default function Simulator({ path }: Props) {
 
   const yearEndBalances = !portfolio
     ? null
-    : portfolio.lifecyclesData[0].yearData.map((yearData) => {
+    : portfolio.lifecyclesData[0].map((yearData) => {
         return (
           <tr key={yearData.cycleYear.toString()}>
             <td>{yearData.cycleYear}</td>
