@@ -10,8 +10,11 @@ export function numToCurrency(amount: number, decimals = 2): string {
   }).format(amount);
 }
 
+/**
+ * Parse a comma-separated stringy number to a number
+ */
 export function parseStringyNum(amount: string): number {
-  const parsed = parseInt(amount.replace(/,/g, ''));
+  const parsed = parseFloat(amount.replace(/,/g, ''));
   if (isNaN(parsed)) {
     throw Error('Not a number');
   } else return parsed;

@@ -68,21 +68,31 @@ export function PortfolioGraph({
   const refSvg = useRef<SVGSVGElement>(null);
   const refGyAxis = useRef<SVGGElement>(null);
   const refGxAxis = useRef<SVGGElement>(null);
-  const refGdataLines = useRef<SVGGElement>(null);
   const refGdot = useRef<SVGGElement>(null);
   const refTooltip = useRef<HTMLDivElement>(null);
-  const [hoveringCycle, setHoveringCycle] = useState<ChartData>(null);
+  const [hoveringCycle, setHoveringCycle] = useState<{
+    data: ChartData;
+    dataIndex: number;
+  }>(null);
   const [hoveringPointData, setHoveringPointData] = useState<PointData>(null);
   const [selectedCycle, setSelectedCycle] = useState<ChartData>(null);
   const [selectedPointData, setSelectedPointData] = useState<PointData>(null);
-  const [linePaths, setLinePaths] = useState<D3LineSelection>(null);
+
+  const [svgRect, setSvgRect] = useState<DOMRect>(null);
 
   const firstCycleData = lifecyclesData[0];
   const xDomain = lifecyclesData[0].map((d, i) => i + 1);
 
-  // Hash chart data for quick access
-  let chartDataHash: { [startYear: string]: ChartData } = {};
-  chartData.forEach((d) => (chartDataHash[d.startYear] = d));
+  const tooltipWidth = 275;
+
+  useEffect(() => {
+    function setRects() {
+      setSvgRect(refSvg.current.getBoundingClientRect());
+    }
+    setRects();
+    window.addEventListener('resize', setRects);
+    return () => window.removeEventListener('resize', setRects);
+  }, []);
 
   const xScale = d3
     .scaleLinear()
@@ -102,6 +112,8 @@ export function PortfolioGraph({
     .line<LineData>()
     .x((d, i) => xScale(i + 1))
     .y((d) => yScale(d.y));
+
+  const linePathStringArray = chartData.map((d) => line(d.values));
 
   const yAxis = (g: D3Selection<SVGGElement>) => {
     d3.selectAll('.LegendY').remove();
@@ -128,29 +140,17 @@ export function PortfolioGraph({
     g.select('.domain').attr('class', 'text-gray');
   };
 
-  function resetLineStyles(linePaths: D3LineSelection) {
-    linePaths
-      .style('mix-blend-mode', 'multiply')
-      .style('opacity', 0.8)
-      .attr('stroke', (d) => {
-        return d.stats.failureYear ? '#F56565' : '#48bb78';
-      })
-      .attr('stroke-width', 1.5);
-  }
-
   // https://observablehq.com/@d3/multi-line-chart
   const mouseMoved = function (e: React.MouseEvent<SVGSVGElement, MouseEvent>) {
     e.preventDefault();
 
     if (selectedCycle) return;
-    const svgRect = refSvg.current.getBoundingClientRect();
 
     // Move tooltip (favor left side when available)
     if (refTooltip.current) {
       let leftAdjust = e.clientX - svgRect.left - window.pageXOffset;
-      if (leftAdjust > refTooltip.current.getBoundingClientRect().width) {
-        leftAdjust =
-          leftAdjust - refTooltip.current.getBoundingClientRect().width;
+      if (leftAdjust > tooltipWidth) {
+        leftAdjust = leftAdjust - tooltipWidth;
       }
       // Alternate method which favors right side when available
       // if (leftAdjust > 690) {
@@ -181,40 +181,7 @@ export function PortfolioGraph({
         : b;
     });
 
-    setHoveringCycle(highlightLineData);
-
-    const lines = Array.from(
-      refGdataLines.current.children
-    ) as SVGPathElement[];
-
-    // Highlight selected line
-    const highlightLine = lines.filter(
-      (line) =>
-        ((line.className as unknown) as SVGAnimatedString).baseVal ===
-        highlightLineData.startYear + ''
-    )[0];
-
-    highlightLine.setAttribute(
-      'stroke',
-      highlightLineData.stats.failureYear ? '#E53E3E' : '#38A169'
-    );
-    highlightLine.style.strokeWidth = '3';
-    highlightLine.style.opacity = '1';
-
-    lines
-      .filter(
-        (line: any) =>
-          line.className.baseVal !== highlightLineData.startYear + ''
-      )
-      .forEach((line) => {
-        const lineData = chartDataHash[line.className.baseVal];
-        line.setAttribute(
-          'stroke',
-          lineData.stats.failureYear ? '#F56565' : '#48bb78'
-        );
-        line.style.strokeWidth = '1.5';
-        line.style.opacity = '0.1';
-      });
+    setHoveringCycle({ data: highlightLineData, dataIndex: i });
 
     // Move selection dot indicator to that nearest point of cursor
     refGdot.current.setAttribute(
@@ -223,19 +190,6 @@ export function PortfolioGraph({
         highlightLineData.values[i].y
       )})`
     );
-
-    setHoveringPointData({
-      yearsAfterPortfolioStart: i + 1,
-      currYear: highlightLineData.startYear + i + 1,
-      cycleStartYear: highlightLineData.startYear,
-      cycleEndYear: highlightLineData.startYear + xDomain.length,
-      currEndingBalanceInflAdj: highlightLineData.values[i].y,
-      currYearWithdrawalInflAdj: highlightLineData.values[i].withdrawal,
-      lastEndingBalanceInflAdj: highlightLineData.stats.balance.endingInflAdj,
-      cycleAvgWithdrawal: highlightLineData.stats.withdrawals.averageInflAdj,
-      cycleMinWithdrawal: highlightLineData.stats.withdrawals.min.amountInflAdj,
-      cycleMaxWithdrawal: highlightLineData.stats.withdrawals.max.amountInflAdj
-    });
   };
 
   const mouseClicked = function () {
@@ -243,7 +197,7 @@ export function PortfolioGraph({
       setSelectedCycle(null);
       setSelectedPointData(null);
     } else {
-      setSelectedCycle(hoveringCycle);
+      setSelectedCycle(hoveringCycle.data);
       setSelectedPointData(hoveringPointData);
     }
   };
@@ -251,7 +205,6 @@ export function PortfolioGraph({
   const mouseLeft = function () {
     setHoveringCycle(null);
     setHoveringPointData(null);
-    if (!selectedCycle) resetLineStyles(linePaths);
   };
 
   // Draw d3 chart
@@ -263,23 +216,76 @@ export function PortfolioGraph({
 
     const gxAxis = d3.select(refGxAxis.current);
     const gyAxis = d3.select(refGyAxis.current);
-    const gDataLines = d3.select(refGdataLines.current);
 
     gxAxis.call(xAxis);
     gyAxis.call(yAxis);
-
-    const linePaths = gDataLines
-      .selectAll('path')
-      .data(chartData)
-      .join('path')
-      .attr('d', (d) => line(d.values))
-      .attr('class', (d) => d.startYear);
-
-    setLinePaths(linePaths);
-    resetLineStyles(linePaths);
-  }, [lifecyclesData]);
+  }, []);
 
   const pointData = selectedPointData ? selectedPointData : hoveringPointData;
+
+  useEffect(() => {
+    if (!hoveringCycle) setHoveringPointData(null);
+    else {
+      setHoveringPointData({
+        yearsAfterPortfolioStart: hoveringCycle.dataIndex + 1,
+        currYear: hoveringCycle.data.startYear + hoveringCycle.dataIndex + 1,
+        cycleStartYear: hoveringCycle.data.startYear,
+        cycleEndYear: hoveringCycle.data.startYear + xDomain.length,
+        currEndingBalanceInflAdj:
+          hoveringCycle.data.values[hoveringCycle.dataIndex].y,
+        currYearWithdrawalInflAdj:
+          hoveringCycle.data.values[hoveringCycle.dataIndex].withdrawal,
+        lastEndingBalanceInflAdj:
+          hoveringCycle.data.stats.balance.endingInflAdj,
+        cycleAvgWithdrawal: hoveringCycle.data.stats.withdrawals.averageInflAdj,
+        cycleMinWithdrawal:
+          hoveringCycle.data.stats.withdrawals.min.amountInflAdj,
+        cycleMaxWithdrawal:
+          hoveringCycle.data.stats.withdrawals.max.amountInflAdj
+      });
+    }
+  }, [hoveringCycle]);
+
+  const linePaths = chartData.map((d, i) => {
+    let pathStrokeColor = d.stats.failureYear ? '#F56565' : '#48BB78';
+    let pathOpacity = '0.1'; // = d.stats.failureYear ? '#F56565' : '#48BB78';
+    let pathStrokeWidth = '1.5';
+    if (hoveringCycle) {
+      if (hoveringCycle.data.startYear === d.startYear) {
+        // This is the hovered line
+        pathStrokeColor = d.stats.failureYear ? '#E53E3E' : '#38A169';
+        pathOpacity = '1';
+        pathStrokeWidth = '3';
+      }
+    } else {
+      if (selectedCycle) {
+        if (selectedCycle.startYear === d.startYear) {
+          // This is the selected line
+          pathStrokeColor = d.stats.failureYear ? '#E53E3E' : '#38A169';
+          pathOpacity = '1';
+          pathStrokeWidth = '3';
+        }
+      }
+    }
+
+    if (!hoveringCycle && !selectedCycle) {
+      // We're not hovering and don't have anything selected
+      pathOpacity = '0.8';
+    }
+
+    return (
+      <path
+        key={d.startYear}
+        d={linePathStringArray[i]}
+        style={{
+          mixBlendMode: 'multiply',
+          opacity: pathOpacity,
+          stroke: pathStrokeColor,
+          strokeWidth: pathStrokeWidth
+        }}
+      ></path>
+    );
+  });
 
   return !lifecyclesData ? null : (
     <div className="flex flex-wrap">
@@ -296,13 +302,14 @@ export function PortfolioGraph({
             <g ref={refGyAxis}></g>
             <g ref={refGxAxis} transform={`translate(0,${height})`}></g>
             <g
-              ref={refGdataLines}
               fill="none"
               stroke="#48bb78"
               strokeWidth="1.5"
               strokeLinejoin="round"
               strokeLinecap="round"
-            ></g>
+            >
+              {linePaths}
+            </g>
             <g
               ref={refGdot}
               display={hoveringCycle || selectedCycle ? null : 'none'}
@@ -315,7 +322,7 @@ export function PortfolioGraph({
           <div
             ref={refTooltip}
             style={{
-              width: '17rem',
+              width: `${tooltipWidth}px`,
               height: '11rem',
               top: '26px'
             }}
