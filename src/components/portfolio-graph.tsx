@@ -1,4 +1,5 @@
 import * as d3 from 'd3';
+import { format } from 'd3-format';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   CycleStats,
@@ -6,21 +7,21 @@ import {
   PortfolioOptions,
   PortfolioStats
 } from '../data/calc/portfolio-calc';
-import {
-  numToCurrency,
-  numToCurrencyShort,
-  numToPercent
-} from '../utilities/format';
+import { numToCurrency, numToCurrencyShort } from '../utilities/format';
 import { clamp } from '../utilities/math';
 
 export interface PortfolioData {
   lifecyclesData: CycleYearData[][];
   stats: PortfolioStats;
+  chartData: ChartData[];
   options: PortfolioOptions;
   startYear: number;
 }
 
 type LineData = { x: number; y: number; withdrawal: number };
+/**
+ * Data formatted for chart consumption
+ */
 type ChartData = {
   startYear: number;
   values: LineData[];
@@ -60,6 +61,7 @@ const height = 600 - margin.top - margin.bottom;
 export function PortfolioGraph({
   lifecyclesData,
   stats,
+  chartData,
   options,
   startYear
 }: PortfolioData) {
@@ -77,19 +79,6 @@ export function PortfolioGraph({
 
   const firstCycleData = lifecyclesData[0];
   const xDomain = lifecyclesData[0].map((d, i) => i + 1);
-
-  // Format data for d3 chart consumption
-  const chartData: ChartData[] = lifecyclesData.map((cycle, i) => {
-    return {
-      startYear: startYear + i,
-      values: cycle.map((year, i) => ({
-        x: i,
-        y: year.balanceInfAdjEnd,
-        withdrawal: year.withdrawalInfAdjust
-      })),
-      stats: stats.cycleStats[i]
-    };
-  });
 
   // Hash chart data for quick access
   let chartDataHash: { [startYear: string]: ChartData } = {};
@@ -212,7 +201,6 @@ export function PortfolioGraph({
     highlightLine.style.strokeWidth = '3';
     highlightLine.style.opacity = '1';
 
-    // Dim all other lines
     lines
       .filter(
         (line: any) =>
@@ -379,7 +367,7 @@ export function PortfolioGraph({
                 Success
               </label>
               <span className="text-2xl text-green-400 font-bold">
-                {numToPercent(stats.successRate)}
+                {format('.2%')(stats.successRate)}
               </span>
             </div>
           </div>

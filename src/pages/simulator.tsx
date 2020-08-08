@@ -1,3 +1,4 @@
+import { format } from 'd3-format';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import Layout from '../components/layout';
 import { PortfolioData, PortfolioGraph } from '../components/portfolio-graph';
@@ -14,11 +15,7 @@ import {
 } from '../data/calc/portfolio-calc';
 import { DatasetContext, defaultDatasetName } from '../data/data-context';
 import { parseCSVStringToJSON } from '../data/data-helpers';
-import {
-  commaNumToNum,
-  numToCommaNum,
-  numToCurrency
-} from '../utilities/format';
+import { parseStringyNum } from '../utilities/format';
 
 type Props = {
   path: string;
@@ -68,7 +65,7 @@ export default function Simulator({ path }: Props) {
     switch (withdrawalMethod) {
       case WithdrawalMethod.InflationAdjusted:
         withdrawal = {
-          staticAmount: commaNumToNum(refWithdrawalAmount.current.value)
+          staticAmount: parseStringyNum(refWithdrawalAmount.current.value)
         };
         break;
       case WithdrawalMethod.PercentPortfolio:
@@ -83,8 +80,8 @@ export default function Simulator({ path }: Props) {
       case WithdrawalMethod.PercentPortfolioClamped:
         withdrawal = {
           percentage: parseFloat(refWithdrawalPercent.current.value) / 100,
-          floor: commaNumToNum(refWithdrawalMin.current.value),
-          ceiling: commaNumToNum(refWithdrawalMax.current.value)
+          floor: parseStringyNum(refWithdrawalMin.current.value),
+          ceiling: parseStringyNum(refWithdrawalMax.current.value)
         };
         if (isNaN(withdrawal.percentage)) {
           setInputErr('Invalid value for withdrawal percent.');
@@ -94,7 +91,7 @@ export default function Simulator({ path }: Props) {
     }
 
     const portfolioOptions: PortfolioOptions = {
-      startBalance: commaNumToNum(refStartingBalance.current.value),
+      startBalance: parseStringyNum(refStartingBalance.current.value),
       equitiesRatio: parseFloat(refStockRatio.current.value) / 100,
       investmentExpenseRatio: parseFloat(refExpenseRatio.current.value) / 100,
       simulationYearsLength: parseInt(refSimLength.current.value),
@@ -146,6 +143,17 @@ export default function Simulator({ path }: Props) {
     setPortfolio({
       lifecyclesData,
       stats,
+      chartData: lifecyclesData.map((cycle, i) => {
+        return {
+          startYear: data[0].year + i,
+          values: cycle.map((year, i) => ({
+            x: i,
+            y: year.balanceInfAdjEnd,
+            withdrawal: year.withdrawalInfAdjust
+          })),
+          stats: stats.cycleStats[i]
+        };
+      }),
       options: curPortfolio.options,
       startYear: data[0].year
     });
@@ -170,7 +178,7 @@ export default function Simulator({ path }: Props) {
                 className="form-input pl-8 w-full"
                 name="withdrawalAmount"
                 type="text"
-                defaultValue={numToCommaNum(40000)}
+                defaultValue={format(',')(40000)}
                 ref={refWithdrawalAmount}
                 onChange={(e) =>
                   handleIntegerInputChange(e, refWithdrawalAmount)
@@ -234,7 +242,7 @@ export default function Simulator({ path }: Props) {
                   className="form-input pl-8 w-full"
                   name="withdrawalMin"
                   type="text"
-                  defaultValue={numToCommaNum(30000)}
+                  defaultValue={format(',')(30000)}
                   ref={refWithdrawalMin}
                   onChange={(e) =>
                     handleIntegerInputChange(e, refWithdrawalMin)
@@ -254,7 +262,7 @@ export default function Simulator({ path }: Props) {
                   className="form-input pl-8 w-full"
                   name="withdrawalMax"
                   type="text"
-                  defaultValue={numToCommaNum(60000)}
+                  defaultValue={format(',')(60000)}
                   ref={refWithdrawalMax}
                   onChange={(e) =>
                     handleIntegerInputChange(e, refWithdrawalMax)
@@ -276,7 +284,7 @@ export default function Simulator({ path }: Props) {
         return (
           <tr key={yearData.cycleYear.toString()}>
             <td>{yearData.cycleYear}</td>
-            <td>{numToCurrency(yearData.balanceInfAdjEnd)}</td>
+            <td>{format('$.2f')(yearData.balanceInfAdjEnd)}</td>
           </tr>
         );
       });
@@ -288,7 +296,7 @@ export default function Simulator({ path }: Props) {
     e.preventDefault();
     const input = e.target.value;
     try {
-      const num = numToCommaNum(commaNumToNum(input));
+      const num = format(',')(parseStringyNum(input));
       refEl.current.value = num;
     } catch (e) {
       if ((e as Error).message !== undefined) {
@@ -377,7 +385,7 @@ export default function Simulator({ path }: Props) {
                   className="form-input pl-8 w-full"
                   name="startBalance"
                   type="text"
-                  defaultValue={numToCommaNum(1000000)}
+                  defaultValue={format(',')(1000000)}
                   ref={refStartingBalance}
                   onChange={(e) =>
                     handleIntegerInputChange(e, refStartingBalance)

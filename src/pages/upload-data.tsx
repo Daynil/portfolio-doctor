@@ -1,4 +1,4 @@
-import * as accounting from 'accounting';
+import { format } from 'd3-format';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import Layout from '../components/layout';
 import SEO from '../components/seo';
@@ -226,16 +226,16 @@ export default function UploadData({ path }: Props) {
                       {dataRow.year}
                     </td>
                     <td className="group-hover:bg-gray-400 duration-200 text-right">
-                      {accounting.formatMoney(dataRow.equitiesPrice)}
+                      {format('$.2f')(dataRow.equitiesPrice)}
                     </td>
                     <td className="group-hover:bg-gray-400 duration-200 text-right">
-                      {accounting.formatMoney(dataRow.equitiesDividend)}
+                      {format('$.2f')(dataRow.equitiesDividend)}
                     </td>
                     <td className="group-hover:bg-gray-400 duration-200 text-right">
-                      {accounting.formatNumber(dataRow.inflationIndex, 3)}
+                      {format('$.2f')(dataRow.inflationIndex)}
                     </td>
                     <td className="group-hover:bg-gray-400 duration-200 text-right">
-                      {accounting.formatNumber(dataRow.fixedIncomeInterest, 2)}%
+                      {format('.2%')(dataRow.fixedIncomeInterest / 100)}
                     </td>
                   </tr>
                 );
