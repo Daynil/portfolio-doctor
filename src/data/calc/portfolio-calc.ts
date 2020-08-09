@@ -83,6 +83,7 @@ export interface CycleStats {
   };
 
   failureYear: number;
+  nearFailure: boolean;
 }
 
 export interface PortfolioStats {
@@ -468,6 +469,10 @@ export class CyclePortfolio {
       (balance) => balance <= 0
     );
 
+    const nearFailIdx = cycleYearDataColumns.balanceInfAdjEnd.findIndex(
+      (balance) => balance <= this.options.startBalance * 0.5
+    );
+
     return {
       cycleStartYear: cycleYearDataColumns.cycleStartYear[0],
       fees: sum(cycleYearDataColumns.fees),
@@ -521,7 +526,8 @@ export class CyclePortfolio {
         }
       },
       failureYear:
-        failureYearIdx < 0 ? 0 : cycleYearDataColumns.cycleYear[failureYearIdx]
+        failureYearIdx < 0 ? 0 : cycleYearDataColumns.cycleYear[failureYearIdx],
+      nearFailure: failureYearIdx < 0 && nearFailIdx >= 0
     };
   }
 

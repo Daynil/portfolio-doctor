@@ -247,13 +247,23 @@ export function PortfolioGraph({
   }, [hoveringCycle]);
 
   const linePaths = chartData.map((d, i) => {
-    let pathStrokeColor = d.stats.failureYear ? '#F56565' : '#48BB78';
-    let pathOpacity = '0.1'; // = d.stats.failureYear ? '#F56565' : '#48BB78';
+    let pathStrokeColor: string;
+    // Red
+    if (d.stats.failureYear) pathStrokeColor = '#F56565';
+    // Yellow
+    else if (d.stats.nearFailure) pathStrokeColor = '#FFD600';
+    else '#48BB78'; // Green
+
+    let pathOpacity = '0.1';
     let pathStrokeWidth = '1.5';
     if (hoveringCycle) {
       if (hoveringCycle.data.startYear === d.startYear) {
         // This is the hovered line
-        pathStrokeColor = d.stats.failureYear ? '#E53E3E' : '#38A169';
+        // Red
+        if (d.stats.failureYear) pathStrokeColor = '#E53E3E';
+        // Yellow
+        else if (d.stats.nearFailure) pathStrokeColor = '#FFD600';
+        else '#38A169'; // Green
         pathOpacity = '1';
         pathStrokeWidth = '3';
       }
@@ -261,7 +271,11 @@ export function PortfolioGraph({
       if (selectedCycle) {
         if (selectedCycle.startYear === d.startYear) {
           // This is the selected line
-          pathStrokeColor = d.stats.failureYear ? '#E53E3E' : '#38A169';
+          // Red
+          if (d.stats.failureYear) pathStrokeColor = '#E53E3E';
+          // Yellow
+          else if (d.stats.nearFailure) pathStrokeColor = '#FFD600';
+          else '#38A169'; // Green
           pathOpacity = '1';
           pathStrokeWidth = '3';
         }
