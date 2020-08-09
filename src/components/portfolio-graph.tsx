@@ -80,7 +80,7 @@ export function PortfolioGraph({
 
   const [svgRect, setSvgRect] = useState<DOMRect>(null);
 
-  const tooltipWidth = 275;
+  const tooltipWidth = 325;
 
   useEffect(() => {
     function setRects() {
@@ -311,6 +311,10 @@ export function PortfolioGraph({
     );
   });
 
+  let portfolioHealthColor = 'text-green-500';
+  if (stats.successRate < 0.75) portfolioHealthColor = 'text-yellow-500';
+  if (stats.successRate < 0.5) portfolioHealthColor = 'text-red-500';
+
   return !lifecyclesData ? null : (
     <div className="flex flex-wrap">
       <div className="relative">
@@ -354,12 +358,18 @@ export function PortfolioGraph({
           >
             <div className="flex justify-evenly">
               <div className="flex flex-col">
+                <label className="form-label my-0">Start Year</label>
+                <span>{pointData.cycleStartYear}</span>
+              </div>
+              <div className="flex flex-col">
                 <label className="form-label my-0">Current Year</label>
                 <span>{pointData.currYear}</span>
               </div>
               <div className="flex flex-col">
-                <label className="form-label my-0">Start Year</label>
-                <span>{pointData.cycleStartYear}</span>
+                <label className="form-label my-0">End Year</label>
+                <span>
+                  {pointData.cycleStartYear + options.simulationYearsLength}
+                </span>
               </div>
             </div>
             <div className="my-3 bg-gray-400 w-full h-px"></div>
@@ -397,7 +407,7 @@ export function PortfolioGraph({
               <label className="text-gray-600 font-semibold tracking-wide block">
                 Success
               </label>
-              <span className="text-2xl text-green-400 font-bold">
+              <span className={'text-2xl font-bold ' + portfolioHealthColor}>
                 {format('.2%')(stats.successRate)}
               </span>
             </div>
