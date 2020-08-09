@@ -1,6 +1,6 @@
 import * as d3 from 'd3';
 import { format } from 'd3-format';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   CycleStats,
   CycleYearData,
@@ -80,9 +80,6 @@ export function PortfolioGraph({
 
   const [svgRect, setSvgRect] = useState<DOMRect>(null);
 
-  const firstCycleData = lifecyclesData[0];
-  const xDomain = lifecyclesData[0].map((d, i) => i + 1);
-
   const tooltipWidth = 275;
 
   useEffect(() => {
@@ -94,42 +91,55 @@ export function PortfolioGraph({
     return () => window.removeEventListener('resize', setRects);
   }, []);
 
-  const xScale = d3
-    .scaleLinear()
-    .domain([1, firstCycleData.length])
-    .range([0, width]);
+  const memoized = useMemo(() => {
+    const xDomain = lifecyclesData[0].map((d, i) => i + 1);
 
-  const yScale = d3
-    .scaleLinear()
-    .domain([
-      0,
-      d3.max(lifecyclesData, (d) => d3.max(d.map((d) => d.balanceInfAdjEnd)))
-    ])
-    .nice()
-    .range([height, 0]);
+    const xScale = d3
+      .scaleLinear()
+      .domain([1, lifecyclesData[0].length])
+      .range([0, width]);
 
-  const line = d3
-    .line<LineData>()
-    .x((d, i) => xScale(i + 1))
-    .y((d) => yScale(d.y));
+    const yScale = d3
+      .scaleLinear()
+      .domain([
+        0,
+        d3.max(lifecyclesData, (d) => d3.max(d.map((d) => d.balanceInfAdjEnd)))
+      ])
+      .nice()
+      .range([height, 0]);
 
-  const linePathStringArray = chartData.map((d) => line(d.values));
+    const line = d3
+      .line<LineData>()
+      .x((d, i) => xScale(i + 1))
+      .y((d) => yScale(d.y));
 
-  const yAxis = (g: D3Selection<SVGGElement>) => {
+    const linePathStringArray = chartData.map((d) => line(d.values));
+
+    return {
+      xDomain,
+      xScale,
+      yScale,
+      linePathStringArray
+    };
+  }, [lifecyclesData]);
+
+  function yAxis(g: D3Selection<SVGGElement>) {
     d3.selectAll('.LegendY').remove();
     g.call(
-      d3.axisLeft(yScale).tickFormat((d: number) => numToCurrencyShort(d))
+      d3
+        .axisLeft(memoized.yScale)
+        .tickFormat((d: number) => numToCurrencyShort(d))
     );
 
     g.attr('class', 'text-gray-600');
 
     g.selectAll('.tick').attr('class', 'tick LegendY tracking-wide text-sm');
-  };
+  }
 
-  const xAxis = (g: D3Selection<SVGGElement>) => {
+  function xAxis(g: D3Selection<SVGGElement>) {
     g.call(
       d3
-        .axisBottom(xScale)
+        .axisBottom(memoized.xScale)
         .ticks(width / 80)
         .tickSizeOuter(0)
     );
@@ -138,10 +148,24 @@ export function PortfolioGraph({
 
     g.selectAll('.tick').attr('class', 'tick LegendX tracking-wide text-sm');
     g.select('.domain').attr('class', 'text-gray');
-  };
+  }
+
+  // Draw d3 axes
+  useEffect(() => {
+    setHoveringCycle(null);
+    setHoveringPointData(null);
+    setSelectedCycle(null);
+    setSelectedPointData(null);
+
+    const gxAxis = d3.select(refGxAxis.current);
+    const gyAxis = d3.select(refGyAxis.current);
+
+    gxAxis.call(xAxis);
+    gyAxis.call(yAxis);
+  }, [lifecyclesData]);
 
   // https://observablehq.com/@d3/multi-line-chart
-  const mouseMoved = function (e: React.MouseEvent<SVGSVGElement, MouseEvent>) {
+  function mouseMoved(e: React.MouseEvent<SVGSVGElement, MouseEvent>) {
     e.preventDefault();
 
     if (selectedCycle) return;
@@ -161,17 +185,17 @@ export function PortfolioGraph({
     }
 
     // Transform current mouse coords to domain values, adjusting for svg position and scroll
-    const ym = yScale.invert(
+    const ym = memoized.yScale.invert(
       //d3.event.layerY - svgRect.top - margin.top - window.pageYOffset
       e.clientY - svgRect.top - margin.top - window.pageYOffset
     );
-    const xm = xScale.invert(
+    const xm = memoized.xScale.invert(
       //d3.event.layerX - svgRect.left - margin.left - window.pageXOffset
       e.clientX - svgRect.left - margin.left - window.pageXOffset
     );
 
     // Get the array index of the closest x value to current hover
-    const i = clamp(Math.round(xm) - 1, 0, xDomain.length - 1);
+    const i = clamp(Math.round(xm) - 1, 0, memoized.xDomain.length - 1);
 
     // Find the data for the line at the current x position
     // closest in y value to the current y position
@@ -186,13 +210,13 @@ export function PortfolioGraph({
     // Move selection dot indicator to that nearest point of cursor
     refGdot.current.setAttribute(
       'transform',
-      `translate(${xScale(xDomain[i])},${yScale(
+      `translate(${memoized.xScale(memoized.xDomain[i])},${memoized.yScale(
         highlightLineData.values[i].y
       )})`
     );
-  };
+  }
 
-  const mouseClicked = function () {
+  function mouseClicked() {
     if (selectedCycle) {
       setSelectedCycle(null);
       setSelectedPointData(null);
@@ -200,26 +224,12 @@ export function PortfolioGraph({
       setSelectedCycle(hoveringCycle.data);
       setSelectedPointData(hoveringPointData);
     }
-  };
+  }
 
-  const mouseLeft = function () {
+  function mouseLeft() {
     setHoveringCycle(null);
     setHoveringPointData(null);
-  };
-
-  // Draw d3 chart
-  useEffect(() => {
-    setHoveringCycle(null);
-    setHoveringPointData(null);
-    setSelectedCycle(null);
-    setSelectedPointData(null);
-
-    const gxAxis = d3.select(refGxAxis.current);
-    const gyAxis = d3.select(refGyAxis.current);
-
-    gxAxis.call(xAxis);
-    gyAxis.call(yAxis);
-  }, []);
+  }
 
   const pointData = selectedPointData ? selectedPointData : hoveringPointData;
 
@@ -230,7 +240,7 @@ export function PortfolioGraph({
         yearsAfterPortfolioStart: hoveringCycle.dataIndex + 1,
         currYear: hoveringCycle.data.startYear + hoveringCycle.dataIndex + 1,
         cycleStartYear: hoveringCycle.data.startYear,
-        cycleEndYear: hoveringCycle.data.startYear + xDomain.length,
+        cycleEndYear: hoveringCycle.data.startYear + memoized.xDomain.length,
         currEndingBalanceInflAdj:
           hoveringCycle.data.values[hoveringCycle.dataIndex].y,
         currYearWithdrawalInflAdj:
@@ -290,7 +300,7 @@ export function PortfolioGraph({
     return (
       <path
         key={d.startYear}
-        d={linePathStringArray[i]}
+        d={memoized.linePathStringArray[i]}
         style={{
           mixBlendMode: 'multiply',
           opacity: pathOpacity,

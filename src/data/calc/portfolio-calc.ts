@@ -432,7 +432,8 @@ export class CyclePortfolio {
             portfolioAggregate.cycleStartYear[minInfAdjWithdrawalIdx],
           yearInCycleInflAdj:
             portfolioAggregate.cycleYear[minInfAdjWithdrawalIdx],
-          amountInflAdj: portfolioAggregate.withdrawal[minInfAdjWithdrawalIdx]
+          amountInflAdj:
+            portfolioAggregate.withdrawalInfAdjust[minInfAdjWithdrawalIdx]
         },
         max: {
           cycleStartYear: portfolioAggregate.cycleStartYear[maxWithdrawalIdx],
@@ -442,7 +443,8 @@ export class CyclePortfolio {
             portfolioAggregate.cycleStartYear[maxInfAdjWithdrawalIdx],
           yearInCycleInflAdj:
             portfolioAggregate.cycleYear[maxInfAdjWithdrawalIdx],
-          amountInflAdj: portfolioAggregate.withdrawal[maxInfAdjWithdrawalIdx]
+          amountInflAdj:
+            portfolioAggregate.withdrawalInfAdjust[maxInfAdjWithdrawalIdx]
         }
       }
     };
