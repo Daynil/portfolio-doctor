@@ -38,7 +38,7 @@ ul {
 }
 
 .btn {
-  @apply font-bold py-2 px-4 rounded;
+  @apply font-semibold py-2 px-4 rounded;
 }
 
 .btn:disabled {
@@ -50,6 +50,13 @@ ul {
 }
 .btn-green:hover {
   @apply bg-green-700;
+}
+
+.btn-green-2 {
+  @apply bg-green-200 text-green-700;
+}
+.btn-green-2:hover {
+  @apply bg-green-300;
 }
 
 .form-input:hover {

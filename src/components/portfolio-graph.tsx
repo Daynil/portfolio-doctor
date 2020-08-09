@@ -77,6 +77,7 @@ export function PortfolioGraph({
   const [hoveringPointData, setHoveringPointData] = useState<PointData>(null);
   const [selectedCycle, setSelectedCycle] = useState<ChartData>(null);
   const [selectedPointData, setSelectedPointData] = useState<PointData>(null);
+  const [showCycleDetails, setshowCycleDetails] = useState(false);
 
   const [svgRect, setSvgRect] = useState<DOMRect>(null);
 
@@ -155,6 +156,7 @@ export function PortfolioGraph({
     setHoveringCycle(null);
     setHoveringPointData(null);
     setSelectedCycle(null);
+    setshowCycleDetails(false);
     setSelectedPointData(null);
 
     const gxAxis = d3.select(refGxAxis.current);
@@ -219,6 +221,7 @@ export function PortfolioGraph({
   function mouseClicked() {
     if (selectedCycle) {
       setSelectedCycle(null);
+      setshowCycleDetails(false);
       setSelectedPointData(null);
     } else {
       setSelectedCycle(hoveringCycle.data);
@@ -316,249 +319,294 @@ export function PortfolioGraph({
   if (stats.successRate < 0.5) portfolioHealthColor = 'text-red-500';
 
   return !lifecyclesData ? null : (
-    <div className="flex flex-wrap">
-      <div className="relative">
-        <svg
-          ref={refSvg}
-          width={width + margin.left + margin.right}
-          height={height + margin.top + margin.bottom}
-          onClick={mouseClicked}
-          onMouseMove={(e) => mouseMoved(e)}
-          onMouseLeave={mouseLeft}
-        >
-          <g transform={`translate(${margin.left},${margin.top})`}>
-            <g ref={refGyAxis}></g>
-            <g ref={refGxAxis} transform={`translate(0,${height})`}></g>
-            <g
-              fill="none"
-              stroke="#48bb78"
-              strokeWidth="1.5"
-              strokeLinejoin="round"
-              strokeLinecap="round"
-            >
-              {linePaths}
-            </g>
-            <g
-              ref={refGdot}
-              display={hoveringCycle || selectedCycle ? null : 'none'}
-            >
-              <circle r="3.5"></circle>
-            </g>
-          </g>
-        </svg>
-        {!pointData ? null : (
-          <div
-            ref={refTooltip}
-            style={{
-              width: `${tooltipWidth}px`,
-              height: '11rem',
-              top: '26px'
-            }}
-            className="absolute inset-y-0 inset-x-0 pointer-events-none bg-gray-100 rounded-md p-4 shadow-md"
+    <div className="flex flex-row flex-wrap">
+      <div className="flex flex-wrap">
+        <div className="relative">
+          <svg
+            ref={refSvg}
+            width={width + margin.left + margin.right}
+            height={height + margin.top + margin.bottom}
+            onClick={mouseClicked}
+            onMouseMove={(e) => mouseMoved(e)}
+            onMouseLeave={mouseLeft}
           >
-            <div className="flex justify-evenly">
-              <div className="flex flex-col">
-                <label className="form-label my-0">Start Year</label>
-                <span>{pointData.cycleStartYear}</span>
+            <g transform={`translate(${margin.left},${margin.top})`}>
+              <g ref={refGyAxis}></g>
+              <g ref={refGxAxis} transform={`translate(0,${height})`}></g>
+              <g
+                fill="none"
+                stroke="#48bb78"
+                strokeWidth="1.5"
+                strokeLinejoin="round"
+                strokeLinecap="round"
+              >
+                {linePaths}
+              </g>
+              <g
+                ref={refGdot}
+                display={hoveringCycle || selectedCycle ? null : 'none'}
+              >
+                <circle r="3.5"></circle>
+              </g>
+            </g>
+          </svg>
+          {!pointData ? null : (
+            <div
+              ref={refTooltip}
+              style={{
+                width: `${tooltipWidth}px`,
+                height: '11rem',
+                top: '26px'
+              }}
+              className="absolute inset-y-0 inset-x-0 pointer-events-none bg-gray-100 rounded-md p-4 shadow-md"
+            >
+              <div className="flex justify-evenly">
+                <div className="flex flex-col">
+                  <label className="form-label my-0">Start Year</label>
+                  <span>{pointData.cycleStartYear}</span>
+                </div>
+                <div className="flex flex-col">
+                  <label className="form-label my-0">Current Year</label>
+                  <span>{pointData.currYear}</span>
+                </div>
+                <div className="flex flex-col">
+                  <label className="form-label my-0">End Year</label>
+                  <span>
+                    {pointData.cycleStartYear + options.simulationYearsLength}
+                  </span>
+                </div>
               </div>
-              <div className="flex flex-col">
-                <label className="form-label my-0">Current Year</label>
-                <span>{pointData.currYear}</span>
-              </div>
-              <div className="flex flex-col">
-                <label className="form-label my-0">End Year</label>
+              <div className="my-3 bg-gray-400 w-full h-px"></div>
+              <div className="flex justify-between mt-2">
+                <label className="form-label my-0">Balance</label>
                 <span>
-                  {pointData.cycleStartYear + options.simulationYearsLength}
+                  {numToCurrency(pointData.currEndingBalanceInflAdj, 0)}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <label className="form-label my-0">Withdrawal</label>
+                <span>
+                  {numToCurrency(pointData.currYearWithdrawalInflAdj, 0)}
+                </span>
+              </div>
+              <div className="text-gray-500 text-sm text-center mt-2 font-semibold">
+                Click to {selectedPointData ? 'release' : 'freeze'} point
+              </div>
+            </div>
+          )}
+        </div>
+        <div
+          style={{
+            width: '16rem',
+            height: 'fit-content'
+          }}
+          className="rounded-md pb-4 border-2 border-gray-300 m-6 overflow-hidden"
+        >
+          <div className="bg-gray-300 text-gray-700 font-semibold py-1 text-center w-full">
+            Portfolio Health
+          </div>
+          <div className="px-2 text-center">
+            <div className="text-center">
+              <div className="pt-2">
+                <label className="text-gray-600 font-semibold tracking-wide block">
+                  Success
+                </label>
+                <span className={'text-2xl font-bold ' + portfolioHealthColor}>
+                  {format('.2%')(stats.successRate)}
                 </span>
               </div>
             </div>
-            <div className="my-3 bg-gray-400 w-full h-px"></div>
-            <div className="flex justify-between mt-2">
-              <label className="form-label my-0">Balance</label>
-              <span>
-                {numToCurrency(pointData.currEndingBalanceInflAdj, 0)}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <label className="form-label my-0">Withdrawal</label>
-              <span>
-                {numToCurrency(pointData.currYearWithdrawalInflAdj, 0)}
-              </span>
-            </div>
-            <div className="text-gray-500 text-sm text-center mt-2 font-semibold">
-              Click to {selectedPointData ? 'release' : 'freeze'} point
-            </div>
-          </div>
-        )}
-      </div>
-      <div
-        style={{
-          width: '16rem',
-          height: 'fit-content'
-        }}
-        className="rounded-md pb-4 border-2 border-gray-300 m-6 overflow-hidden"
-      >
-        <div className="bg-gray-300 text-gray-700 font-semibold py-1 text-center w-full">
-          Portfolio Health
-        </div>
-        <div className="px-2 text-center">
-          <div className="text-center">
+            <div className="my-2 mx-auto bg-gray-500 w-5/6 h-px"></div>
             <div className="pt-2">
               <label className="text-gray-600 font-semibold tracking-wide block">
-                Success
+                Average Ending Balance
               </label>
-              <span className={'text-2xl font-bold ' + portfolioHealthColor}>
-                {format('.2%')(stats.successRate)}
+              <span className="text-xl">
+                {numToCurrency(stats.balance.averageInflAdj, 0)}
+              </span>
+            </div>
+            <div className="pt-2">
+              <label className="text-gray-600 font-semibold tracking-wide block">
+                Average Withdrawal
+              </label>
+              <span className="text-xl">
+                {numToCurrency(stats.withdrawals.averageInflAdj, 0)}
               </span>
             </div>
           </div>
-          <div className="my-2 mx-auto bg-gray-500 w-5/6 h-px"></div>
-          <div className="pt-2">
-            <label className="text-gray-600 font-semibold tracking-wide block">
-              Average Ending Balance
-            </label>
-            <span className="text-xl">
-              {numToCurrency(stats.balance.averageInflAdj, 0)}
-            </span>
-          </div>
-          <div className="pt-2">
-            <label className="text-gray-600 font-semibold tracking-wide block">
-              Average Withdrawal
-            </label>
-            <span className="text-xl">
-              {numToCurrency(stats.withdrawals.averageInflAdj, 0)}
-            </span>
-          </div>
+        </div>
+        <div className="rounded-md overflow-hidden border-2 m-6">
+          <table>
+            <thead>
+              <tr>
+                <td className="p-0" colSpan={4}>
+                  <div className="pt-1 bg-gray-300"></div>
+                </td>
+              </tr>
+              <tr>
+                <th className="bg-gray-300" style={{ width: '12rem' }}></th>
+                <th
+                  colSpan={2}
+                  className="text-right text-gray-700 bg-gray-300 font-semibold"
+                  style={{ width: '14rem' }}
+                >
+                  Portfolio
+                </th>
+                <th
+                  className="text-right pr-4 text-gray-700 bg-gray-300 font-semibold"
+                  style={{ width: '10rem' }}
+                >
+                  Cycle
+                </th>
+              </tr>
+              <tr>
+                <td className="p-0" colSpan={4}>
+                  <div className="py-1 bg-gray-300"></div>
+                </td>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className="p-0" colSpan={4}>
+                  <div className="py-1"></div>
+                </td>
+              </tr>
+              <tr>
+                <td className="pl-4 text-gray-700 font-semibold" rowSpan={3}>
+                  Ending Balance
+                </td>
+                <td>
+                  <label className="form-label my-0 font-normal block">
+                    Minimum
+                  </label>
+                </td>
+                <td className="text-right">
+                  {stats.balance.min.balanceInflAdj < 0
+                    ? numToCurrency(0)
+                    : numToCurrency(stats.balance.min.balanceInflAdj, 0)}
+                </td>
+                <td className="text-right pr-4" rowSpan={3}>
+                  {numToCurrency(pointData?.lastEndingBalanceInflAdj, 0)}
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label className="form-label my-0 font-normal block">
+                    Average
+                  </label>
+                </td>
+                <td className="text-right">
+                  {numToCurrency(stats.balance.averageInflAdj, 0)}
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label className="form-label my-0 font-normal block">
+                    Maximum
+                  </label>
+                </td>
+                <td className="text-right">
+                  {numToCurrency(stats.balance.max.balanceInflAdj, 0)}
+                </td>
+              </tr>
+              <tr>
+                <td colSpan={4}>
+                  <div className="h-px bg-gray-500 my-2"></div>
+                </td>
+              </tr>
+              <tr>
+                <td className="pl-4 text-gray-700 font-semibold" rowSpan={3}>
+                  Annual Withdrawal
+                </td>
+                <td>
+                  <label className="form-label my-0 font-normal block">
+                    Minimum
+                  </label>
+                </td>
+                <td className="text-right">
+                  {numToCurrency(stats.withdrawals.min.amountInflAdj, 0)}
+                </td>
+                <td className="text-right pr-4">
+                  {numToCurrency(pointData?.cycleMinWithdrawal, 0)}
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label className="form-label my-0 font-normal block">
+                    Average
+                  </label>
+                </td>
+                <td className="text-right">
+                  {numToCurrency(stats.withdrawals.averageInflAdj, 0)}
+                </td>
+                <td className="text-right pr-4">
+                  {numToCurrency(pointData?.cycleAvgWithdrawal, 0)}
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label className="form-label my-0 font-normal block">
+                    Maximum
+                  </label>
+                </td>
+                <td className="text-right">
+                  {numToCurrency(stats.withdrawals.max.amountInflAdj, 0)}
+                </td>
+                <td className="text-right pr-4">
+                  {numToCurrency(pointData?.cycleMaxWithdrawal, 0)}
+                </td>
+              </tr>
+              <tr>
+                <td colSpan={4}>
+                  <div className="my-2"></div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
-      <div className="rounded-md overflow-hidden border-2 m-6">
-        <table>
-          <thead>
-            <tr>
-              <td className="p-0" colSpan={4}>
-                <div className="pt-1 bg-gray-300"></div>
-              </td>
-            </tr>
-            <tr>
-              <th className="bg-gray-300" style={{ width: '12rem' }}></th>
-              <th
-                colSpan={2}
-                className="text-right text-gray-700 bg-gray-300 font-semibold"
-                style={{ width: '14rem' }}
-              >
-                Portfolio
-              </th>
-              <th
-                className="text-right pr-4 text-gray-700 bg-gray-300 font-semibold"
-                style={{ width: '10rem' }}
-              >
-                Cycle
-              </th>
-            </tr>
-            <tr>
-              <td className="p-0" colSpan={4}>
-                <div className="py-1 bg-gray-300"></div>
-              </td>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td className="p-0" colSpan={4}>
-                <div className="py-1"></div>
-              </td>
-            </tr>
-            <tr>
-              <td className="pl-4 text-gray-700 font-semibold" rowSpan={3}>
-                Ending Balance
-              </td>
-              <td>
-                <label className="form-label my-0 font-normal block">
-                  Minimum
-                </label>
-              </td>
-              <td className="text-right">
-                {stats.balance.min.balanceInflAdj < 0
-                  ? numToCurrency(0)
-                  : numToCurrency(stats.balance.min.balanceInflAdj, 0)}
-              </td>
-              <td className="text-right pr-4" rowSpan={3}>
-                {numToCurrency(pointData?.lastEndingBalanceInflAdj, 0)}
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <label className="form-label my-0 font-normal block">
-                  Average
-                </label>
-              </td>
-              <td className="text-right">
-                {numToCurrency(stats.balance.averageInflAdj, 0)}
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <label className="form-label my-0 font-normal block">
-                  Maximum
-                </label>
-              </td>
-              <td className="text-right">
-                {numToCurrency(stats.balance.max.balanceInflAdj, 0)}
-              </td>
-            </tr>
-            <tr>
-              <td colSpan={4}>
-                <div className="h-px bg-gray-500 my-2"></div>
-              </td>
-            </tr>
-            <tr>
-              <td className="pl-4 text-gray-700 font-semibold" rowSpan={3}>
-                Annual Withdrawal
-              </td>
-              <td>
-                <label className="form-label my-0 font-normal block">
-                  Minimum
-                </label>
-              </td>
-              <td className="text-right">
-                {numToCurrency(stats.withdrawals.min.amountInflAdj, 0)}
-              </td>
-              <td className="text-right pr-4">
-                {numToCurrency(pointData?.cycleMinWithdrawal, 0)}
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <label className="form-label my-0 font-normal block">
-                  Average
-                </label>
-              </td>
-              <td className="text-right">
-                {numToCurrency(stats.withdrawals.averageInflAdj, 0)}
-              </td>
-              <td className="text-right pr-4">
-                {numToCurrency(pointData?.cycleAvgWithdrawal, 0)}
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <label className="form-label my-0 font-normal block">
-                  Maximum
-                </label>
-              </td>
-              <td className="text-right">
-                {numToCurrency(stats.withdrawals.max.amountInflAdj, 0)}
-              </td>
-              <td className="text-right pr-4">
-                {numToCurrency(pointData?.cycleMaxWithdrawal, 0)}
-              </td>
-            </tr>
-            <tr>
-              <td colSpan={4}>
-                <div className="my-2"></div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <div className="ml-6">
+        {!selectedCycle ? null : (
+          <button
+            className="btn btn-green-2"
+            onClick={() => setshowCycleDetails(!showCycleDetails)}
+          >
+            Show Cycle Details
+          </button>
+        )}
+        {!selectedCycle || !showCycleDetails ? null : (
+          <table className="mt-4 border-collapse">
+            <thead>
+              <tr className="bg-green-500 text-white text-right">
+                <th className="p-2">Year</th>
+                <th className="p-2">Ending Balance</th>
+                <th className="p-2">Withdrawal</th>
+              </tr>
+            </thead>
+            <tbody>
+              {lifecyclesData
+                .find(
+                  (cycle) => cycle[0].cycleStartYear === selectedCycle.startYear
+                )
+                .map((yearData, i) => (
+                  <tr
+                    key={i + 1}
+                    className="group transition-colors even:bg-gray-200"
+                  >
+                    <td className="group-hover:bg-gray-400 duration-200 text-right p-2">
+                      {yearData.cycleYear}
+                    </td>
+                    <td className="group-hover:bg-gray-400 duration-200 text-right p-2">
+                      {format('$,.2f')(yearData.balanceInfAdjEnd)}
+                    </td>
+                    <td className="group-hover:bg-gray-400 duration-200 text-right p-2">
+                      {format('$,.2f')(yearData.withdrawalInfAdjust)}
+                    </td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );
