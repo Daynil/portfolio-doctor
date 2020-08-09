@@ -189,7 +189,7 @@ export function PortfolioGraph({
     // Transform current mouse coords to domain values, adjusting for svg position and scroll
     const ym = memoized.yScale.invert(
       //d3.event.layerY - svgRect.top - margin.top - window.pageYOffset
-      e.clientY - svgRect.top - margin.top - window.pageYOffset
+      e.clientY - svgRect.top - margin.top + window.pageYOffset
     );
     const xm = memoized.xScale.invert(
       //d3.event.layerX - svgRect.left - margin.left - window.pageXOffset
