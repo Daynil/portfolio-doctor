@@ -450,7 +450,7 @@ export function PortfolioGraph({
             </div>
           </div>
         </div>
-        <div className="rounded-md overflow-hidden border-2 m-6">
+        <div className="rounded-md overflow-hidden border-2 m-6 self-center">
           <table>
             <thead>
               <tr>
@@ -586,7 +586,7 @@ export function PortfolioGraph({
             className="btn btn-green-2"
             onClick={() => setshowCycleDetails(!showCycleDetails)}
           >
-            Show Cycle Details
+            {showCycleDetails ? 'Hide' : 'Show'} Cycle Details
           </button>
         )}
         {!selectedCycle || !showCycleDetails ? null : (
