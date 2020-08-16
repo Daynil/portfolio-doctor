@@ -2,6 +2,7 @@ import { parse, stringify } from 'query-string';
 import {
   CycleYearData,
   PortfolioOptions,
+  SimulationMethod,
   WithdrawalMethod
 } from '../data/calc/portfolio-calc';
 
@@ -26,6 +27,7 @@ export interface DataColumns {
 }
 
 export interface UrlQuery {
+  simulationMethod: string;
   startBalance: string;
   equitiesRatio: string;
   investmentExpenseRatio: string;
@@ -38,6 +40,7 @@ export interface UrlQuery {
 }
 
 export const defaultPortfolioOptions: PortfolioOptions = {
+  simulationMethod: 'Historical Data',
   startBalance: 1000000,
   equitiesRatio: 0.9,
   investmentExpenseRatio: 0.0025,
@@ -139,6 +142,7 @@ export function queryStringToPortfolioOptions(
   let options = { ...defaultPortfolioOptions };
 
   try {
+    options.simulationMethod = query.simulationMethod as SimulationMethod;
     options.startBalance = parseInt(query.startBalance);
     options.equitiesRatio = parseFloat(query.equitiesRatio);
     options.investmentExpenseRatio = parseFloat(query.investmentExpenseRatio);
@@ -167,6 +171,7 @@ export function portfolioOptionsToQueryString(
   options: PortfolioOptions
 ): string {
   const queryObj: UrlQuery = {
+    simulationMethod: options.simulationMethod,
     startBalance: options.startBalance + '',
     equitiesRatio: options.equitiesRatio + '',
     investmentExpenseRatio: options.investmentExpenseRatio + '',

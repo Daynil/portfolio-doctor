@@ -223,6 +223,7 @@ export enum WithdrawalMethod {
 export type SimulationMethod = 'Historical Data' | 'Monte Carlo';
 
 export interface PortfolioOptions {
+  simulationMethod: SimulationMethod;
   simulationYearsLength: number;
   startBalance: number;
   investmentExpenseRatio: number;

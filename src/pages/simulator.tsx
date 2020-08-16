@@ -32,9 +32,6 @@ export default function Simulator({ path }: Props) {
   const [portfolio, setPortfolio] = useState<PortfolioData>(null);
   const [data, setData] = useState<MarketYearData[]>([]);
   const [inputErr, setInputErr] = useState('');
-  const [simulationMethod, setSimulationMethod] = useState<SimulationMethod>(
-    'Historical Data'
-  );
 
   const refStartingBalance = useRef<HTMLInputElement>(null);
   const refStockRatio = useRef<HTMLInputElement>(null);
@@ -48,12 +45,14 @@ export default function Simulator({ path }: Props) {
   let startingOptions = { ...defaultPortfolioOptions };
 
   if (typeof location !== 'undefined' && location?.search) {
-    console.log('location ', location);
     startingOptions = queryStringToPortfolioOptions(location.search);
   }
 
   const [portfolioOptions, setPortfolioOptions] = useState<PortfolioOptions>(
     startingOptions
+  );
+  const [simulationMethod, setSimulationMethod] = useState<SimulationMethod>(
+    startingOptions.simulationMethod
   );
   const [withdrawalMethod, setWithdrawalMethod] = useState<WithdrawalMethod>(
     startingOptions.withdrawalMethod
@@ -115,6 +114,7 @@ export default function Simulator({ path }: Props) {
         break;
     }
 
+    newPortfolioOptions.simulationMethod = simulationMethod;
     newPortfolioOptions.startBalance = parseStringyNum(
       refStartingBalance.current.value
     );
