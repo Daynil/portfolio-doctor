@@ -1,6 +1,9 @@
-// import { CycleData } from '../data/calc/portfolio-calc';
-
-import { CycleYearData } from '../data/calc/portfolio-calc';
+import { parse, stringify } from 'query-string';
+import {
+  CycleYearData,
+  PortfolioOptions,
+  WithdrawalMethod
+} from '../data/calc/portfolio-calc';
 
 export interface DataColumns {
   cycleYear: number[];
@@ -21,6 +24,32 @@ export interface DataColumns {
   balanceEnd: number[];
   balanceInfAdjEnd: number[];
 }
+
+export interface UrlQuery {
+  startBalance: string;
+  equitiesRatio: string;
+  investmentExpenseRatio: string;
+  withdrawalMethod: string;
+  withdrawalStaticAmount?: string;
+  withdrawalPercent?: string;
+  withdrawalFloor?: string;
+  withdrawalCeiling?: string;
+  simulationYearsLength: string;
+}
+
+export const defaultPortfolioOptions: PortfolioOptions = {
+  startBalance: 1000000,
+  equitiesRatio: 0.9,
+  investmentExpenseRatio: 0.0025,
+  withdrawalMethod: 1,
+  withdrawal: {
+    staticAmount: 40000,
+    percentage: 0.04,
+    floor: 30000,
+    ceiling: 60000
+  },
+  simulationYearsLength: 60
+};
 
 /**
  * Create an object with an array of each column across all years for each cycle year
@@ -101,4 +130,60 @@ export function pivotPortfolioCyclesAggregate(
     });
   });
   return portfolioCycleDataColumns;
+}
+
+export function queryStringToPortfolioOptions(
+  queryString: string
+): PortfolioOptions {
+  const query = (parse(queryString) as unknown) as UrlQuery;
+  let options = { ...defaultPortfolioOptions };
+
+  try {
+    options.startBalance = parseInt(query.startBalance);
+    options.equitiesRatio = parseFloat(query.equitiesRatio);
+    options.investmentExpenseRatio = parseFloat(query.investmentExpenseRatio);
+    options.simulationYearsLength = parseInt(query.simulationYearsLength);
+    options.withdrawalMethod = parseInt(
+      query.withdrawalMethod
+    ) as WithdrawalMethod;
+
+    if (options.withdrawalMethod === WithdrawalMethod.InflationAdjusted) {
+      options.withdrawal.staticAmount = parseInt(query.withdrawalStaticAmount);
+    } else {
+      options.withdrawal.percentage = parseFloat(query.withdrawalPercent);
+    }
+
+    if (options.withdrawalMethod === WithdrawalMethod.PercentPortfolioClamped) {
+      options.withdrawal.floor = parseInt(query.withdrawalFloor);
+      options.withdrawal.ceiling = parseInt(query.withdrawalCeiling);
+    }
+  } catch (e) {
+    return defaultPortfolioOptions;
+  }
+  return options;
+}
+
+export function portfolioOptionsToQueryString(
+  options: PortfolioOptions
+): string {
+  const queryObj: UrlQuery = {
+    startBalance: options.startBalance + '',
+    equitiesRatio: options.equitiesRatio + '',
+    investmentExpenseRatio: options.investmentExpenseRatio + '',
+    withdrawalMethod: options.withdrawalMethod + '',
+    simulationYearsLength: options.simulationYearsLength + ''
+  };
+
+  if (options.withdrawalMethod === WithdrawalMethod.InflationAdjusted) {
+    queryObj.withdrawalStaticAmount = options.withdrawal.staticAmount + '';
+  } else {
+    queryObj.withdrawalPercent = options.withdrawal.percentage + '';
+  }
+
+  if (options.withdrawalMethod === WithdrawalMethod.PercentPortfolioClamped) {
+    queryObj.withdrawalFloor = options.withdrawal.floor + '';
+    queryObj.withdrawalCeiling = options.withdrawal.ceiling + '';
+  }
+
+  return stringify(queryObj);
 }

@@ -10,24 +10,28 @@ import {
   MarketYearData,
   PortfolioOptions,
   SimulationMethod,
-  WithdrawalMethod,
-  WithdrawalOptions
+  WithdrawalMethod
 } from '../data/calc/portfolio-calc';
 import { DatasetContext, defaultDatasetName } from '../data/data-context';
 import { parseCSVStringToJSON } from '../data/data-helpers';
 import { parseStringyNum } from '../utilities/format';
+import {
+  defaultPortfolioOptions,
+  portfolioOptionsToQueryString,
+  queryStringToPortfolioOptions
+} from '../utilities/util';
 
 type Props = {
   path: string;
+  location: {
+    search?: string;
+  };
 };
 
 export default function Simulator({ path }: Props) {
   const [portfolio, setPortfolio] = useState<PortfolioData>(null);
   const [data, setData] = useState<MarketYearData[]>([]);
   const [inputErr, setInputErr] = useState('');
-  const [withdrawalMethod, setWithdrawalMethod] = useState<WithdrawalMethod>(
-    WithdrawalMethod.InflationAdjusted
-  );
   const [simulationMethod, setSimulationMethod] = useState<SimulationMethod>(
     'Historical Data'
   );
@@ -40,6 +44,20 @@ export default function Simulator({ path }: Props) {
   const refWithdrawalMin = useRef<HTMLInputElement>(null);
   const refWithdrawalMax = useRef<HTMLInputElement>(null);
   const refSimLength = useRef<HTMLInputElement>(null);
+
+  let startingOptions = { ...defaultPortfolioOptions };
+
+  if (typeof location !== 'undefined' && location?.search) {
+    console.log('location ', location);
+    startingOptions = queryStringToPortfolioOptions(location.search);
+  }
+
+  const [portfolioOptions, setPortfolioOptions] = useState<PortfolioOptions>(
+    startingOptions
+  );
+  const [withdrawalMethod, setWithdrawalMethod] = useState<WithdrawalMethod>(
+    startingOptions.withdrawalMethod
+  );
 
   const {
     preferredDataset,
@@ -61,75 +79,86 @@ export default function Simulator({ path }: Props) {
   }, [defaultDatasetCSVStringCache]);
 
   function calculatePortfolio() {
-    let withdrawal: WithdrawalOptions;
+    let newPortfolioOptions = { ...defaultPortfolioOptions };
+
     switch (withdrawalMethod) {
       case WithdrawalMethod.InflationAdjusted:
-        withdrawal = {
-          staticAmount: parseStringyNum(refWithdrawalAmount.current.value)
-        };
+        newPortfolioOptions.withdrawal.staticAmount = parseStringyNum(
+          refWithdrawalAmount.current.value
+        );
         break;
+
       case WithdrawalMethod.PercentPortfolio:
-        withdrawal = {
-          percentage: parseFloat(refWithdrawalPercent.current.value) / 100
-        };
-        if (isNaN(withdrawal.percentage)) {
+        newPortfolioOptions.withdrawal.percentage =
+          parseFloat(refWithdrawalPercent.current.value) / 100;
+
+        if (isNaN(newPortfolioOptions.withdrawal.percentage)) {
           setInputErr('Invalid value for withdrawal percent.');
           return;
         }
         break;
+
       case WithdrawalMethod.PercentPortfolioClamped:
-        withdrawal = {
-          percentage: parseFloat(refWithdrawalPercent.current.value) / 100,
-          floor: parseStringyNum(refWithdrawalMin.current.value),
-          ceiling: parseStringyNum(refWithdrawalMax.current.value)
-        };
-        if (isNaN(withdrawal.percentage)) {
+        (newPortfolioOptions.withdrawal.percentage =
+          parseFloat(refWithdrawalPercent.current.value) / 100),
+          (newPortfolioOptions.withdrawal.floor = parseStringyNum(
+            refWithdrawalMin.current.value
+          ));
+        newPortfolioOptions.withdrawal.ceiling = parseStringyNum(
+          refWithdrawalMax.current.value
+        );
+
+        if (isNaN(newPortfolioOptions.withdrawal.percentage)) {
           setInputErr('Invalid value for withdrawal percent.');
           return;
         }
         break;
     }
 
-    const portfolioOptions: PortfolioOptions = {
-      startBalance: parseStringyNum(refStartingBalance.current.value),
-      equitiesRatio: parseFloat(refStockRatio.current.value) / 100,
-      investmentExpenseRatio: parseFloat(refExpenseRatio.current.value) / 100,
-      simulationYearsLength: parseInt(refSimLength.current.value),
-      withdrawalMethod,
-      withdrawal
-    };
+    newPortfolioOptions.startBalance = parseStringyNum(
+      refStartingBalance.current.value
+    );
+    newPortfolioOptions.equitiesRatio =
+      parseFloat(refStockRatio.current.value) / 100;
+    newPortfolioOptions.investmentExpenseRatio =
+      parseFloat(refExpenseRatio.current.value) / 100;
+    newPortfolioOptions.simulationYearsLength = parseInt(
+      refSimLength.current.value
+    );
+    newPortfolioOptions.withdrawalMethod = withdrawalMethod;
 
-    if (isNaN(portfolioOptions.equitiesRatio)) {
+    if (isNaN(newPortfolioOptions.equitiesRatio)) {
       setInputErr('Invalid value for withdrawal equities ratio.');
       return;
-    } else if (portfolioOptions.equitiesRatio > 1) {
+    } else if (newPortfolioOptions.equitiesRatio > 1) {
       setInputErr('Maximium equities ratio is 100%.');
       return;
-    } else if (portfolioOptions.equitiesRatio < 0) {
+    } else if (newPortfolioOptions.equitiesRatio < 0) {
       setInputErr('Minimum equities ratio is 0%.');
       return;
-    } else if (isNaN(portfolioOptions.investmentExpenseRatio)) {
+    } else if (isNaN(newPortfolioOptions.investmentExpenseRatio)) {
       setInputErr('Invalid value for withdrawal investment expense ratio.');
       return;
-    } else if (portfolioOptions.investmentExpenseRatio > 1) {
+    } else if (newPortfolioOptions.investmentExpenseRatio > 1) {
       setInputErr('Maximium investment expense ratio is 100%.');
       return;
-    } else if (portfolioOptions.investmentExpenseRatio < 0) {
+    } else if (newPortfolioOptions.investmentExpenseRatio < 0) {
       setInputErr('Minimum investment expense ratio is 0%.');
       return;
     } else if (
-      portfolioOptions.simulationYearsLength > getMaxSimulationLength(data)
+      newPortfolioOptions.simulationYearsLength > getMaxSimulationLength(data)
     ) {
       setInputErr(
         `Maximium simulation length is ${getMaxSimulationLength(data)} years.`
       );
       return;
-    } else if (portfolioOptions.simulationYearsLength < 3) {
+    } else if (newPortfolioOptions.simulationYearsLength < 3) {
       setInputErr('Minimum simulation length is 3 years.');
       return;
     }
 
     setInputErr('');
+    setPortfolioOptions(newPortfolioOptions);
 
     const curPortfolio = new CyclePortfolio(data, portfolioOptions);
     const lifecyclesData = curPortfolio.crunchAllCyclesData();
@@ -159,6 +188,10 @@ export default function Simulator({ path }: Props) {
     });
   }
 
+  function shareResults() {
+    console.log(portfolioOptionsToQueryString(portfolioOptions));
+  }
+
   function getWithdrawalInputs(): JSX.Element {
     switch (withdrawalMethod) {
       case WithdrawalMethod.InflationAdjusted:
@@ -178,7 +211,9 @@ export default function Simulator({ path }: Props) {
                 className="form-input pl-8 w-full"
                 name="withdrawalAmount"
                 type="text"
-                defaultValue={format(',')(40000)}
+                defaultValue={format(',')(
+                  portfolioOptions.withdrawal.staticAmount
+                )}
                 ref={refWithdrawalAmount}
                 onChange={(e) =>
                   handleIntegerInputChange(e, refWithdrawalAmount)
@@ -201,7 +236,7 @@ export default function Simulator({ path }: Props) {
                 className="form-input w-full"
                 name="withdrawalPercent"
                 type="text"
-                defaultValue={4}
+                defaultValue={portfolioOptions.withdrawal.percentage * 100}
                 ref={refWithdrawalPercent}
               />
               <span className="absolute pointer-events-none inset-y-0 right-0 pr-4 flex items-center text-gray-600 font-medium">
@@ -222,7 +257,7 @@ export default function Simulator({ path }: Props) {
                   className="form-input w-full"
                   name="withdrawalPercent"
                   type="text"
-                  defaultValue={4}
+                  defaultValue={portfolioOptions.withdrawal.percentage * 100}
                   ref={refWithdrawalPercent}
                 />
                 <span className="absolute pointer-events-none inset-y-0 right-0 pr-4 flex items-center text-gray-600 font-medium">
@@ -242,7 +277,7 @@ export default function Simulator({ path }: Props) {
                   className="form-input pl-8 w-full"
                   name="withdrawalMin"
                   type="text"
-                  defaultValue={format(',')(30000)}
+                  defaultValue={format(',')(portfolioOptions.withdrawal.floor)}
                   ref={refWithdrawalMin}
                   onChange={(e) =>
                     handleIntegerInputChange(e, refWithdrawalMin)
@@ -262,7 +297,9 @@ export default function Simulator({ path }: Props) {
                   className="form-input pl-8 w-full"
                   name="withdrawalMax"
                   type="text"
-                  defaultValue={format(',')(60000)}
+                  defaultValue={format(',')(
+                    portfolioOptions.withdrawal.ceiling
+                  )}
                   ref={refWithdrawalMax}
                   onChange={(e) =>
                     handleIntegerInputChange(e, refWithdrawalMax)
@@ -387,46 +424,6 @@ export default function Simulator({ path }: Props) {
               ) : null}
             </div>
 
-            {/* <div className="flex flex-col mt-4">
-              <label className="form-label" htmlFor="simulationMethod">
-                Simulation Method
-              </label>
-              <div className="inline-block relative w-full">
-                <select
-                  className="block appearance-none w-full text-base bg-gray-200 shdow border border-gray-400 hover:border-green-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline"
-                  style={{ WebkitAppearance: 'none' }}
-                  name="simulationMethod"
-                  onChange={(e) =>
-                    setSimulationMethod(e.target.value as SimulationMethod)
-                  }
-                >
-                  <option>Historical Data</option>
-                  <option>Monte Carlo</option>
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                  <svg
-                    className="fill-current h-4 w-4 text-gray-600"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                  >
-                    <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
-                  </svg>
-                </div>
-              </div>
-              {simulationMethod === 'Historical Data' ? (
-                <div className="flex flex-col mt-4 mb-2">
-                  <label className="form-label">Currently Active Dataset</label>
-                  <div className="text-base">
-                    <TextLink
-                      href="/upload-data/"
-                      title="Upload or Change Dataset"
-                    >
-                      {preferredDataset}
-                    </TextLink>
-                  </div>
-                </div>
-              ) : null}
-            </div> */}
             <div className="flex flex-col mt-4">
               <label className="form-label" htmlFor="startBalance">
                 Starting Balance
@@ -439,7 +436,7 @@ export default function Simulator({ path }: Props) {
                   className="form-input pl-8 w-full"
                   name="startBalance"
                   type="text"
-                  defaultValue={format(',')(1000000)}
+                  defaultValue={format(',')(portfolioOptions.startBalance)}
                   ref={refStartingBalance}
                   onChange={(e) =>
                     handleIntegerInputChange(e, refStartingBalance)
@@ -456,7 +453,7 @@ export default function Simulator({ path }: Props) {
                   className="form-input w-full"
                   name="equitiesRatio"
                   type="text"
-                  defaultValue={90}
+                  defaultValue={portfolioOptions.equitiesRatio * 100}
                   ref={refStockRatio}
                 />
                 <span className="absolute pointer-events-none inset-y-0 right-0 pr-4 flex items-center text-gray-600 font-medium">
@@ -473,7 +470,7 @@ export default function Simulator({ path }: Props) {
                   className="form-input w-full"
                   name="expenseRatio"
                   type="text"
-                  defaultValue={0.25}
+                  defaultValue={portfolioOptions.investmentExpenseRatio * 100}
                   ref={refExpenseRatio}
                 />
                 <span className="absolute pointer-events-none inset-y-0 right-0 pr-4 flex items-center text-gray-600 font-medium">
@@ -556,27 +553,28 @@ export default function Simulator({ path }: Props) {
                 name="simLength"
                 className="form-input"
                 type="number"
-                defaultValue={60}
+                defaultValue={portfolioOptions.simulationYearsLength}
                 min={5}
                 max={getMaxSimulationLength(data)}
                 ref={refSimLength}
               />
             </div>
-            <button className="btn btn-green mt-4" onClick={calculatePortfolio}>
-              Calculate!
-            </button>
+            <div className="flex w-full justify-between">
+              <button
+                className="btn btn-green mt-4"
+                onClick={calculatePortfolio}
+              >
+                Calculate!
+              </button>
+              <button className="btn btn-green-2 mt-4" onClick={shareResults}>
+                Share
+              </button>
+            </div>
           </div>
           <div className="w-full">
             {!portfolio ? null : <PortfolioGraph {...portfolio} />}
           </div>
         </div>
-        {/* <table className="dataTable">
-        <tr>
-          <th>Year</th>
-          <th>Ending Balance</th>
-        </tr>
-        {yearEndBalances}
-      </table> */}
       </div>
     </Layout>
   );
