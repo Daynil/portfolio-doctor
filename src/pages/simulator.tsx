@@ -17,7 +17,6 @@ import { parseCSVStringToJSON } from '../data/data-helpers';
 import { parseStringyNum } from '../utilities/format';
 import {
   defaultPortfolioOptions,
-  portfolioOptionsToQueryString,
   queryStringToPortfolioOptions
 } from '../utilities/util';
 
@@ -186,10 +185,6 @@ export default function Simulator({ path }: Props) {
       options: curPortfolio.options,
       startYear: data[0].year
     });
-  }
-
-  function shareResults() {
-    console.log(portfolioOptionsToQueryString(portfolioOptions));
   }
 
   function getWithdrawalInputs(): JSX.Element {
@@ -565,9 +560,6 @@ export default function Simulator({ path }: Props) {
                 onClick={calculatePortfolio}
               >
                 Calculate!
-              </button>
-              <button className="btn btn-green-2 mt-4" onClick={shareResults}>
-                Share
               </button>
             </div>
           </div>

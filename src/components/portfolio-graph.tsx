@@ -9,6 +9,8 @@ import {
 } from '../data/calc/portfolio-calc';
 import { numToCurrency, numToCurrencyShort } from '../utilities/format';
 import { clamp } from '../utilities/math';
+import { portfolioOptionsToQueryString } from '../utilities/util';
+import ShareIcon from './svg/share-icon';
 
 export interface PortfolioData {
   lifecyclesData: CycleYearData[][];
@@ -85,6 +87,15 @@ export function PortfolioGraph({
     window.addEventListener('resize', setRects);
     return () => window.removeEventListener('resize', setRects);
   }, []);
+
+  function shareResults() {
+    window.open(
+      `https://portfoliodoctor.com/simulator?${portfolioOptionsToQueryString(
+        options
+      )}`,
+      '_blank'
+    );
+  }
 
   const memoized = useMemo(() => {
     const xDomain = lifecyclesData[0].map((d, i) => i + 1);
@@ -426,6 +437,16 @@ export function PortfolioGraph({
               <span className="text-xl">
                 {numToCurrency(stats.withdrawals.averageInflAdj, 0)}
               </span>
+            </div>
+            <div className="my-2 mx-auto bg-gray-500 w-5/6 h-px"></div>
+            <div className="pt-2 w-full flex justify-center">
+              <button
+                className="btn btn-green-2 flex items-center"
+                onClick={shareResults}
+              >
+                <span>Share</span>{' '}
+                <ShareIcon className="text-green-700 w-4 ml-2" />
+              </button>
             </div>
           </div>
         </div>
