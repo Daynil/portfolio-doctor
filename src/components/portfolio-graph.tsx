@@ -46,12 +46,6 @@ type D3Selection<T extends d3.BaseType> = d3.Selection<
   null,
   undefined
 >;
-type D3LineSelection = d3.Selection<
-  Element | d3.EnterElement | Document | Window | SVGPathElement,
-  ChartData,
-  SVGGElement,
-  unknown
->;
 
 // https://bl.ocks.org/mbostock/3019563
 const margin = { top: 30, right: 20, bottom: 20, left: 70 };

@@ -333,7 +333,61 @@ export default function Simulator({ path }: Props) {
                 <p className="text-sm">{inputErr}</p>
               </div>
             ) : null}
+
             <div className="flex flex-col mt-4">
+              <div className="text-gray-800 mt-4">
+                <label className="form-label">Simulation Method</label>
+                <div className="ml-2">
+                  <div className="flex items-center">
+                    <input
+                      id="historical"
+                      className="form-radio text-green-500"
+                      type="radio"
+                      name="simulationMethod"
+                      checked={simulationMethod === 'Historical Data'}
+                      value="Historical Data"
+                      onChange={(e) => {
+                        setSimulationMethod(e.target.value as SimulationMethod);
+                      }}
+                    />
+                    <label className="ml-2 text-sm" htmlFor="historical">
+                      Historical Data
+                    </label>
+                  </div>
+                  <div className="flex items-center">
+                    <input
+                      id="monteCarlo"
+                      className="form-radio text-green-500"
+                      type="radio"
+                      name="simulationMethod"
+                      checked={simulationMethod === 'Monte Carlo'}
+                      value="Monte Carlo"
+                      onChange={(e) => {
+                        setSimulationMethod(e.target.value as SimulationMethod);
+                      }}
+                    />
+                    <label className="ml-2 text-sm" htmlFor="monteCarlo">
+                      Monte Carlo
+                    </label>
+                  </div>
+                </div>
+              </div>
+              {simulationMethod === 'Historical Data' ? (
+                <div className="flex flex-col mt-4 mb-2">
+                  <label className="form-label">Currently Active Dataset</label>
+                  <div className="text-base">
+                    <TextLink
+                      href="/upload-data/"
+                      title="Upload or Change Dataset"
+                    >
+                      {preferredDataset}
+                    </TextLink>
+                  </div>
+                </div>
+              ) : null}
+            </div>
+
+            {/* <div className="flex flex-col mt-4">
               <label className="form-label" htmlFor="simulationMethod">
                 Simulation Method
               </label>
@@ -372,7 +426,7 @@ export default function Simulator({ path }: Props) {
                   </div>
                 </div>
               ) : null}
-            </div>
+            </div> */}
             <div className="flex flex-col mt-4">
               <label className="form-label" htmlFor="startBalance">
                 Starting Balance
