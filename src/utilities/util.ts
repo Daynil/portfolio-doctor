@@ -137,7 +137,7 @@ export function pivotPortfolioCyclesAggregate(
 
 export function queryStringToPortfolioOptions(
   queryString: string
-): PortfolioOptions {
+): [PortfolioOptions, boolean] {
   const query = (parse(queryString) as unknown) as UrlQuery;
   let options = { ...defaultPortfolioOptions };
 
@@ -162,9 +162,9 @@ export function queryStringToPortfolioOptions(
       options.withdrawal.ceiling = parseInt(query.withdrawalCeiling);
     }
   } catch (e) {
-    return defaultPortfolioOptions;
+    return [defaultPortfolioOptions, false];
   }
-  return options;
+  return [options, true];
 }
 
 export function portfolioOptionsToQueryString(

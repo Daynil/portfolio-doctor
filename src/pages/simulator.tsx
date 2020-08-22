@@ -42,9 +42,12 @@ export default function Simulator({ path }: Props) {
   const refSimLength = useRef<HTMLInputElement>(null);
 
   let startingOptions = { ...defaultPortfolioOptions };
+  let urlOptionsValidated = false;
 
   if (typeof location !== 'undefined' && location?.search) {
-    startingOptions = queryStringToPortfolioOptions(location.search);
+    [startingOptions, urlOptionsValidated] = queryStringToPortfolioOptions(
+      location.search
+    );
   }
 
   const [portfolioOptions, setPortfolioOptions] = useState<PortfolioOptions>(
@@ -75,6 +78,11 @@ export default function Simulator({ path }: Props) {
       setData(parseCSVStringToJSON(datasetString));
     }
   }, [defaultDatasetCSVStringCache]);
+
+  useEffect(() => {
+    // Auto-trigger portfolio calculation if we have valid options in the URL
+    if (urlOptionsValidated && data.length) calculatePortfolio();
+  }, [data]);
 
   function calculatePortfolio() {
     let newPortfolioOptions = { ...defaultPortfolioOptions };
