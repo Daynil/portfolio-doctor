@@ -67,6 +67,7 @@ export function PortfolioGraph({
   const refGxAxis = useRef<SVGGElement>(null);
   const refGdot = useRef<SVGGElement>(null);
   const refTooltip = useRef<HTMLDivElement>(null);
+  const refCopyURL = useRef<HTMLInputElement>(null);
   const [hoveringCycle, setHoveringCycle] = useState<{
     data: ChartData;
     dataIndex: number;
@@ -77,6 +78,8 @@ export function PortfolioGraph({
   const [showCycleDetails, setshowCycleDetails] = useState(false);
 
   const [svgRect, setSvgRect] = useState<DOMRect>(null);
+  const [copyComplete, setCopyComplete] = useState(false);
+  const [copyModalActive, setCopyModalActive] = useState(false);
 
   const tooltipWidth = 325;
 
@@ -90,12 +93,18 @@ export function PortfolioGraph({
   }, []);
 
   function shareResults() {
-    window.open(
-      `https://portfoliodoctor.com/simulator?${portfolioOptionsToQueryString(
-        options
-      )}`,
-      '_blank'
-    );
+    setCopyModalActive(true);
+  }
+
+  function copyURL() {
+    refCopyURL.current.select();
+    document.execCommand('copy');
+    setCopyComplete(true);
+  }
+
+  function closeCopyModal() {
+    setCopyModalActive(false);
+    setCopyComplete(false);
   }
 
   const memoized = useMemo(() => {
@@ -326,7 +335,12 @@ export function PortfolioGraph({
 
   return !lifecyclesData ? null : (
     <div className="flex flex-row flex-wrap">
-      <div className="fixed inset-0 transition-opacity z-10">
+      <div
+        className={
+          copyModalActive ? 'fixed inset-0 transition-opacity z-10' : 'hidden'
+        }
+        onClick={closeCopyModal}
+      >
         <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
       </div>
       <div className="flex flex-wrap">
@@ -451,18 +465,43 @@ export function PortfolioGraph({
                 <ShareIcon className="text-green-700 w-4" />
                 <span className="ml-2">Share</span>
               </button>
-              <div className="absolute bg-white shadow-lg rounded-md -mt-32 -mx-16 text-base p-4 flex flex-col z-20">
+              <div
+                className={
+                  copyModalActive
+                    ? 'absolute bg-white shadow-lg rounded-md -mt-32 -mx-16 text-base p-4 flex flex-col z-20'
+                    : 'hidden'
+                }
+              >
                 <div className="text-gray-900">
                   Share this portfolio run with this URL or just bookmark it for
                   future reference
                 </div>
                 <div className="flex mt-2">
-                  <input type="text" className="form-input w-full" />
-                  <button className="btn btn-green ml-2 flex items-center">
+                  <input
+                    type="text"
+                    className="form-input w-full"
+                    defaultValue={`https://portfoliodoctor.com/simulator?${portfolioOptionsToQueryString(
+                      options
+                    )}`}
+                    readOnly
+                    ref={refCopyURL}
+                  />
+                  <button
+                    className="btn btn-green ml-2 flex items-center"
+                    onClick={copyURL}
+                  >
                     <CopyIcon className="text-white w-4"></CopyIcon>
                     <span className="ml-2">Copy</span>
                   </button>
                 </div>
+                {!copyComplete ? null : (
+                  <div
+                    className="bg-green-100 border-l-4 border-green-500 text-green-700 py-2 px-4 mt-4"
+                    role="alert"
+                  >
+                    Copied to clipboard!
+                  </div>
+                )}
               </div>
             </div>
           </div>
