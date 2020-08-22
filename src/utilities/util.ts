@@ -140,31 +140,53 @@ export function queryStringToPortfolioOptions(
 ): [PortfolioOptions, boolean] {
   const query = (parse(queryString) as unknown) as UrlQuery;
   let options = { ...defaultPortfolioOptions };
+  let validatedOptionPresent = false;
 
-  try {
-    options.simulationMethod = query.simulationMethod as SimulationMethod;
-    options.startBalance = parseInt(query.startBalance);
-    options.equitiesRatio = parseFloat(query.equitiesRatio);
-    options.investmentExpenseRatio = parseFloat(query.investmentExpenseRatio);
-    options.simulationYearsLength = parseInt(query.simulationYearsLength);
-    options.withdrawalMethod = parseInt(
-      query.withdrawalMethod
-    ) as WithdrawalMethod;
+  options.simulationMethod = query.simulationMethod as SimulationMethod;
+  options.startBalance = parseInt(query.startBalance);
+  options.equitiesRatio = parseFloat(query.equitiesRatio);
+  options.investmentExpenseRatio = parseFloat(query.investmentExpenseRatio);
+  options.simulationYearsLength = parseInt(query.simulationYearsLength);
+  options.withdrawalMethod = parseInt(
+    query.withdrawalMethod
+  ) as WithdrawalMethod;
 
-    if (options.withdrawalMethod === WithdrawalMethod.InflationAdjusted) {
-      options.withdrawal.staticAmount = parseInt(query.withdrawalStaticAmount);
-    } else {
-      options.withdrawal.percentage = parseFloat(query.withdrawalPercent);
-    }
-
-    if (options.withdrawalMethod === WithdrawalMethod.PercentPortfolioClamped) {
-      options.withdrawal.floor = parseInt(query.withdrawalFloor);
-      options.withdrawal.ceiling = parseInt(query.withdrawalCeiling);
-    }
-  } catch (e) {
-    return [defaultPortfolioOptions, false];
+  if (options.withdrawalMethod === WithdrawalMethod.InflationAdjusted) {
+    options.withdrawal.staticAmount = parseInt(query.withdrawalStaticAmount);
+  } else {
+    options.withdrawal.percentage = parseFloat(query.withdrawalPercent);
   }
-  return [options, true];
+
+  if (options.withdrawalMethod === WithdrawalMethod.PercentPortfolioClamped) {
+    options.withdrawal.floor = parseInt(query.withdrawalFloor);
+    options.withdrawal.ceiling = parseInt(query.withdrawalCeiling);
+  }
+
+  // Check if we have any valid options parsed from query, else reset them to default
+  for (const key in options) {
+    if (options.hasOwnProperty(key)) {
+      if (isNaN(options[key]) || typeof options[key] === 'undefined') {
+        options[key] = defaultPortfolioOptions[key];
+      } else {
+        validatedOptionPresent = true;
+      }
+    }
+  }
+
+  if (options.withdrawalMethod !== WithdrawalMethod.InflationAdjusted) {
+    for (const key in options.withdrawal) {
+      if (options.withdrawal.hasOwnProperty(key)) {
+        if (isNaN(options.withdrawal[key])) {
+          options.withdrawal[key] = defaultPortfolioOptions.withdrawal[key];
+        } else {
+          validatedOptionPresent = true;
+        }
+      }
+    }
+  }
+
+  if (validatedOptionPresent) return [options, true];
+  else return [defaultPortfolioOptions, false];
 }
 
 export function portfolioOptionsToQueryString(
