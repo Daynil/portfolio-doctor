@@ -10,6 +10,7 @@ import {
 import { numToCurrency, numToCurrencyShort } from '../utilities/format';
 import { clamp } from '../utilities/math';
 import { portfolioOptionsToQueryString } from '../utilities/util';
+import CopyIcon from './svg/copy-icon';
 import ShareIcon from './svg/share-icon';
 
 export interface PortfolioData {
@@ -325,8 +326,8 @@ export function PortfolioGraph({
 
   return !lifecyclesData ? null : (
     <div className="flex flex-row flex-wrap">
-      <div className="fixed inset-0 transition-opacity">
-        <div className="absolute inset-0 bg-gray-500 opacity-75 z-10"></div>
+      <div className="fixed inset-0 transition-opacity z-10">
+        <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
       </div>
       <div className="flex flex-wrap">
         <div className="relative">
@@ -450,14 +451,17 @@ export function PortfolioGraph({
                 <ShareIcon className="text-green-700 w-4" />
                 <span className="ml-2">Share</span>
               </button>
-              <div className="absolute bg-white shadow-lg rounded-md -mt-32 -mx-16 text-base p-4 flex flex-col">
+              <div className="absolute bg-white shadow-lg rounded-md -mt-32 -mx-16 text-base p-4 flex flex-col z-20">
                 <div className="text-gray-900">
-                  You can share this portfolio run with the URL or just bookmark
-                  it for future reference.
+                  Share this portfolio run with this URL or just bookmark it for
+                  future reference
                 </div>
                 <div className="flex mt-2">
                   <input type="text" className="form-input w-full" />
-                  <button className="btn btn-green ml-2">Copy</button>
+                  <button className="btn btn-green ml-2 flex items-center">
+                    <CopyIcon className="text-white w-4"></CopyIcon>
+                    <span className="ml-2">Copy</span>
+                  </button>
                 </div>
               </div>
             </div>
