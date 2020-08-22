@@ -33,7 +33,7 @@ const Layout = ({ path, children }: Props) => {
           }`}
         >
           <main>{children}</main>
-          <footer className="text-gray-600 mt-32 pb-12">
+          <footer className="text-gray-600 mt-12 pb-12">
             © {new Date().getFullYear()} Portfolio Doctor. All Rights Reserved.
             Created by{' '}
             <TextLink href="https://dlibin.net">Danny Libin</TextLink>.
