@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-import { format } from 'd3-format';
+import { format } from 'd3';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   CycleStats,
@@ -490,7 +490,7 @@ export function PortfolioGraph({
                     className="btn btn-green ml-2 flex items-center"
                     onClick={copyURL}
                   >
-                    <CopyIcon className="text-white w-4"></CopyIcon>
+                    <CopyIcon className="text-white w-4" />
                     <span className="ml-2">Copy</span>
                   </button>
                 </div>

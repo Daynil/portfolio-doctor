@@ -167,7 +167,7 @@ export default function Simulator({ path }: Props) {
     setInputErr('');
     setPortfolioOptions(newPortfolioOptions);
 
-    const curPortfolio = new CyclePortfolio(data, portfolioOptions);
+    const curPortfolio = new CyclePortfolio(data, newPortfolioOptions);
     const lifecyclesData = curPortfolio.crunchAllCyclesData();
     const stats = curPortfolio.crunchAllPortfolioStats(lifecyclesData);
 
@@ -317,17 +317,6 @@ export default function Simulator({ path }: Props) {
         break;
     }
   }
-
-  const yearEndBalances = !portfolio
-    ? null
-    : portfolio.lifecyclesData[0].map((yearData) => {
-        return (
-          <tr key={yearData.cycleYear.toString()}>
-            <td>{yearData.cycleYear}</td>
-            <td>{format('$.2f')(yearData.balanceInfAdjEnd)}</td>
-          </tr>
-        );
-      });
 
   function handleIntegerInputChange(
     e: React.ChangeEvent<HTMLInputElement>,
