@@ -1,8 +1,9 @@
 import { format } from 'd3-format';
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import Layout from '../components/layout';
 import { PortfolioData, PortfolioGraph } from '../components/portfolio-graph';
+import RadioInput from '../components/radio-input';
 import SEO from '../components/seo';
+import TextInput from '../components/text-input';
 import TextLink from '../components/text-link';
 import {
   CyclePortfolio,
@@ -21,13 +22,12 @@ import {
 } from '../utilities/util';
 
 type Props = {
-  path: string;
   location: {
     search?: string;
   };
 };
 
-export default function Simulator({ path }: Props) {
+export default function Simulator() {
   const [portfolio, setPortfolio] = useState<PortfolioData>(null);
   const [data, setData] = useState<MarketYearData[]>([]);
   const [inputErr, setInputErr] = useState('');
@@ -206,23 +206,17 @@ export default function Simulator({ path }: Props) {
             <label className="form-label" htmlFor="withdrawalAmount">
               Withdrawal Amount
             </label>
-            <div className="relative">
-              <span className="absolute pointer-events-none inset-y-0 left-0 pl-4 flex items-center text-gray-600 font-medium">
-                $
-              </span>
-              <input
-                className="form-input pl-8 w-full"
-                name="withdrawalAmount"
-                type="text"
-                defaultValue={format(',')(
-                  portfolioOptions.withdrawal.staticAmount
-                )}
-                ref={refWithdrawalAmount}
-                onChange={(e) =>
-                  handleIntegerInputChange(e, refWithdrawalAmount)
-                }
-              />
-            </div>
+            <TextInput
+              symbolPrefix="$"
+              className="pl-8 w-full"
+              name="withdrawalAmount"
+              type="text"
+              defaultValue={format(',')(
+                portfolioOptions.withdrawal.staticAmount
+              )}
+              ref={refWithdrawalAmount}
+              onChange={(e) => handleIntegerInputChange(e, refWithdrawalAmount)}
+            />
           </div>
         );
       case WithdrawalMethod.PercentPortfolio:
@@ -234,18 +228,14 @@ export default function Simulator({ path }: Props) {
             <label className="form-label" htmlFor="withdrawalPercent">
               Withdrawal Percent
             </label>
-            <div className="relative">
-              <input
-                className="form-input w-full"
-                name="withdrawalPercent"
-                type="text"
-                defaultValue={portfolioOptions.withdrawal.percentage * 100}
-                ref={refWithdrawalPercent}
-              />
-              <span className="absolute pointer-events-none inset-y-0 right-0 pr-4 flex items-center text-gray-600 font-medium">
-                %
-              </span>
-            </div>
+            <TextInput
+              symbolSuffix="%"
+              className="w-full"
+              name="withdrawalPercent"
+              type="text"
+              defaultValue={portfolioOptions.withdrawal.percentage * 100}
+              ref={refWithdrawalPercent}
+            />
           </div>
         );
       case WithdrawalMethod.PercentPortfolioClamped:
@@ -255,60 +245,42 @@ export default function Simulator({ path }: Props) {
               <label className="form-label" htmlFor="withdrawalPercent">
                 Withdrawal Percent
               </label>
-              <div className="relative">
-                <input
-                  className="form-input w-full"
-                  name="withdrawalPercent"
-                  type="text"
-                  defaultValue={portfolioOptions.withdrawal.percentage * 100}
-                  ref={refWithdrawalPercent}
-                />
-                <span className="absolute pointer-events-none inset-y-0 right-0 pr-4 flex items-center text-gray-600 font-medium">
-                  %
-                </span>
-              </div>
+              <TextInput
+                symbolSuffix="%"
+                className="w-full"
+                name="withdrawalPercent"
+                type="text"
+                defaultValue={portfolioOptions.withdrawal.percentage * 100}
+                ref={refWithdrawalPercent}
+              />
             </div>
             <div className="flex flex-col mt-4">
               <label className="form-label" htmlFor="withdrawalMin">
                 Withdrawal Minimum
               </label>
-              <div className="relative">
-                <span className="absolute pointer-events-none inset-y-0 left-0 pl-4 flex items-center text-gray-600 font-medium">
-                  $
-                </span>
-                <input
-                  className="form-input pl-8 w-full"
-                  name="withdrawalMin"
-                  type="text"
-                  defaultValue={format(',')(portfolioOptions.withdrawal.floor)}
-                  ref={refWithdrawalMin}
-                  onChange={(e) =>
-                    handleIntegerInputChange(e, refWithdrawalMin)
-                  }
-                />
-              </div>
+              <TextInput
+                symbolPrefix="$"
+                className="pl-8 w-full"
+                name="withdrawalMin"
+                type="text"
+                defaultValue={format(',')(portfolioOptions.withdrawal.floor)}
+                ref={refWithdrawalMin}
+                onChange={(e) => handleIntegerInputChange(e, refWithdrawalMin)}
+              />
             </div>
             <div className="flex flex-col mt-4">
               <label className="form-label" htmlFor="withdrawalMax">
                 Withdrawal Maximum
               </label>
-              <div className="relative">
-                <span className="absolute pointer-events-none inset-y-0 left-0 pl-4 flex items-center text-gray-600 font-medium">
-                  $
-                </span>
-                <input
-                  className="form-input pl-8 w-full"
-                  name="withdrawalMax"
-                  type="text"
-                  defaultValue={format(',')(
-                    portfolioOptions.withdrawal.ceiling
-                  )}
-                  ref={refWithdrawalMax}
-                  onChange={(e) =>
-                    handleIntegerInputChange(e, refWithdrawalMax)
-                  }
-                />
-              </div>
+              <TextInput
+                symbolPrefix="$"
+                className="pl-8 w-full"
+                name="withdrawalMax"
+                type="text"
+                defaultValue={format(',')(portfolioOptions.withdrawal.ceiling)}
+                ref={refWithdrawalMax}
+                onChange={(e) => handleIntegerInputChange(e, refWithdrawalMax)}
+              />
             </div>
           </div>
         );
@@ -339,7 +311,7 @@ export default function Simulator({ path }: Props) {
   }
 
   return (
-    <Layout path={path}>
+    <div>
       <SEO
         title="Portfolio Doctor Simulator"
         description="An app for projecting portfolio performance"
@@ -368,10 +340,8 @@ export default function Simulator({ path }: Props) {
                 <label className="form-label">Simulation Method</label>
                 <div className="ml-2">
                   <div className="flex items-center">
-                    <input
+                    <RadioInput
                       id="historical"
-                      className="form-radio text-green-500"
-                      type="radio"
                       name="simulationMethod"
                       checked={simulationMethod === 'Historical Data'}
                       value="Historical Data"
@@ -384,10 +354,8 @@ export default function Simulator({ path }: Props) {
                     </label>
                   </div>
                   <div className="flex items-center">
-                    <input
+                    <RadioInput
                       id="monteCarlo"
-                      className="form-radio text-green-500"
-                      type="radio"
                       name="simulationMethod"
                       checked={simulationMethod === 'Monte Carlo'}
                       value="Monte Carlo"
@@ -420,64 +388,50 @@ export default function Simulator({ path }: Props) {
               <label className="form-label" htmlFor="startBalance">
                 Starting Balance
               </label>
-              <div className="relative">
-                <span className="absolute pointer-events-none inset-y-0 left-0 pl-4 flex items-center text-gray-600 font-medium">
-                  $
-                </span>
-                <input
-                  className="form-input pl-8 w-full"
-                  name="startBalance"
-                  type="text"
-                  defaultValue={format(',')(portfolioOptions.startBalance)}
-                  ref={refStartingBalance}
-                  onChange={(e) =>
-                    handleIntegerInputChange(e, refStartingBalance)
-                  }
-                />
-              </div>
+              <TextInput
+                symbolPrefix="$"
+                className="pl-8 w-full"
+                name="startBalance"
+                type="text"
+                defaultValue={format(',')(portfolioOptions.startBalance)}
+                ref={refStartingBalance}
+                onChange={(e) =>
+                  handleIntegerInputChange(e, refStartingBalance)
+                }
+              />
             </div>
             <div className="flex flex-col mt-4">
               <label className="form-label" htmlFor="equitiesRatio">
                 Stock Ratio
               </label>
-              <div className="relative">
-                <input
-                  className="form-input w-full"
-                  name="equitiesRatio"
-                  type="text"
-                  defaultValue={portfolioOptions.equitiesRatio * 100}
-                  ref={refStockRatio}
-                />
-                <span className="absolute pointer-events-none inset-y-0 right-0 pr-4 flex items-center text-gray-600 font-medium">
-                  %
-                </span>
-              </div>
+              <TextInput
+                symbolSuffix="%"
+                className="w-full"
+                name="equitiesRatio"
+                type="text"
+                defaultValue={portfolioOptions.equitiesRatio * 100}
+                ref={refStockRatio}
+              />
             </div>
             <div className="flex flex-col mt-4">
               <label className="form-label" htmlFor="expenseRatio">
                 Expense Ratio
               </label>
-              <div className="relative">
-                <input
-                  className="form-input w-full"
-                  name="expenseRatio"
-                  type="text"
-                  defaultValue={portfolioOptions.investmentExpenseRatio * 100}
-                  ref={refExpenseRatio}
-                />
-                <span className="absolute pointer-events-none inset-y-0 right-0 pr-4 flex items-center text-gray-600 font-medium">
-                  %
-                </span>
-              </div>
+              <TextInput
+                symbolSuffix="%"
+                className="w-full"
+                name="expenseRatio"
+                type="text"
+                defaultValue={portfolioOptions.investmentExpenseRatio * 100}
+                ref={refExpenseRatio}
+              />
             </div>
             <div className="text-gray-800 mt-4">
               <label className="form-label">Withdrawal Method</label>
               <div className="ml-2">
                 <div className="flex items-center">
-                  <input
+                  <RadioInput
                     id="fixed"
-                    className="form-radio text-green-500"
-                    type="radio"
                     name="withdrawalMethod"
                     checked={
                       withdrawalMethod === WithdrawalMethod.InflationAdjusted
@@ -494,10 +448,8 @@ export default function Simulator({ path }: Props) {
                   </label>
                 </div>
                 <div className="flex items-center">
-                  <input
+                  <RadioInput
                     id="percent"
-                    className="form-radio text-green-500"
-                    type="radio"
                     name="withdrawalMethod"
                     checked={
                       withdrawalMethod === WithdrawalMethod.PercentPortfolio
@@ -514,10 +466,8 @@ export default function Simulator({ path }: Props) {
                   </label>
                 </div>
                 <div className="flex items-center">
-                  <input
+                  <RadioInput
                     id="clamped"
-                    className="form-radio text-green-500"
-                    type="radio"
                     name="withdrawalMethod"
                     checked={
                       withdrawalMethod ===
@@ -541,9 +491,8 @@ export default function Simulator({ path }: Props) {
               <label className="form-label" htmlFor="simLength">
                 Simulation Length (years)
               </label>
-              <input
+              <TextInput
                 name="simLength"
-                className="form-input"
                 type="number"
                 defaultValue={portfolioOptions.simulationYearsLength}
                 min={5}
@@ -565,6 +514,6 @@ export default function Simulator({ path }: Props) {
           </div>
         </div>
       </div>
-    </Layout>
+    </div>
   );
 }

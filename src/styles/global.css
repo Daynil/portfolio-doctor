@@ -1,4 +1,3 @@
-/*! purgecss start ignore */
 @tailwind base;
 
 body {
@@ -38,7 +37,7 @@ ul {
 }
 
 .btn {
-  @apply font-semibold py-2 px-4 rounded;
+  @apply font-semibold py-2 px-4 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-opacity-75;
 }
 
 .btn:disabled {
@@ -46,21 +45,17 @@ ul {
 }
 
 .btn-green {
-  @apply bg-green-500 text-white;
+  @apply bg-green-500 text-white focus:ring-green-400;
 }
 .btn-green:hover {
-  @apply bg-green-700;
+  @apply bg-green-700 focus:ring-green-400;
 }
 
 .btn-green-2 {
-  @apply bg-green-200 text-green-700;
+  @apply bg-green-200 text-green-700 focus:ring-green-400;
 }
 .btn-green-2:hover {
-  @apply bg-green-300;
-}
-
-.form-input:hover {
-  @apply outline-none border-green-500;
+  @apply bg-green-300 focus:ring-green-400;
 }
 
 .form-label {
@@ -68,6 +63,5 @@ ul {
 }
 
 @tailwind components;
-/*! purgecss end ignore */
 
 @tailwind utilities;

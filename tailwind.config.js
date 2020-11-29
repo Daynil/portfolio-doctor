@@ -1,72 +1,28 @@
-const plugin = require('tailwindcss/plugin');
+const defaultTheme = require('tailwindcss/defaultTheme');
+const colors = require('tailwindcss/colors');
 
 module.exports = {
+  purge: {
+    layers: ['utilities'],
+    content: ['./src/**/*.tsx', './src/**/*.ts', './src/**/*.css']
+  },
   theme: {
-    extend: {
-      boxShadow: {
-        outline: '0 0 0 3px rgba(72, 187, 120, 0.4)'
+    colors: {
+      ...defaultTheme.colors,
+      green: {
+        100: '#f0fff4',
+        200: '#c6f6d5',
+        300: '#9ae6b4',
+        400: '#68d391',
+        500: '#48bb78',
+        600: '#38a169',
+        700: '#2f855a',
+        800: '#276749',
+        900: '#22543d'
       },
-      colors: {
-        dblue: {
-          100: '#E6F0FF',
-          200: '#BFDAFF',
-          300: '#99C3FF',
-          400: '#4D97FF',
-          500: '#006AFF',
-          600: '#005FE6',
-          700: '#004099',
-          800: '#003073',
-          900: '#00204D'
-        }
-      }
-    },
-    customForms: (theme) => ({
-      default: {
-        'input, textarea, multiselect, select, checkbox': {
-          backgroundColor: theme('colors.gray.200'),
-          '&:focus': {
-            borderColor: theme('colors.green.500'),
-            boxShadow: theme('boxShadow.outline')
-          }
-        },
-        radio: {
-          '&:focus': {
-            borderColor: theme('colors.green.500'),
-            boxShadow: theme('boxShadow.outline')
-          }
-        }
-      }
-    })
+      gray: colors.coolGray,
+      transparent: 'transparent'
+    }
   },
-  variants: {
-    borderColor: ['responsive', 'hover', 'focus', 'dark', 'dark-hover'],
-    backgroundColor: [
-      'responsive',
-      'hover',
-      'focus',
-      'even',
-      'group-hover',
-      'dark',
-      'dark-hover'
-    ],
-    textColor: ['responsive', 'hover', 'focus', 'dark', 'dark-hover']
-  },
-  plugins: [
-    require('@tailwindcss/custom-forms'),
-    // `e` function escapes class names to handle non-standard characters
-    plugin(function ({ addVariant, e }) {
-      addVariant('dark', ({ modifySelectors, separator }) => {
-        modifySelectors(({ className }) => {
-          return `.dark-mode .${e(`dk${separator}${className}`)}`;
-        });
-      });
-    }),
-    plugin(function ({ addVariant, e }) {
-      addVariant('dark-hover', ({ modifySelectors, separator }) => {
-        modifySelectors(({ className }) => {
-          return `.dark-mode .${e(`dk-hover${separator}${className}`)}:hover`;
-        });
-      });
-    })
-  ]
+  plugins: [require('@tailwindcss/forms')]
 };

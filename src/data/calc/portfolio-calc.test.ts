@@ -39,7 +39,7 @@ let fullMarketYearData: MarketYearData[];
 
 beforeAll(async () => {
   const csvString = readFileSync(
-    require.resolve('../../../static/jan-shiller-data.csv'),
+    require.resolve('../../../public/jan-shiller-data.csv'),
     {
       encoding: 'utf8'
     }

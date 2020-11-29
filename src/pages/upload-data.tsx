@@ -1,16 +1,11 @@
 import { format } from 'd3-format';
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import Layout from '../components/layout';
 import SEO from '../components/seo';
 import { MarketYearData } from '../data/calc/portfolio-calc';
 import { DatasetContext, defaultDatasetName } from '../data/data-context';
 import { loadFile, parseCSVStringToJSON } from '../data/data-helpers';
 
-type Props = {
-  path: string;
-};
-
-export default function UploadData({ path }: Props) {
+export default function UploadData() {
   const fileInput = useRef<HTMLInputElement>(null);
 
   const [inputErr, setInputErr] = useState('');
@@ -110,7 +105,7 @@ export default function UploadData({ path }: Props) {
   }
 
   return (
-    <Layout path={path}>
+    <div>
       <SEO title="About - Portfolio Doctor" />
       <h1 className="mt-20 text-center">Upload Custom Market Data</h1>
       <p>
@@ -146,7 +141,7 @@ export default function UploadData({ path }: Props) {
         <select
           name="preferredDataset"
           id="preferredDataset"
-          className="form-input"
+          className="rounded-md shadow-sm bg-gray-100 border-gray-300 transition-colors duration-75 hover:border-green-300 focus:bg-transparent focus:border-green-400 focus:ring focus:ring-green-300 focus:ring-opacity-50"
           onChange={(e) => setSelectedDatasetName(e.target.value)}
         >
           {storedDatasets.map((dataset, i) => (
@@ -181,7 +176,7 @@ export default function UploadData({ path }: Props) {
           id="csv"
           name="csv"
           accept=".csv"
-          className="form-input"
+          className="rounded-md shadow-sm p-2 bg-gray-100 border-gray-300 transition-colors duration-75 hover:border-green-300 focus:bg-transparent focus:border-green-400 focus:ring focus:ring-green-300 focus:ring-opacity-50"
           ref={fileInput}
         />
         <div className="flex mt-4">
@@ -242,6 +237,6 @@ export default function UploadData({ path }: Props) {
               })}
         </table>
       </div>
-    </Layout>
+    </div>
   );
 }

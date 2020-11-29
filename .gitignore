@@ -54,9 +54,13 @@ typings/
 # dotenv environment variable files
 .env*
 
-# gatsby files
-.cache/
-public
+# next files
+.next
+out
+
+# built files
+public/sitemap.xml
+public/postsMetaData.json
 
 # Mac files
 .DS_Store

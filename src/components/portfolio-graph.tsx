@@ -7,6 +7,7 @@ import {
   PortfolioOptions,
   PortfolioStats
 } from '../data/calc/portfolio-calc';
+import { baseUrl } from '../utilities/constants';
 import { numToCurrency, numToCurrencyShort } from '../utilities/format';
 import { clamp } from '../utilities/math';
 import { portfolioOptionsToQueryString } from '../utilities/util';
@@ -480,7 +481,7 @@ export function PortfolioGraph({
                   <input
                     type="text"
                     className="form-input w-full"
-                    defaultValue={`https://portfoliodoctor.com/simulator?${portfolioOptionsToQueryString(
+                    defaultValue={`${baseUrl}/simulator?${portfolioOptionsToQueryString(
                       options
                     )}`}
                     readOnly

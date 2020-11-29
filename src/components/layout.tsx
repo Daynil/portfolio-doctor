@@ -1,15 +1,17 @@
+import { useRouter } from 'next/dist/client/router';
 import React, { useEffect, useState } from 'react';
 import Header from './header';
 import TextLink from './text-link';
 
 type Props = {
-  path: string;
   children: React.ReactNode;
 };
 
-const Layout = ({ path, children }: Props) => {
+const Layout = ({ children }: Props) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const handleMenuOpen = () => setMenuOpen(!menuOpen);
+
+  const router = useRouter();
 
   useEffect(() => {
     if (menuOpen) document.body.style.overflowY = 'hidden';
@@ -21,15 +23,11 @@ const Layout = ({ path, children }: Props) => {
 
   return (
     <div>
-      <div className="min-h-screen dk:bg-gray-900 transition duration-200 ease-in-out border-t-4 border-green-500">
-        <Header
-          path={path}
-          menuOpen={menuOpen}
-          handleMenuOpen={handleMenuOpen}
-        />
+      <div className="min-h-screen transition duration-200 ease-in-out border-t-4 border-green-500">
+        <Header menuOpen={menuOpen} handleMenuOpen={handleMenuOpen} />
         <div
           className={`m-auto text-gray-900 text-lg px-6 transition duration-200 ease-in-out ${
-            path !== '/simulator/' ? ' md:max-w-3xl' : ''
+            router.asPath !== '/simulator' ? ' md:max-w-3xl' : ''
           }`}
         >
           <main>{children}</main>
