@@ -1,5 +1,13 @@
-import * as d3 from 'd3';
-import { format } from 'd3';
+import {
+  axisBottom,
+  axisLeft,
+  format,
+  line,
+  max,
+  scaleLinear,
+  select,
+  selectAll
+} from 'd3';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   CycleStats,
@@ -111,26 +119,23 @@ export function PortfolioGraph({
   const memoized = useMemo(() => {
     const xDomain = lifecyclesData[0].map((d, i) => i + 1);
 
-    const xScale = d3
-      .scaleLinear()
+    const xScale = scaleLinear()
       .domain([1, lifecyclesData[0].length])
       .range([0, width]);
 
-    const yScale = d3
-      .scaleLinear()
+    const yScale = scaleLinear()
       .domain([
         0,
-        d3.max(lifecyclesData, (d) => d3.max(d.map((d) => d.balanceInfAdjEnd)))
+        max(lifecyclesData, (d) => max(d.map((d) => d.balanceInfAdjEnd)))
       ])
       .nice()
       .range([height, 0]);
 
-    const line = d3
-      .line<LineData>()
+    const chartLine = line<LineData>()
       .x((d, i) => xScale(i + 1))
       .y((d) => yScale(d.y));
 
-    const linePathStringArray = chartData.map((d) => line(d.values));
+    const linePathStringArray = chartData.map((d) => chartLine(d.values));
 
     return {
       xDomain,
@@ -141,11 +146,9 @@ export function PortfolioGraph({
   }, [lifecyclesData]);
 
   function yAxis(g: D3Selection<SVGGElement>) {
-    d3.selectAll('.LegendY').remove();
+    selectAll('.LegendY').remove();
     g.call(
-      d3
-        .axisLeft(memoized.yScale)
-        .tickFormat((d: number) => numToCurrencyShort(d))
+      axisLeft(memoized.yScale).tickFormat((d: number) => numToCurrencyShort(d))
     );
 
     g.attr('class', 'text-gray-600');
@@ -155,8 +158,7 @@ export function PortfolioGraph({
 
   function xAxis(g: D3Selection<SVGGElement>) {
     g.call(
-      d3
-        .axisBottom(memoized.xScale)
+      axisBottom(memoized.xScale)
         .ticks(width / 80)
         .tickSizeOuter(0)
     );
@@ -175,8 +177,8 @@ export function PortfolioGraph({
     setshowCycleDetails(false);
     setSelectedPointData(null);
 
-    const gxAxis = d3.select(refGxAxis.current);
-    const gyAxis = d3.select(refGyAxis.current);
+    const gxAxis = select(refGxAxis.current);
+    const gyAxis = select(refGyAxis.current);
 
     gxAxis.call(xAxis);
     gyAxis.call(yAxis);
