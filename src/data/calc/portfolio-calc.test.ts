@@ -17,6 +17,8 @@ import {
   WithdrawalMethod
 } from './portfolio-calc';
 
+// Test expectations from "Portfolio Doctor Simulator.xlsm"
+
 const minimalOptions: PortfolioOptions = {
   simulationMethod: 'Historical Data',
   investmentExpenseRatio: 1,
@@ -538,7 +540,7 @@ describe('basic functionality test', () => {
   });
 });
 
-describe('full cycle portfolio tests against excel data', () => {
+describe('full 3-cycle portfolio tests against excel data', () => {
   let portfolioStats: PortfolioStats;
   beforeAll(() => {
     const excelStatsTestSlice = fullMarketYearData.slice(
@@ -558,41 +560,39 @@ describe('full cycle portfolio tests against excel data', () => {
   test('calculates each type of cycle-level statistic correctly', () => {
     const firstCycleStats = portfolioStats.cycleStats[0];
 
-    expect(round(firstCycleStats.fees, 4)).toEqual(9124.9341);
-    expect(round(firstCycleStats.balance.averageInflAdj, 4)).toEqual(
-      1201199.3865
-    );
-    expect(round(firstCycleStats.withdrawals.median, 4)).toEqual(40595.2753);
-    expect(round(firstCycleStats.balance.ending, 4)).toEqual(1192323.1914);
+    expect(firstCycleStats.fees).toBeCloseTo(9124.9341, 4);
+    expect(firstCycleStats.balance.averageInflAdj).toBeCloseTo(1201199.3865, 4);
+    expect(firstCycleStats.withdrawals.median).toBeCloseTo(40595.2753, 4);
+    expect(firstCycleStats.balance.ending).toBeCloseTo(1192323.1914, 4);
     expect(firstCycleStats.balance.max.year).toEqual(2014);
-    expect(round(firstCycleStats.withdrawals.min.amountInflAdj, 4)).toEqual(
-      40000
-    );
+    expect(firstCycleStats.withdrawals.min.amountInflAdj).toBeCloseTo(40000, 4);
     expect(firstCycleStats.failureYear).toEqual(0);
   });
 
   test('calculates each type of portfolio-level statistic correctly', () => {
     expect(portfolioStats.successRate).toEqual(1);
-    expect(round(portfolioStats.investmentExpenses.averageAnnual, 4)).toEqual(
-      2807.3571
+    expect(portfolioStats.investmentExpenses.averageAnnual).toBeCloseTo(
+      2807.3571,
+      4
     );
-    expect(round(portfolioStats.investmentExpenses.medianTotal, 4)).toEqual(
-      8077.9112
+    expect(portfolioStats.investmentExpenses.medianTotal).toBeCloseTo(
+      8077.9112,
+      4
     );
-    expect(round(portfolioStats.equitiesPriceChange.averageAnnual, 4)).toEqual(
-      85745.9881
+    expect(portfolioStats.equitiesPriceChange.averageAnnual).toBeCloseTo(
+      85745.9881,
+      4
     );
-    expect(round(portfolioStats.balance.averageInflAdj, 4)).toEqual(
-      1164253.2156
-    );
+    expect(portfolioStats.balance.averageInflAdj).toBeCloseTo(1164253.2156, 4);
     expect(portfolioStats.balance.min.year).toEqual(2014);
-    expect(round(portfolioStats.balance.max.balanceInflAdj, 4)).toEqual(
-      1191404.6718
+    expect(portfolioStats.balance.max.balanceInflAdj).toBeCloseTo(
+      1191404.6718,
+      4
     );
-    expect(round(portfolioStats.withdrawals.average, 4)).toEqual(40424.0374);
+    expect(portfolioStats.withdrawals.average).toBeCloseTo(40424.0374, 4);
     expect(portfolioStats.withdrawals.max.cycleStartYear).toEqual(2015);
     expect(portfolioStats.withdrawals.max.yearInCycle).toEqual(2017);
-    expect(round(portfolioStats.withdrawals.max.amount, 4)).toEqual(41562.9827);
+    expect(portfolioStats.withdrawals.max.amount).toBeCloseTo(41562.9827, 4);
   });
 
   test('calculates max length single cycle nominal withdrawal', () => {

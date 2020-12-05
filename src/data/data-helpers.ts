@@ -1,6 +1,17 @@
 //import parse from 'csv-parse';
 //import { writeFileSync } from 'fs';
-import { MarketYearData } from './calc/portfolio-calc';
+import { deviation } from 'd3';
+import { mean } from 'd3-array';
+import { MarketDataStats, MarketYearData } from './calc/portfolio-calc';
+
+export function loadFile(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = (e) => reject(e);
+    reader.readAsBinaryString(file);
+  });
+}
 
 /**
  * Take a CSV File with market data and parse it into JSON to cache data.
@@ -41,6 +52,26 @@ export function parseCSVStringToJSON(
   // Toss the trailing newline if it exists
   if (!parsedRows[parsedRows.length - 1].year) parsedRows.pop();
   return parsedRows;
+}
+
+export function getMarketDataStats(
+  marketYearData: MarketYearData[]
+): MarketDataStats {
+  let equitiesYearPcntChange: number[] = [];
+
+  // Start at second year (can't get prev year in first year)
+  for (let i = 1; i < marketYearData.length; i++) {
+    const curYearEquitiesPrice = marketYearData[i].equitiesPrice;
+    const prevYearEquitiesPrice = marketYearData[i - 1].equitiesPrice;
+    equitiesYearPcntChange.push(
+      (curYearEquitiesPrice - prevYearEquitiesPrice) / prevYearEquitiesPrice
+    );
+  }
+
+  return {
+    meanAnnualMarketChange: mean(equitiesYearPcntChange),
+    stdDevAnnualMarketChange: deviation(equitiesYearPcntChange)
+  };
 }
 
 /**
@@ -204,15 +235,6 @@ export function parseCSVStringToJSON(
 //   //writeFileSync('results.csv', csvString);
 //   writeFileSync(destCSVPath, csvString);
 // }
-
-export function loadFile(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = (e) => reject(e);
-    reader.readAsBinaryString(file);
-  });
-}
 
 // Old version of parser for posterity, was loading in all month data into separate datasets in a hash
 // import parse from 'csv-parse';
