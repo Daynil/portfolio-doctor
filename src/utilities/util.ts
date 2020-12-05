@@ -192,7 +192,6 @@ export function queryStringToPortfolioOptions(
 export function portfolioOptionsToQueryString(
   options: PortfolioOptions
 ): string {
-  console.log(options);
   const queryObj: UrlQuery = {
     simulationMethod: options.simulationMethod,
     startBalance: options.startBalance + '',
@@ -212,6 +211,6 @@ export function portfolioOptionsToQueryString(
     queryObj.withdrawalFloor = options.withdrawal.floor + '';
     queryObj.withdrawalCeiling = options.withdrawal.ceiling + '';
   }
-
+  // @ts-ignore (this works fine, type defs seem insufficient)
   return stringify(queryObj);
 }

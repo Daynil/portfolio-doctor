@@ -18,6 +18,7 @@ import {
 } from './portfolio-calc';
 
 const minimalOptions: PortfolioOptions = {
+  simulationMethod: 'Historical Data',
   investmentExpenseRatio: 1,
   equitiesRatio: 1,
   simulationYearsLength: 1,
@@ -27,6 +28,7 @@ const minimalOptions: PortfolioOptions = {
 };
 
 const starterOptions: PortfolioOptions = {
+  simulationMethod: 'Historical Data',
   startBalance: 1000000,
   equitiesRatio: 0.9,
   investmentExpenseRatio: 0.0025,
@@ -738,6 +740,7 @@ describe('full cycle portfolio tests against excel data', () => {
     );
 
     const portfolio = new CyclePortfolio(longTestData, {
+      simulationMethod: 'Historical Data',
       startBalance: 800000,
       investmentExpenseRatio: 0.019,
       equitiesRatio: 0.75,

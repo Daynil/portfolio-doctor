@@ -239,7 +239,14 @@ export interface WithdrawalOptions {
   ceiling?: number;
 }
 
+export interface MarketDataStats {
+  meanAnnualMarketChange: number;
+  stdDevAnnualMarketChange: number;
+}
+
 export class CyclePortfolio {
+  private marketDataStats;
+
   constructor(
     public marketYearData: MarketYearData[],
     public options: PortfolioOptions
