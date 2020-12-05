@@ -483,7 +483,7 @@ export function PortfolioGraph({
                   <input
                     type="text"
                     className="form-input w-full"
-                    defaultValue={`${baseUrl}/simulator?${portfolioOptionsToQueryString(
+                    value={`${baseUrl}/simulator?${portfolioOptionsToQueryString(
                       options
                     )}`}
                     readOnly

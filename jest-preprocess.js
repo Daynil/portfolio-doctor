@@ -1,5 +1,5 @@
 const babelOptions = {
-  presets: ['next/babel', '@babel/preset-typescript']
+  presets: ['next/babel']
 };
 
 module.exports = require('babel-jest').createTransformer(babelOptions);

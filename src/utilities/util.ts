@@ -192,6 +192,7 @@ export function queryStringToPortfolioOptions(
 export function portfolioOptionsToQueryString(
   options: PortfolioOptions
 ): string {
+  console.log(options);
   const queryObj: UrlQuery = {
     simulationMethod: options.simulationMethod,
     startBalance: options.startBalance + '',
