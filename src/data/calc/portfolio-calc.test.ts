@@ -5,10 +5,11 @@ import {
   pivotPortfolioCycles,
   pivotPortfolioCyclesAggregate
 } from '../../utilities/util';
-import { parseCSVStringToJSON } from '../data-helpers';
+import * as dataHelpers from '../data-helpers';
 import {
   CyclePortfolio,
   CycleYearData,
+  generateMonteCarloRuns,
   getMaxSimulationLength,
   getYearIndex,
   MarketYearData,
@@ -48,7 +49,7 @@ beforeAll(async () => {
       encoding: 'utf8'
     }
   );
-  fullMarketYearData = parseCSVStringToJSON(csvString);
+  fullMarketYearData = dataHelpers.parseCSVStringToJSON(csvString);
 });
 
 describe('data slicing tests', () => {
@@ -770,5 +771,65 @@ describe('full 3-cycle portfolio tests against excel data', () => {
     expect(round(stats.balance.endingInflAdj, 4)).toBeLessThanOrEqual(
       expectedEndingInflAdj - expectedEnding * percentErrorTolerance
     );
+  });
+});
+
+/**
+ * Expected values are from:
+ * Portfolio Doctor Simulation, 3-Cycle Inf Adj Monte Carlo sheet
+ */
+describe('monte carlo simulation', () => {
+  test('3 cycle simulated 3 times', () => {
+    const excelStatsTestSlice = fullMarketYearData.slice(
+      getYearIndex(fullMarketYearData, 2013),
+      getYearIndex(fullMarketYearData, 2018) + 1
+    );
+
+    // Seed random values for each call to Math.random() that will occur
+    jest
+      .spyOn(global.Math, 'random')
+      .mockReturnValueOnce(0.296694870605894)
+      .mockReturnValueOnce(0.279680326751622)
+      .mockReturnValueOnce(0.853271701727797)
+      .mockReturnValueOnce(0.69306737230965)
+      .mockReturnValueOnce(0.161196456935518)
+      .mockReturnValueOnce(0.985188407160825)
+      .mockReturnValueOnce(0.581885716265265)
+      .mockReturnValueOnce(0.0833282215968913)
+      .mockReturnValueOnce(0.511172862727826)
+      .mockReturnValueOnce(0.457656632902557)
+      .mockReturnValueOnce(0.612517212448199)
+      .mockReturnValueOnce(0.729196831437739)
+      .mockReturnValueOnce(0.210962776440891)
+      .mockReturnValueOnce(0.99075579998327)
+      .mockReturnValueOnce(0.246091026024186);
+
+    // In production, this will always be the stats
+    // since we are enforcing use of the default jan-shiller-data
+    // for Monte Carlo simulations.
+    // // So for this test data slice, mock that value
+    jest.spyOn(dataHelpers, 'getMarketDataStats').mockReturnValue({
+      meanAnnualMarketChange: 0.0602046969835648,
+      stdDevAnnualMarketChange: 0.176139177843765
+    });
+
+    const simulations = generateMonteCarloRuns(
+      excelStatsTestSlice,
+      {
+        ...starterOptions,
+        simulationYearsLength: 3,
+        withdrawalMethod: WithdrawalMethod.InflationAdjusted
+      },
+      3
+    );
+
+    console.log(
+      simulations.map((cycles) => cycles.map((yr) => yr.balanceInfAdjEnd))
+    );
+    // console.log(simulations);
+
+    expect(1).toEqual(1);
+
+    jest.spyOn(global.Math, 'random').mockRestore();
   });
 });

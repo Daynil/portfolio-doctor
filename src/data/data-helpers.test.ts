@@ -112,6 +112,10 @@ describe('CSV parsing', () => {
   });
 });
 
+/**
+ * Expected values are from
+ * Portfolio Doctor Simulation, 1-Cycle Nominal sheet
+ */
 describe('market data stats', () => {
   const csvString = readFileSync(
     require.resolve('../../public/jan-shiller-data.csv'),

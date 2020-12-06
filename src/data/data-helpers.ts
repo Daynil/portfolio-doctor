@@ -2,6 +2,7 @@
 //import { writeFileSync } from 'fs';
 import { deviation } from 'd3';
 import { mean } from 'd3-array';
+import { normSinv } from '../utilities/math';
 import { MarketDataStats, MarketYearData } from './calc/portfolio-calc';
 
 export function loadFile(file: File): Promise<string> {
@@ -54,6 +55,10 @@ export function parseCSVStringToJSON(
   return parsedRows;
 }
 
+/**
+ * Get market fluctuation statistics across the dataset
+ * @param marketYearData This will always be the default jan-shiller-data
+ */
 export function getMarketDataStats(
   marketYearData: MarketYearData[]
 ): MarketDataStats {
@@ -72,6 +77,37 @@ export function getMarketDataStats(
     meanAnnualMarketChange: mean(equitiesYearPcntChange),
     stdDevAnnualMarketChange: deviation(equitiesYearPcntChange)
   };
+}
+
+/**
+ * Perform Monte Carlo simulation and return simulated market year data
+ */
+export function generateMonteCarloDataset(
+  originalYearData: MarketYearData[],
+  marketDataStats: MarketDataStats
+): MarketYearData[] {
+  const monteCarloYearData: MarketYearData[] = [];
+
+  for (let i = 0; i < originalYearData.length; i++) {
+    if (i === 0) {
+      monteCarloYearData[i] = originalYearData[i];
+    } else {
+      const randomFraction = Math.random();
+      const randomNumStdDevs = normSinv(randomFraction);
+      const simulatedMarketChange =
+        marketDataStats.meanAnnualMarketChange +
+        randomNumStdDevs * marketDataStats.stdDevAnnualMarketChange;
+      const priorYearEquitiesPrice = monteCarloYearData[i - 1].equitiesPrice;
+      monteCarloYearData[i] = {
+        ...originalYearData[i],
+        equitiesPrice:
+          priorYearEquitiesPrice +
+          priorYearEquitiesPrice * simulatedMarketChange
+      };
+    }
+  }
+
+  return monteCarloYearData;
 }
 
 /**

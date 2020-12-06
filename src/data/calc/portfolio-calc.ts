@@ -4,6 +4,7 @@ import {
   pivotPortfolioCycles,
   pivotPortfolioCyclesAggregate
 } from '../../utilities/util';
+import { generateMonteCarloDataset, getMarketDataStats } from '../data-helpers';
 
 export interface MarketYearData {
   year: number;
@@ -244,9 +245,39 @@ export interface MarketDataStats {
   stdDevAnnualMarketChange: number;
 }
 
-export class CyclePortfolio {
-  private marketDataStats;
+/**
+ * Run a cycle portfolio for each Monte Carlo simulation of the original data.
+ *
+ * It is not useful or practical to differentiate which cycle goes with which simulation.
+ * We essentially return a portfolio run:
+ *  -Across every simulated market year dataset
+ *  -Across every possible start year,
+ *    given the length of the original market year data
+ *      and the simulation year length in options
+ *
+ *  @returns A single array of portfolio cycles.
+ */
+export function generateMonteCarloRuns(
+  originalMarketYearData: MarketYearData[],
+  options: PortfolioOptions,
+  numRuns: number
+): CycleYearData[][] {
+  const marketDataStats = getMarketDataStats(originalMarketYearData);
 
+  const simulations: CycleYearData[][] = [];
+  for (let i = 0; i < numRuns; i++) {
+    const monteCarloDataset = generateMonteCarloDataset(
+      originalMarketYearData,
+      marketDataStats
+    );
+    const portfolio = new CyclePortfolio(monteCarloDataset, options);
+    const lifecylesData = portfolio.crunchAllCyclesData();
+    simulations.push(...lifecylesData);
+  }
+  return simulations;
+}
+
+export class CyclePortfolio {
   constructor(
     public marketYearData: MarketYearData[],
     public options: PortfolioOptions
