@@ -9,8 +9,8 @@ export function round(num: number, places: number) {
 
 /**
  * Get the inverse of the standard normal cumulative distribution
- * (a distribution with a mean of zero and a standard deviation of one)
- * This gets the quantile corresponding to the input probability which is
+ * (a distribution with a mean of zero and a standard deviation of one).
+ * This gets the quantile corresponding to the input probability, which is
  * essentially the number of standard deviations from the mean.
  *
  * Relative error of this implemenation is less than 1.15 × 10−9 in the entire region.

@@ -804,10 +804,10 @@ describe('monte carlo simulation', () => {
       .mockReturnValueOnce(0.99075579998327)
       .mockReturnValueOnce(0.246091026024186);
 
-    // In production, this will always be the stats
+    // In production, these will always be the stats
     // since we are enforcing use of the default jan-shiller-data
     // for Monte Carlo simulations.
-    // // So for this test data slice, mock that value
+    //  So for this test data slice, mock that value
     jest.spyOn(dataHelpers, 'getMarketDataStats').mockReturnValue({
       meanAnnualMarketChange: 0.0602046969835648,
       stdDevAnnualMarketChange: 0.176139177843765
@@ -823,12 +823,62 @@ describe('monte carlo simulation', () => {
       3
     );
 
-    console.log(
-      simulations.map((cycles) => cycles.map((yr) => yr.balanceInfAdjEnd))
-    );
-    // console.log(simulations);
+    const sim1yearEndBalances = simulations
+      .slice(0, 3)
+      .map((cycles) => cycles.map((yr) => yr.balanceInfAdjEnd));
 
-    expect(1).toEqual(1);
+    const sim2yearEndBalances = simulations
+      .slice(3, 6)
+      .map((cycles) => cycles.map((yr) => yr.balanceInfAdjEnd));
+
+    const sim3yearEndBalances = simulations
+      .slice(6, 9)
+      .map((cycles) => cycles.map((yr) => yr.balanceInfAdjEnd));
+
+    const sim1Expected = [
+      [948622.7919, 879851.2861, 1047188.0095],
+      [944936.3778, 1128337.4089, 1240826.2148],
+      [1195877.8261, 1317868.7146, 1144246.5547]
+    ];
+
+    const sim2Expected = [
+      [1359862.7205, 1431149.4727, 1183583.6036],
+      [1057886.418, 866021.2636, 878210.9288],
+      [816012.8775, 825007.5378, 808780.2565]
+    ];
+
+    const sim3Expected = [
+      [1073073.9887, 1189438.5622, 1087327.8166],
+      [1123443.1996, 1024900.5023, 1406329.5727],
+      [907286.0993, 1238295.4383, 1122781.7141]
+    ];
+
+    for (let cycle = 0; cycle < sim1Expected.length; cycle++) {
+      for (let year = 0; year < sim1Expected[cycle].length; year++) {
+        expect(sim1yearEndBalances[cycle][year]).toBeCloseTo(
+          sim1Expected[cycle][year],
+          3
+        );
+      }
+    }
+
+    for (let cycle = 0; cycle < sim2Expected.length; cycle++) {
+      for (let year = 0; year < sim2Expected[cycle].length; year++) {
+        expect(sim2yearEndBalances[cycle][year]).toBeCloseTo(
+          sim2Expected[cycle][year],
+          3
+        );
+      }
+    }
+
+    for (let cycle = 0; cycle < sim3Expected.length; cycle++) {
+      for (let year = 0; year < sim3Expected[cycle].length; year++) {
+        expect(sim3yearEndBalances[cycle][year]).toBeCloseTo(
+          sim3Expected[cycle][year],
+          3
+        );
+      }
+    }
 
     jest.spyOn(global.Math, 'random').mockRestore();
   });
