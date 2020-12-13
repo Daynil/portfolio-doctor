@@ -1,6 +1,5 @@
 import { format } from 'd3-format';
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import { LineChart, Point } from '../components/line-chart';
 import { PortfolioData, PortfolioGraph } from '../components/portfolio-graph';
 import RadioInput from '../components/radio-input';
 import SEO from '../components/seo';
@@ -8,7 +7,6 @@ import TextInput from '../components/text-input';
 import TextLink from '../components/text-link';
 import {
   CyclePortfolio,
-  CycleStats,
   getMaxSimulationLength,
   MarketYearData,
   PortfolioOptions,
@@ -513,7 +511,7 @@ export default function Simulator() {
           </div>
           <div className="w-full">
             {!portfolio ? null : <PortfolioGraph {...portfolio} />}
-            {!portfolio ? null : (
+            {/* {!portfolio ? null : (
               <LineChart
                 dataSeries={portfolio.chartData.map((d) => d.values)}
                 plotWidth={1000}
@@ -539,7 +537,7 @@ export default function Simulator() {
                   return portfolio.stats.cycleStats[i];
                 })}
               />
-            )}
+            )} */}
           </div>
         </div>
       </div>

@@ -1,14 +1,5 @@
-import {
-  axisBottom,
-  axisLeft,
-  format,
-  line,
-  max,
-  scaleLinear,
-  select,
-  selectAll
-} from 'd3';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { format } from 'd3';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   CycleStats,
   CycleYearData,
@@ -16,10 +7,9 @@ import {
   PortfolioStats
 } from '../data/calc/portfolio-calc';
 import { baseUrl } from '../utilities/constants';
-import { numToCurrency, numToCurrencyShort } from '../utilities/format';
-import { clamp } from '../utilities/math';
+import { numToCurrency } from '../utilities/format';
 import { portfolioOptionsToQueryString } from '../utilities/util';
-import { D3Selection } from './line-chart';
+import { LineChart, Point } from './charts/line-chart';
 import CopyIcon from './svg/copy-icon';
 import ShareIcon from './svg/share-icon';
 
@@ -54,11 +44,6 @@ type PointData = {
   cycleMaxWithdrawal: number;
 };
 
-// https://bl.ocks.org/mbostock/3019563
-const margin = { top: 30, right: 20, bottom: 20, left: 70 };
-const width = 1000 - margin.left - margin.right;
-const height = 600 - margin.top - margin.bottom;
-
 export function PortfolioGraph({
   lifecyclesData,
   stats,
@@ -67,9 +52,6 @@ export function PortfolioGraph({
   startYear
 }: PortfolioData) {
   const refSvg = useRef<SVGSVGElement>(null);
-  const refGyAxis = useRef<SVGGElement>(null);
-  const refGxAxis = useRef<SVGGElement>(null);
-  const refGdot = useRef<SVGGElement>(null);
   const refTooltip = useRef<HTMLDivElement>(null);
   const refCopyURL = useRef<HTMLInputElement>(null);
   const [hoveringCycle, setHoveringCycle] = useState<{
@@ -87,14 +69,14 @@ export function PortfolioGraph({
 
   const tooltipWidth = 325;
 
-  useEffect(() => {
-    function setRects() {
-      setSvgRect(refSvg.current.getBoundingClientRect());
-    }
-    setRects();
-    window.addEventListener('resize', setRects);
-    return () => window.removeEventListener('resize', setRects);
-  }, []);
+  // useEffect(() => {
+  //   function setRects() {
+  //     setSvgRect(refSvg.current.getBoundingClientRect());
+  //   }
+  //   setRects();
+  //   window.addEventListener('resize', setRects);
+  //   return () => window.removeEventListener('resize', setRects);
+  // }, []);
 
   function shareResults() {
     setCopyModalActive(true);
@@ -111,58 +93,34 @@ export function PortfolioGraph({
     setCopyComplete(false);
   }
 
-  const memoized = useMemo(() => {
-    const xDomain = lifecyclesData[0].map((d, i) => i + 1);
+  // const memoized = useMemo(() => {
+  //   const xDomain = lifecyclesData[0].map((d, i) => i + 1);
 
-    const xScale = scaleLinear()
-      .domain([1, lifecyclesData[0].length])
-      .range([0, width]);
+  //   const xScale = scaleLinear()
+  //     .domain([1, lifecyclesData[0].length])
+  //     .range([0, width]);
 
-    const yScale = scaleLinear()
-      .domain([
-        0,
-        max(lifecyclesData, (d) => max(d.map((d) => d.balanceInfAdjEnd)))
-      ])
-      .nice()
-      .range([height, 0]);
+  //   const yScale = scaleLinear()
+  //     .domain([
+  //       0,
+  //       max(lifecyclesData, (d) => max(d.map((d) => d.balanceInfAdjEnd)))
+  //     ])
+  //     .nice()
+  //     .range([height, 0]);
 
-    const chartLine = line<LineData>()
-      .x((d, i) => xScale(i + 1))
-      .y((d) => yScale(d.y));
+  //   const chartLine = line<LineData>()
+  //     .x((d, i) => xScale(i + 1))
+  //     .y((d) => yScale(d.y));
 
-    const linePathStringArray = chartData.map((d) => chartLine(d.values));
+  //   const linePathStringArray = chartData.map((d) => chartLine(d.values));
 
-    return {
-      xDomain,
-      xScale,
-      yScale,
-      linePathStringArray
-    };
-  }, [lifecyclesData]);
-
-  function yAxis(g: D3Selection<SVGGElement>) {
-    selectAll('.LegendY').remove();
-    g.call(
-      axisLeft(memoized.yScale).tickFormat((d: number) => numToCurrencyShort(d))
-    );
-
-    g.attr('class', 'text-gray-600');
-
-    g.selectAll('.tick').attr('class', 'tick LegendY tracking-wide text-sm');
-  }
-
-  function xAxis(g: D3Selection<SVGGElement>) {
-    g.call(
-      axisBottom(memoized.xScale)
-        .ticks(width / 80)
-        .tickSizeOuter(0)
-    );
-
-    g.attr('class', 'text-gray-600');
-
-    g.selectAll('.tick').attr('class', 'tick LegendX tracking-wide text-sm');
-    g.select('.domain').attr('class', 'text-gray');
-  }
+  //   return {
+  //     xDomain,
+  //     xScale,
+  //     yScale,
+  //     linePathStringArray
+  //   };
+  // }, [lifecyclesData]);
 
   // Draw d3 axes
   useEffect(() => {
@@ -172,64 +130,64 @@ export function PortfolioGraph({
     setshowCycleDetails(false);
     setSelectedPointData(null);
 
-    const gxAxis = select(refGxAxis.current);
-    const gyAxis = select(refGyAxis.current);
+    // const gxAxis = select(refGxAxis.current);
+    // const gyAxis = select(refGyAxis.current);
 
-    gxAxis.call(xAxis);
-    gyAxis.call(yAxis);
+    // gxAxis.call(xAxis);
+    // gyAxis.call(yAxis);
   }, [lifecyclesData]);
 
   // https://observablehq.com/@d3/multi-line-chart
-  function mouseMoved(e: React.MouseEvent<SVGSVGElement, MouseEvent>) {
-    e.preventDefault();
+  // function mouseMoved(e: React.MouseEvent<SVGSVGElement, MouseEvent>) {
+  //   e.preventDefault();
 
-    if (selectedCycle) return;
+  //   if (selectedCycle) return;
 
-    // Move tooltip (favor left side when available)
-    if (refTooltip.current) {
-      let leftAdjust = e.clientX - svgRect.left - window.pageXOffset;
-      if (leftAdjust > tooltipWidth) {
-        leftAdjust = leftAdjust - tooltipWidth;
-      }
-      // Alternate method which favors right side when available
-      // if (leftAdjust > 690) {
-      //   leftAdjust =
-      //     leftAdjust - refTooltip.current.getBoundingClientRect().width;
-      // }
-      refTooltip.current.style.left = leftAdjust + 'px';
-    }
+  //   // Move tooltip (favor left side when available)
+  //   if (refTooltip.current) {
+  //     let leftAdjust = e.clientX - svgRect.left - window.pageXOffset;
+  //     if (leftAdjust > tooltipWidth) {
+  //       leftAdjust = leftAdjust - tooltipWidth;
+  //     }
+  //     // Alternate method which favors right side when available
+  //     // if (leftAdjust > 690) {
+  //     //   leftAdjust =
+  //     //     leftAdjust - refTooltip.current.getBoundingClientRect().width;
+  //     // }
+  //     refTooltip.current.style.left = leftAdjust + 'px';
+  //   }
 
-    // Transform current mouse coords to domain values, adjusting for svg position and scroll
-    const ym = memoized.yScale.invert(
-      //d3.event.layerY - svgRect.top - margin.top - window.pageYOffset
-      e.clientY - svgRect.top - margin.top + window.pageYOffset
-    );
-    const xm = memoized.xScale.invert(
-      //d3.event.layerX - svgRect.left - margin.left - window.pageXOffset
-      e.clientX - svgRect.left - margin.left - window.pageXOffset
-    );
+  //   // Transform current mouse coords to domain values, adjusting for svg position and scroll
+  //   const ym = memoized.yScale.invert(
+  //     //d3.event.layerY - svgRect.top - margin.top - window.pageYOffset
+  //     e.clientY - svgRect.top - margin.top + window.pageYOffset
+  //   );
+  //   const xm = memoized.xScale.invert(
+  //     //d3.event.layerX - svgRect.left - margin.left - window.pageXOffset
+  //     e.clientX - svgRect.left - margin.left - window.pageXOffset
+  //   );
 
-    // Get the array index of the closest x value to current hover
-    const i = clamp(Math.round(xm) - 1, 0, memoized.xDomain.length - 1);
+  //   // Get the array index of the closest x value to current hover
+  //   const i = clamp(Math.round(xm) - 1, 0, memoized.xDomain.length - 1);
 
-    // Find the data for the line at the current x position
-    // closest in y value to the current y position
-    const highlightLineData = chartData.reduce((a, b) => {
-      return Math.abs(a.values[i].y - ym) < Math.abs(b.values[i].y - ym)
-        ? a
-        : b;
-    });
+  //   // Find the data for the line at the current x position
+  //   // closest in y value to the current y position
+  //   const highlightLineData = chartData.reduce((a, b) => {
+  //     return Math.abs(a.values[i].y - ym) < Math.abs(b.values[i].y - ym)
+  //       ? a
+  //       : b;
+  //   });
 
-    setHoveringCycle({ data: highlightLineData, dataIndex: i });
+  //   setHoveringCycle({ data: highlightLineData, dataIndex: i });
 
-    // Move selection dot indicator to that nearest point of cursor
-    refGdot.current.setAttribute(
-      'transform',
-      `translate(${memoized.xScale(memoized.xDomain[i])},${memoized.yScale(
-        highlightLineData.values[i].y
-      )})`
-    );
-  }
+  //   // Move selection dot indicator to that nearest point of cursor
+  //   refGdot.current.setAttribute(
+  //     'transform',
+  //     `translate(${memoized.xScale(memoized.xDomain[i])},${memoized.yScale(
+  //       highlightLineData.values[i].y
+  //     )})`
+  //   );
+  // }
 
   function mouseClicked() {
     if (selectedCycle) {
@@ -249,83 +207,28 @@ export function PortfolioGraph({
 
   const pointData = selectedPointData ? selectedPointData : hoveringPointData;
 
-  useEffect(() => {
-    if (!hoveringCycle) setHoveringPointData(null);
-    else {
-      setHoveringPointData({
-        yearsAfterPortfolioStart: hoveringCycle.dataIndex + 1,
-        currYear: hoveringCycle.data.startYear + hoveringCycle.dataIndex + 1,
-        cycleStartYear: hoveringCycle.data.startYear,
-        cycleEndYear: hoveringCycle.data.startYear + memoized.xDomain.length,
-        currEndingBalanceInflAdj:
-          hoveringCycle.data.values[hoveringCycle.dataIndex].y,
-        currYearWithdrawalInflAdj:
-          hoveringCycle.data.values[hoveringCycle.dataIndex].withdrawal,
-        lastEndingBalanceInflAdj:
-          hoveringCycle.data.stats.balance.endingInflAdj,
-        cycleAvgWithdrawal: hoveringCycle.data.stats.withdrawals.averageInflAdj,
-        cycleMinWithdrawal:
-          hoveringCycle.data.stats.withdrawals.min.amountInflAdj,
-        cycleMaxWithdrawal:
-          hoveringCycle.data.stats.withdrawals.max.amountInflAdj
-      });
-    }
-  }, [hoveringCycle]);
-
-  const linePaths = chartData.map((d, i) => {
-    let pathStrokeColor: string;
-    // Red
-    if (d.stats.failureYear) pathStrokeColor = '#F56565';
-    // Yellow
-    else if (d.stats.nearFailure) pathStrokeColor = '#FFD600';
-    else '#48BB78'; // Green
-
-    let pathOpacity = '0.1';
-    let pathStrokeWidth = '1.5';
-    if (hoveringCycle) {
-      if (hoveringCycle.data.startYear === d.startYear) {
-        // This is the hovered line
-        // Red
-        if (d.stats.failureYear) pathStrokeColor = '#E53E3E';
-        // Yellow
-        else if (d.stats.nearFailure) pathStrokeColor = '#FFD600';
-        else '#38A169'; // Green
-        pathOpacity = '1';
-        pathStrokeWidth = '3';
-      }
-    } else {
-      if (selectedCycle) {
-        if (selectedCycle.startYear === d.startYear) {
-          // This is the selected line
-          // Red
-          if (d.stats.failureYear) pathStrokeColor = '#E53E3E';
-          // Yellow
-          else if (d.stats.nearFailure) pathStrokeColor = '#FFD600';
-          else '#38A169'; // Green
-          pathOpacity = '1';
-          pathStrokeWidth = '3';
-        }
-      }
-    }
-
-    if (!hoveringCycle && !selectedCycle) {
-      // We're not hovering and don't have anything selected
-      pathOpacity = '0.8';
-    }
-
-    return (
-      <path
-        key={d.startYear}
-        d={memoized.linePathStringArray[i]}
-        style={{
-          mixBlendMode: 'multiply',
-          opacity: pathOpacity,
-          stroke: pathStrokeColor,
-          strokeWidth: pathStrokeWidth
-        }}
-      ></path>
-    );
-  });
+  // useEffect(() => {
+  //   if (!hoveringCycle) setHoveringPointData(null);
+  //   else {
+  //     setHoveringPointData({
+  //       yearsAfterPortfolioStart: hoveringCycle.dataIndex + 1,
+  //       currYear: hoveringCycle.data.startYear + hoveringCycle.dataIndex + 1,
+  //       cycleStartYear: hoveringCycle.data.startYear,
+  //       cycleEndYear: hoveringCycle.data.startYear + memoized.xDomain.length,
+  //       currEndingBalanceInflAdj:
+  //         hoveringCycle.data.values[hoveringCycle.dataIndex].y,
+  //       currYearWithdrawalInflAdj:
+  //         hoveringCycle.data.values[hoveringCycle.dataIndex].withdrawal,
+  //       lastEndingBalanceInflAdj:
+  //         hoveringCycle.data.stats.balance.endingInflAdj,
+  //       cycleAvgWithdrawal: hoveringCycle.data.stats.withdrawals.averageInflAdj,
+  //       cycleMinWithdrawal:
+  //         hoveringCycle.data.stats.withdrawals.min.amountInflAdj,
+  //       cycleMaxWithdrawal:
+  //         hoveringCycle.data.stats.withdrawals.max.amountInflAdj
+  //     });
+  //   }
+  // }, [hoveringCycle]);
 
   let portfolioHealthColor = 'text-green-500';
   if (stats.successRate < 0.75) portfolioHealthColor = 'text-yellow-500';
@@ -343,7 +246,36 @@ export function PortfolioGraph({
       </div>
       <div className="flex flex-wrap">
         <div className="relative">
-          <svg
+          <LineChart
+            dataSeries={chartData.map((line) =>
+              line.values.map((point) => ({
+                x: point.x,
+                y: point.y
+              }))
+            )}
+            plotWidth={1000}
+            plotHeight={600}
+            lineColorizer={function lineColorizer(
+              line: Point[],
+              lineMeta: CycleStats
+            ): React.CSSProperties {
+              const lineStyle: React.CSSProperties = {
+                stroke: '#48BB78', // Green
+                opacity: '0.8',
+                strokeWidth: '1.5'
+              };
+
+              // Red
+              if (lineMeta.failureYear) lineStyle.stroke = '#F56565';
+              // Yellow
+              else if (lineMeta.nearFailure) lineStyle.stroke = '#FFD600';
+
+              return lineStyle;
+            }}
+            allPointMeta={lifecyclesData}
+            allLineMeta={chartData.map((d) => d.stats)}
+          />
+          {/* <svg
             ref={refSvg}
             width={width + margin.left + margin.right}
             height={height + margin.top + margin.bottom}
@@ -370,7 +302,7 @@ export function PortfolioGraph({
                 <circle r="3.5"></circle>
               </g>
             </g>
-          </svg>
+          </svg> */}
           {!pointData ? null : (
             <div
               ref={refTooltip}

@@ -1,16 +1,11 @@
-import {
-  axisBottom,
-  axisLeft,
-  line,
-  max,
-  scaleLinear,
-  select,
-  selectAll
-} from 'd3';
+import { line, max, scaleLinear } from 'd3';
 import { maxIndex } from 'd3-array';
-import React, { useEffect, useRef } from 'react';
-import { CycleStats } from '../data/calc/portfolio-calc';
-import { numToCurrencyShort } from '../utilities/format';
+import React, { useEffect, useRef, useState } from 'react';
+import { CycleStats, CycleYearData } from '../../data/calc/portfolio-calc';
+import { numToCurrencyShort } from '../../utilities/format';
+import { clamp } from '../../utilities/math';
+import { AxisBottom } from './axis-bottom';
+import { AxisLeft } from './axis-left';
 
 export type Point = {
   x: number;
@@ -48,6 +43,7 @@ type Props = {
   /** Total height of chart element including margin */
   plotHeight: number;
   lineColorizer?: LineColorizer;
+  allPointMeta?: CycleYearData[][];
   allLineMeta?: CycleStats[];
 } & typeof defaultProps;
 
@@ -71,8 +67,17 @@ export function LineChart({
   margin
 }: Props) {
   const refSvg = useRef<SVGSVGElement>(null);
-  const refGyAxis = useRef<SVGGElement>(null);
-  const refGxAxis = useRef<SVGGElement>(null);
+  const refGdot = useRef<SVGGElement>(null);
+  const [svgRect, setSvgRect] = useState<DOMRect>(null);
+
+  useEffect(() => {
+    function setRects() {
+      setSvgRect(refSvg.current.getBoundingClientRect());
+    }
+    setRects();
+    window.addEventListener('resize', setRects);
+    return () => window.removeEventListener('resize', setRects);
+  }, []);
 
   // https://bl.ocks.org/mbostock/3019563
   const width = plotWidth - margin.left - margin.right;
@@ -80,54 +85,22 @@ export function LineChart({
 
   const longestLine = dataSeries[maxIndex(dataSeries, (line) => line.length)];
 
-  // const xDomain = longestLine.map((_d, i) => i + 1);
-  const xScale = scaleLinear()
-    .domain([1, longestLine.length])
-    .range([0, width]);
+  const xDomain: [number, number] = [1, longestLine.length];
+  const xRange: [number, number] = [0, width];
+  const xScale = scaleLinear().domain(xDomain).range(xRange);
 
-  const yScale = scaleLinear()
-    .domain([0, max(dataSeries, (line) => max(line.map((point) => point.y)))])
-    .nice()
-    .range([height, 0]);
+  const yDomain: [number, number] = [
+    0,
+    max(dataSeries, (line) => max(line.map((point) => point.y)))
+  ];
+  const yRange: [number, number] = [height, 0];
+  const yScale = scaleLinear().domain(yDomain).nice().range(yRange);
 
   const chartLine = line<Point>()
     .x((_d, i) => xScale(i + 1))
     .y((d) => yScale(d.y));
 
   const linePathStringArray = dataSeries.map((line) => chartLine(line));
-
-  // TODO: reactify axes and make more reusable somehow
-  // (check the great react d3 post, she had exactly this)
-  function yAxis(g: D3Selection<SVGGElement>) {
-    selectAll('.LegendY').remove();
-    g.call(axisLeft(yScale).tickFormat((d: number) => numToCurrencyShort(d)));
-
-    g.attr('class', 'text-gray-600');
-
-    g.selectAll('.tick').attr('class', 'tick LegendY tracking-wide text-sm');
-  }
-
-  function xAxis(g: D3Selection<SVGGElement>) {
-    g.call(
-      axisBottom(xScale)
-        .ticks(width / 80)
-        .tickSizeOuter(0)
-    );
-
-    g.attr('class', 'text-gray-600');
-
-    g.selectAll('.tick').attr('class', 'tick LegendX tracking-wide text-sm');
-    g.select('.domain').attr('class', 'text-gray');
-  }
-
-  // Draw d3 axes
-  useEffect(() => {
-    const gxAxis = select(refGxAxis.current);
-    const gyAxis = select(refGyAxis.current);
-
-    gxAxis.call(xAxis);
-    gyAxis.call(yAxis);
-  }, [dataSeries]);
 
   const linePaths = dataSeries.map((line, i) => {
     let lineStyle = lineColorizer(line, allLineMeta[i]);
@@ -186,6 +159,59 @@ export function LineChart({
     );
   });
 
+  // https://observablehq.com/@d3/multi-line-chart
+  function mouseMoved(e: React.MouseEvent<SVGSVGElement, MouseEvent>) {
+    e.preventDefault();
+
+    // if (selectedCycle) return;
+
+    // Move tooltip (favor left side when available)
+    // if (refTooltip.current) {
+    //   let leftAdjust = e.clientX - svgRect.left - window.pageXOffset;
+    //   if (leftAdjust > tooltipWidth) {
+    //     leftAdjust = leftAdjust - tooltipWidth;
+    //   }
+    //   // Alternate method which favors right side when available
+    //   // if (leftAdjust > 690) {
+    //   //   leftAdjust =
+    //   //     leftAdjust - refTooltip.current.getBoundingClientRect().width;
+    //   // }
+    //   refTooltip.current.style.left = leftAdjust + 'px';
+    // }
+
+    // Transform current mouse coords to domain values, adjusting for svg position and scroll
+    const ym = yScale.invert(
+      //d3.event.layerY - svgRect.top - margin.top - window.pageYOffset
+      e.clientY - svgRect.top - margin.top + window.pageYOffset
+    );
+    const xm = xScale.invert(
+      //d3.event.layerX - svgRect.left - margin.left - window.pageXOffset
+      e.clientX - svgRect.left - margin.left - window.pageXOffset
+    );
+
+    console.log(e.clientX);
+    console.log(e.clientX - svgRect.left - margin.left - window.pageXOffset);
+
+    // Get the array index of the closest x value to current hover
+    const i = clamp(Math.round(xm) - 1, 0, dataSeries[0].length - 1);
+
+    // Find the data for the line at the current x position
+    // closest in y value to the current y position
+    const highlightLineData = dataSeries.reduce((a, b) => {
+      return Math.abs(a[i].y - ym) < Math.abs(b[i].y - ym) ? a : b;
+    });
+
+    // setHoveringCycle({ data: highlightLineData, dataIndex: i });
+    console.log(highlightLineData[i]);
+
+    // Move selection dot indicator to that nearest point of cursor
+    refGdot.current.setAttribute(
+      'transform',
+      `translate(${xScale(i + 1)},${yScale(highlightLineData[i].y)})`
+    );
+  }
+  console.log(dataSeries);
+
   return (
     dataSeries && (
       <svg
@@ -193,12 +219,22 @@ export function LineChart({
         width={width + margin.left + margin.right}
         height={height + margin.top + margin.bottom}
         // onClick={mouseClicked}
-        // onMouseMove={(e) => mouseMoved(e)}
+        onMouseMove={(e) => mouseMoved(e)}
         // onMouseLeave={mouseLeft}
       >
         <g transform={`translate(${margin.left},${margin.top})`}>
-          <g ref={refGyAxis}></g>
-          <g ref={refGxAxis} transform={`translate(0,${height})`}></g>
+          <AxisLeft
+            domain={yDomain}
+            range={yRange}
+            scale={yScale}
+            tickFormat={(d: number) => numToCurrencyShort(d)}
+          />
+          <AxisBottom
+            domain={xDomain}
+            range={xRange}
+            scale={xScale}
+            height={height}
+          />
           <g
             fill="none"
             stroke="#48bb78"
@@ -208,12 +244,12 @@ export function LineChart({
           >
             {linePaths}
           </g>
-          {/* <g
+          <g
             ref={refGdot}
-            display={hoveringCycle || selectedCycle ? null : 'none'}
+            // display={hoveringCycle || selectedCycle ? null : 'none'}
           >
             <circle r="3.5"></circle>
-          </g> */}
+          </g>
         </g>
       </svg>
     )
