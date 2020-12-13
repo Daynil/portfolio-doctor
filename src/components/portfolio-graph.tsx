@@ -19,6 +19,7 @@ import { baseUrl } from '../utilities/constants';
 import { numToCurrency, numToCurrencyShort } from '../utilities/format';
 import { clamp } from '../utilities/math';
 import { portfolioOptionsToQueryString } from '../utilities/util';
+import { D3Selection } from './line-chart';
 import CopyIcon from './svg/copy-icon';
 import ShareIcon from './svg/share-icon';
 
@@ -52,12 +53,6 @@ type PointData = {
   cycleMinWithdrawal: number;
   cycleMaxWithdrawal: number;
 };
-type D3Selection<T extends d3.BaseType> = d3.Selection<
-  T,
-  unknown,
-  null,
-  undefined
->;
 
 // https://bl.ocks.org/mbostock/3019563
 const margin = { top: 30, right: 20, bottom: 20, left: 70 };

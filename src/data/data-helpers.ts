@@ -80,7 +80,8 @@ export function getMarketDataStats(
 }
 
 /**
- * Perform Monte Carlo simulation and return simulated market year data
+ * Perform Monte Carlo simulation and return simulated market year data.
+ * Only the equities price is simulated.
  */
 export function generateMonteCarloDataset(
   originalYearData: MarketYearData[],
@@ -92,8 +93,8 @@ export function generateMonteCarloDataset(
     if (i === 0) {
       monteCarloYearData[i] = originalYearData[i];
     } else {
-      const randomFraction = Math.random();
-      const randomNumStdDevs = normSinv(randomFraction);
+      const randomProbability = Math.random();
+      const randomNumStdDevs = normSinv(randomProbability);
       const simulatedMarketChange =
         marketDataStats.meanAnnualMarketChange +
         randomNumStdDevs * marketDataStats.stdDevAnnualMarketChange;

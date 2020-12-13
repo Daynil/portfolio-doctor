@@ -786,6 +786,7 @@ describe('monte carlo simulation', () => {
     );
 
     // Seed random values for each call to Math.random() that will occur
+    // Seeded values are from the Excel sheet
     jest
       .spyOn(global.Math, 'random')
       .mockReturnValueOnce(0.296694870605894)
@@ -807,7 +808,7 @@ describe('monte carlo simulation', () => {
     // In production, these will always be the stats
     // since we are enforcing use of the default jan-shiller-data
     // for Monte Carlo simulations.
-    //  So for this test data slice, mock that value
+    // So for this test data slice, just mock that value
     jest.spyOn(dataHelpers, 'getMarketDataStats').mockReturnValue({
       meanAnnualMarketChange: 0.0602046969835648,
       stdDevAnnualMarketChange: 0.176139177843765
@@ -823,6 +824,8 @@ describe('monte carlo simulation', () => {
       3
     );
 
+    // Split each simulation result into separate arrays
+    // for testing purposes only
     const sim1yearEndBalances = simulations
       .slice(0, 3)
       .map((cycles) => cycles.map((yr) => yr.balanceInfAdjEnd));

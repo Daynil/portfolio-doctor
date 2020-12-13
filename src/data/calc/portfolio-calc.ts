@@ -250,10 +250,10 @@ export interface MarketDataStats {
  *
  * It is not useful or practical to differentiate which cycle goes with which simulation.
  * We essentially return a portfolio run:
- *  -Across every simulated market year dataset
+ *  -Across every simulated market year dataset.
  *  -Across every possible start year,
  *    given the length of the original market year data
- *      and the simulation year length in options
+ *      and the simulation year length in options.
  *
  *  @returns A single array of portfolio cycles.
  */
