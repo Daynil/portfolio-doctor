@@ -9,7 +9,7 @@ import {
 import { baseUrl } from '../utilities/constants';
 import { numToCurrency } from '../utilities/format';
 import { portfolioOptionsToQueryString } from '../utilities/util';
-import { LineChart, Point } from './charts/line-chart';
+import { HistoricPortfolioCyclesChart } from './charts/historic-portfolio-cycles-chart';
 import CopyIcon from './svg/copy-icon';
 import ShareIcon from './svg/share-icon';
 
@@ -246,32 +246,9 @@ export function PortfolioGraph({
       </div>
       <div className="flex flex-wrap">
         <div className="w-full">
-          <LineChart
-            dataSeries={chartData.map((line) =>
-              line.values.map((point) => ({
-                x: point.x,
-                y: point.y
-              }))
-            )}
+          <HistoricPortfolioCyclesChart
+            dataSeries={lifecyclesData}
             aspectRatio={1000 / 600}
-            lineColorizer={function lineColorizer(
-              line: Point[],
-              lineMeta: CycleStats
-            ): React.CSSProperties {
-              const lineStyle: React.CSSProperties = {
-                stroke: '#48BB78', // Green
-                opacity: '0.8',
-                strokeWidth: '1.5'
-              };
-
-              // Red
-              if (lineMeta.failureYear) lineStyle.stroke = '#F56565';
-              // Yellow
-              else if (lineMeta.nearFailure) lineStyle.stroke = '#FFD600';
-
-              return lineStyle;
-            }}
-            allPointMeta={lifecyclesData}
             allLineMeta={chartData.map((d) => d.stats)}
           />
           {/* <svg

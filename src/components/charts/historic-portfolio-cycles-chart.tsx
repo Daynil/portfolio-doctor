@@ -1,17 +1,12 @@
 import { line, max, scaleLinear } from 'd3';
 import { maxIndex } from 'd3-array';
-import React, { useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { CycleStats, CycleYearData } from '../../data/calc/portfolio-calc';
 import { numToCurrencyShort } from '../../utilities/format';
 import { useChartDimensions } from '../../utilities/hooks';
+import { clamp } from '../../utilities/math';
 import { Axis } from './axis';
 import { Chart } from './chart';
-// import { AxisBottom } from './axis';
-// import { AxisLeft } from './axis-left';
-
-export type Point = {
-  x: number;
-  y: number;
-};
 
 export type D3Selection<T extends d3.BaseType> = d3.Selection<
   T,
@@ -20,51 +15,40 @@ export type D3Selection<T extends d3.BaseType> = d3.Selection<
   undefined
 >;
 
-type LineColorizerSimple = (line: Point[]) => React.CSSProperties;
-
-type LineColorizerEnriched<D> = (
-  line: Point[],
-  lineMeta: D
-) => React.CSSProperties;
-
-export type LineColorizer<D> = LineColorizerSimple | LineColorizerEnriched<D>;
-
-type Props<T, D> = {
+type Props = {
   /** An array of points is a line, 2d array for multiple lines */
-  dataSeries: Point[][];
+  dataSeries: CycleYearData[][];
   /** Chart's aspect ratio */
   aspectRatio: number;
-  /** Conditions for determining the color or each line */
-  lineColorizer?: LineColorizer<D>;
-  /** Additional metadata about each point */
-  allPointMeta?: T[][]; //CycleYearData[][];
   /** Additional metadata about each line */
-  allLineMeta?: D[]; //CycleStats[];
+  allLineMeta?: CycleStats[];
 };
 
-export function LineChart<T, D>({
+export function HistoricPortfolioCyclesChart({
   dataSeries,
   aspectRatio,
-  lineColorizer,
   allLineMeta
-}: Props<T, D>) {
+}: Props) {
   // const refSvg = useRef<SVGSVGElement>(null);
   const [ref, dimensions] = useChartDimensions({}, aspectRatio);
   const refGdot = useRef<SVGGElement>(null);
-  // const [svgRect, setSvgRect] = useState<DOMRect>(null);
+  const [svgContainerRect, setContainerSvgRect] = useState<DOMRect>(null);
 
-  // useEffect(() => {
-  //   function setRects() {
-  //     setSvgRect(refSvg.current.getBoundingClientRect());
-  //   }
-  //   setRects();
-  //   window.addEventListener('resize', setRects);
-  //   return () => window.removeEventListener('resize', setRects);
-  // }, []);
+  useEffect(() => {
+    function setRects() {
+      setContainerSvgRect(ref.current.getBoundingClientRect());
+    }
+    setRects();
+    window.addEventListener('resize', setRects);
+    return () => window.removeEventListener('resize', setRects);
+  }, []);
 
   // https://bl.ocks.org/mbostock/3019563
   // const width = plotWidth - margin.left - margin.right;
   // const height = plotHeight - margin.top - margin.bottom;
+
+  const xAccessor = (d: CycleYearData) => d.cycleYear - d.cycleStartYear + 1;
+  const yAccessor = (d: CycleYearData) => d.balanceInfAdjEnd;
 
   const longestLine = dataSeries[maxIndex(dataSeries, (line) => line.length)];
 
@@ -74,19 +58,30 @@ export function LineChart<T, D>({
 
   const yDomain: [number, number] = [
     0,
-    max(dataSeries, (line) => max(line.map((point) => point.y)))
+    max(dataSeries, (line) => max(line.map((point) => yAccessor(point))))
   ];
   const yRange: [number, number] = [dimensions.boundedHeight, 0];
   const yScale = scaleLinear().domain(yDomain).nice().range(yRange);
 
-  const chartLine = line<Point>()
-    .x((_d, i) => xScale(i + 1))
-    .y((d) => yScale(d.y));
+  const chartLine = line<CycleYearData>()
+    //.x((_d, i) => xScale(i + 1))
+    .x((d) => xScale(xAccessor(d)))
+    .y((d) => yScale(yAccessor(d)));
 
   const linePathStringArray = dataSeries.map((line) => chartLine(line));
 
-  const linePaths = dataSeries.map((line, i) => {
-    let lineStyle = lineColorizer(line, allLineMeta[i]);
+  const linePaths = dataSeries.map((lineData, i) => {
+    const lineStyle: React.CSSProperties = {
+      stroke: '#48BB78', // Green
+      opacity: '0.8',
+      strokeWidth: '1.5'
+    };
+
+    // Red
+    if (allLineMeta[i].failureYear) lineStyle.stroke = '#F56565';
+    // Yellow
+    else if (allLineMeta[i].nearFailure) lineStyle.stroke = '#FFD600';
+
     // let pathStrokeColor = '#48BB78'; // Green
     // // Red
     // if (d.stats.failureYear) pathStrokeColor = '#F56565';
@@ -134,67 +129,73 @@ export function LineChart<T, D>({
         style={{
           mixBlendMode: 'multiply',
           ...lineStyle
-          // opacity: pathOpacity,
-          // stroke: pathStrokeColor,
-          // strokeWidth: pathStrokeWidth
         }}
       ></path>
     );
   });
 
   // https://observablehq.com/@d3/multi-line-chart
-  // function mouseMoved(e: React.MouseEvent<SVGSVGElement, MouseEvent>) {
-  //   e.preventDefault();
+  function mouseMoved(e: React.MouseEvent<HTMLElement, MouseEvent>) {
+    e.preventDefault();
 
-  //   // if (selectedCycle) return;
+    // if (selectedCycle) return;
 
-  //   // Move tooltip (favor left side when available)
-  //   // if (refTooltip.current) {
-  //   //   let leftAdjust = e.clientX - svgRect.left - window.pageXOffset;
-  //   //   if (leftAdjust > tooltipWidth) {
-  //   //     leftAdjust = leftAdjust - tooltipWidth;
-  //   //   }
-  //   //   // Alternate method which favors right side when available
-  //   //   // if (leftAdjust > 690) {
-  //   //   //   leftAdjust =
-  //   //   //     leftAdjust - refTooltip.current.getBoundingClientRect().width;
-  //   //   // }
-  //   //   refTooltip.current.style.left = leftAdjust + 'px';
-  //   // }
+    // Move tooltip (favor left side when available)
+    // if (refTooltip.current) {
+    //   let leftAdjust = e.clientX - svgRect.left - window.pageXOffset;
+    //   if (leftAdjust > tooltipWidth) {
+    //     leftAdjust = leftAdjust - tooltipWidth;
+    //   }
+    //   // Alternate method which favors right side when available
+    //   // if (leftAdjust > 690) {
+    //   //   leftAdjust =
+    //   //     leftAdjust - refTooltip.current.getBoundingClientRect().width;
+    //   // }
+    //   refTooltip.current.style.left = leftAdjust + 'px';
+    // }
 
-  //   // Transform current mouse coords to domain values, adjusting for svg position and scroll
-  //   const ym = yScale.invert(
-  //     //d3.event.layerY - svgRect.top - margin.top - window.pageYOffset
-  //     e.clientY - svgRect.top - margin.top + window.pageYOffset
-  //   );
-  //   const xm = xScale.invert(
-  //     //d3.event.layerX - svgRect.left - margin.left - window.pageXOffset
-  //     e.clientX - svgRect.left - margin.left - window.pageXOffset
-  //   );
+    // Transform current mouse coords to domain values, adjusting for svg position and scroll
+    const ym = yScale.invert(
+      //d3.event.layerY - svgRect.top - margin.top - window.pageYOffset
+      e.clientY -
+        svgContainerRect.top -
+        dimensions.marginTop +
+        window.pageYOffset
+    );
+    const xm = xScale.invert(
+      //d3.event.layerX - svgRect.left - margin.left - window.pageXOffset
+      e.clientX -
+        svgContainerRect.left -
+        dimensions.marginLeft -
+        window.pageXOffset
+    );
 
-  //   // Get the array index of the closest x value to current hover
-  //   const i = clamp(Math.round(xm) - 1, 0, dataSeries[0].length - 1);
+    // Get the array index of the closest x value to current hover
+    const i = clamp(Math.round(xm) - 1, 0, dataSeries[0].length - 1);
 
-  //   // Find the data for the line at the current x position
-  //   // closest in y value to the current y position
-  //   const highlightLineData = dataSeries.reduce((a, b) => {
-  //     return Math.abs(a[i].y - ym) < Math.abs(b[i].y - ym) ? a : b;
-  //   });
+    // Find the data for the line at the current x position
+    // closest in y value to the current y position
+    const highlightLineData = dataSeries.reduce((a, b) => {
+      return Math.abs(yAccessor(a[i]) - ym) < Math.abs(yAccessor(b[i]) - ym)
+        ? a
+        : b;
+    });
 
-  //   // setHoveringCycle({ data: highlightLineData, dataIndex: i });
+    // setHoveringCycle({ data: highlightLineData, dataIndex: i });
 
-  //   // Move selection dot indicator to that nearest point of cursor
-  //   refGdot.current.setAttribute(
-  //     'transform',
-  //     `translate(${xScale(i + 1)},${yScale(highlightLineData[i].y)})`
-  //   );
-  // }
+    // Move selection dot indicator to that nearest point of cursor
+    refGdot.current.setAttribute(
+      'transform',
+      `translate(${xScale(i + 1)},${yScale(yAccessor(highlightLineData[i]))})`
+    );
+  }
 
   return (
     dataSeries && (
       <div
         className="w-full"
         style={{ maxWidth: `calc(60vh * ${aspectRatio})` }}
+        onMouseMove={mouseMoved}
         ref={ref}
       >
         <Chart dimensions={dimensions}>

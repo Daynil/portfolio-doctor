@@ -109,13 +109,15 @@ export function useChartDimensions(
   const [width, changeWidth] = useState(0);
   const [height, changeHeight] = useState(0);
 
+  // Shrinking window does not change responsive container's width
+  // because we explicitly set a child's width (the svg)
+  // Instead, listen for resize events and reset dimensions
   useEffect(() => {
-    function reset(e) {
-      console.log(e);
+    function reset() {
       changeWidth(0);
       changeHeight(0);
     }
-    window.addEventListener('resize', debounced(200, reset));
+    window.addEventListener('resize', debounced(300, reset));
     return () => window.removeEventListener('resize', reset);
   }, []);
 

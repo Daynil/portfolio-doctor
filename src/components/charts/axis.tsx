@@ -41,12 +41,7 @@ function AxisBottom({
       .map((value) => ({ value, xOffset: scale(value) }));
   }, [domain.join('-'), range.join('-')]);
   return (
-    <g
-      transform={`translate(0,${
-        dimensions.boundedHeight + dimensions.marginTop
-      })`}
-      {...props}
-    >
+    <g transform={`translate(0,${dimensions.boundedHeight})`} {...props}>
       <path
         fill="none"
         stroke="currentColor"
