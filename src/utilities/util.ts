@@ -214,3 +214,19 @@ export function portfolioOptionsToQueryString(
   // @ts-ignore (this works fine, type defs seem insufficient)
   return stringify(queryObj);
 }
+
+/**
+ * Debounces a function
+ */
+export function debounced(delay: number, fn: any) {
+  let timerId: NodeJS.Timeout;
+  return function (...args: any) {
+    if (timerId) {
+      clearTimeout(timerId);
+    }
+    timerId = setTimeout(() => {
+      fn(...args);
+      timerId = null;
+    }, delay);
+  };
+}

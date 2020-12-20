@@ -245,7 +245,7 @@ export function PortfolioGraph({
         <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
       </div>
       <div className="flex flex-wrap">
-        <div className="relative">
+        <div className="w-full">
           <LineChart
             dataSeries={chartData.map((line) =>
               line.values.map((point) => ({
@@ -253,8 +253,7 @@ export function PortfolioGraph({
                 y: point.y
               }))
             )}
-            plotWidth={1000}
-            plotHeight={600}
+            aspectRatio={1000 / 600}
             lineColorizer={function lineColorizer(
               line: Point[],
               lineMeta: CycleStats
