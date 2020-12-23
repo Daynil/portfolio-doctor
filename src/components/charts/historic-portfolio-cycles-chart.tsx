@@ -1,6 +1,6 @@
 import { line, max, scaleLinear, scan } from 'd3';
 import { maxIndex } from 'd3-array';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { CycleStats, CycleYearData } from '../../data/calc/portfolio-calc';
 import { numToCurrencyShort } from '../../utilities/format';
 import { useChartDimensions } from '../../utilities/hooks';
@@ -69,8 +69,12 @@ export function HistoricPortfolioCyclesChart({
     .x((d) => xScale(xAccessor(d)))
     .y((d) => yScale(yAccessor(d)));
 
-  const linePathStringArray = dataSeries.map((line) => chartLine(line));
+  const linePathStringArray = useMemo(
+    () => dataSeries.map((line) => chartLine(line)),
+    [dataSeries, dimensions.width, dimensions.height]
+  );
 
+  // TODO: Add darker colors back if hovering?
   const linePaths = dataSeries.map((lineData, i) => {
     const lineStyle: React.CSSProperties = {
       stroke: '#48BB78', // Green
@@ -83,45 +87,14 @@ export function HistoricPortfolioCyclesChart({
     // Yellow
     else if (allLineMeta[i].nearFailure) lineStyle.stroke = '#FFD600';
 
-    // let pathStrokeColor = '#48BB78'; // Green
-    // // Red
-    // if (d.stats.failureYear) pathStrokeColor = '#F56565';
-    // // Yellow
-    // else if (d.stats.nearFailure) pathStrokeColor = '#FFD600';
-    // else '#48BB78'; // Green
-
-    // let pathOpacity = '0.1';
-    // let pathStrokeWidth = '1.5';
-    // if (hoveringCycle) {
-    //   if (hoveringCycle.data.startYear === d.startYear) {
-    //     // This is the hovered line
-    //     // Red
-    //     if (d.stats.failureYear) pathStrokeColor = '#E53E3E';
-    //     // Yellow
-    //     else if (d.stats.nearFailure) pathStrokeColor = '#FFD600';
-    //     else '#38A169'; // Green
-    //     pathOpacity = '1';
-    //     pathStrokeWidth = '3';
-    //   }
-    // } else {
-    //   if (selectedCycle) {
-    //     if (selectedCycle.startYear === d.startYear) {
-    //       // This is the selected line
-    //       // Red
-    //       if (d.stats.failureYear) pathStrokeColor = '#E53E3E';
-    //       // Yellow
-    //       else if (d.stats.nearFailure) pathStrokeColor = '#FFD600';
-    //       else '#38A169'; // Green
-    //       pathOpacity = '1';
-    //       pathStrokeWidth = '3';
-    //     }
-    //   }
-    // }
-
-    // if (!hoveringCycle && !selectedCycle) {
-    //   // We're not hovering and don't have anything selected
-    //   pathOpacity = '0.8';
-    // }
+    if (selectedPoint) {
+      if (i === selectedPoint.cycleIndex) {
+        lineStyle.opacity = '1';
+        lineStyle.strokeWidth = '3';
+      } else {
+        lineStyle.opacity = '0.1';
+      }
+    }
 
     return (
       <path
@@ -139,7 +112,7 @@ export function HistoricPortfolioCyclesChart({
   function mouseMoved(e: React.MouseEvent<HTMLElement, MouseEvent>) {
     e.preventDefault();
 
-    // if (selectedCycle) return;
+    if (pointFixed) return;
 
     // Move tooltip (favor left side when available)
     // if (refTooltip.current) {
@@ -177,9 +150,7 @@ export function HistoricPortfolioCyclesChart({
       (a, b) => Math.abs(yAccessor(a[i]) - ym) - Math.abs(yAccessor(b[i]) - ym)
     );
 
-    // setHoveringCycle({ data: highlightLineData, dataIndex: i });
-
-    // setSelectedPoint({ yearIndex: i, cycleIndex: closestCycleIndex });
+    setSelectedPoint({ yearIndex: i, cycleIndex: closestCycleIndex });
 
     // Move selection dot indicator to that nearest point of cursor
     refGdot.current.setAttribute(
@@ -190,12 +161,22 @@ export function HistoricPortfolioCyclesChart({
     );
   }
 
+  function mouseLeft() {
+    if (!pointFixed) setSelectedPoint(null);
+  }
+
+  function mouseClicked() {
+    setPointFixed(!pointFixed);
+  }
+
   return (
     dataSeries && (
       <div
         className="w-full"
         style={{ maxWidth: `calc(60vh * ${aspectRatio})` }}
         onMouseMove={mouseMoved}
+        onMouseLeave={mouseLeft}
+        onMouseDown={mouseClicked}
         ref={ref}
       >
         <Chart dimensions={dimensions}>
@@ -214,54 +195,11 @@ export function HistoricPortfolioCyclesChart({
           >
             {linePaths}
           </g>
-          <g
-            ref={refGdot}
-            // display={hoveringCycle || selectedCycle ? null : 'none'}
-          >
+          <g ref={refGdot} display={selectedPoint ? null : 'none'}>
             <circle r="3.5"></circle>
           </g>
         </Chart>
       </div>
     )
-    // dataSeries && (
-    //   <svg
-    //     ref={refSvg}
-    //     width={width + margin.left + margin.right}
-    //     height={height + margin.top + margin.bottom}
-    //     // onClick={mouseClicked}
-    //     onMouseMove={(e) => mouseMoved(e)}
-    //     // onMouseLeave={mouseLeft}
-    //   >
-    //     <g transform={`translate(${margin.left},${margin.top})`}>
-    //       <AxisLeft
-    //         domain={yDomain}
-    //         range={yRange}
-    //         scale={yScale}
-    //         tickFormat={(d: number) => numToCurrencyShort(d)}
-    //       />
-    //       <AxisBottom
-    //         domain={xDomain}
-    //         range={xRange}
-    //         scale={xScale}
-    //         height={height}
-    //       />
-    //       <g
-    //         fill="none"
-    //         stroke="#48bb78"
-    //         strokeWidth="1.5"
-    //         strokeLinejoin="round"
-    //         strokeLinecap="round"
-    //       >
-    //         {linePaths}
-    //       </g>
-    //       <g
-    //         ref={refGdot}
-    //         // display={hoveringCycle || selectedCycle ? null : 'none'}
-    //       >
-    //         <circle r="3.5"></circle>
-    //       </g>
-    //     </g>
-    //   </svg>
-    // )
   );
 }
