@@ -244,7 +244,7 @@ export function PortfolioGraph({
       >
         <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
       </div>
-      <div className="flex flex-wrap">
+      <div className="flex flex-wrap w-full">
         <div className="w-full">
           <HistoricPortfolioCyclesChart
             dataSeries={lifecyclesData}

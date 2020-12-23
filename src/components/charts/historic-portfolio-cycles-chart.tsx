@@ -1,4 +1,4 @@
-import { line, max, scaleLinear } from 'd3';
+import { line, max, scaleLinear, scan } from 'd3';
 import { maxIndex } from 'd3-array';
 import React, { useEffect, useRef, useState } from 'react';
 import { CycleStats, CycleYearData } from '../../data/calc/portfolio-calc';
@@ -24,15 +24,21 @@ type Props = {
   allLineMeta?: CycleStats[];
 };
 
+export type Point = {
+  cycleIndex: number;
+  yearIndex: number;
+};
+
 export function HistoricPortfolioCyclesChart({
   dataSeries,
   aspectRatio,
   allLineMeta
 }: Props) {
-  // const refSvg = useRef<SVGSVGElement>(null);
   const [ref, dimensions] = useChartDimensions({}, aspectRatio);
   const refGdot = useRef<SVGGElement>(null);
   const [svgContainerRect, setContainerSvgRect] = useState<DOMRect>(null);
+  const [selectedPoint, setSelectedPoint] = useState<Point>(null);
+  const [pointFixed, setPointFixed] = useState(false);
 
   useEffect(() => {
     function setRects() {
@@ -42,10 +48,6 @@ export function HistoricPortfolioCyclesChart({
     window.addEventListener('resize', setRects);
     return () => window.removeEventListener('resize', setRects);
   }, []);
-
-  // https://bl.ocks.org/mbostock/3019563
-  // const width = plotWidth - margin.left - margin.right;
-  // const height = plotHeight - margin.top - margin.bottom;
 
   const xAccessor = (d: CycleYearData) => d.cycleYear - d.cycleStartYear + 1;
   const yAccessor = (d: CycleYearData) => d.balanceInfAdjEnd;
@@ -58,13 +60,12 @@ export function HistoricPortfolioCyclesChart({
 
   const yDomain: [number, number] = [
     0,
-    max(dataSeries, (line) => max(line.map((point) => yAccessor(point))))
+    max(dataSeries, (line) => max(line.map((d) => yAccessor(d))))
   ];
   const yRange: [number, number] = [dimensions.boundedHeight, 0];
   const yScale = scaleLinear().domain(yDomain).nice().range(yRange);
 
   const chartLine = line<CycleYearData>()
-    //.x((_d, i) => xScale(i + 1))
     .x((d) => xScale(xAccessor(d)))
     .y((d) => yScale(yAccessor(d)));
 
@@ -156,14 +157,12 @@ export function HistoricPortfolioCyclesChart({
 
     // Transform current mouse coords to domain values, adjusting for svg position and scroll
     const ym = yScale.invert(
-      //d3.event.layerY - svgRect.top - margin.top - window.pageYOffset
       e.clientY -
         svgContainerRect.top -
         dimensions.marginTop +
         window.pageYOffset
     );
     const xm = xScale.invert(
-      //d3.event.layerX - svgRect.left - margin.left - window.pageXOffset
       e.clientX -
         svgContainerRect.left -
         dimensions.marginLeft -
@@ -173,20 +172,21 @@ export function HistoricPortfolioCyclesChart({
     // Get the array index of the closest x value to current hover
     const i = clamp(Math.round(xm) - 1, 0, dataSeries[0].length - 1);
 
-    // Find the data for the line at the current x position
-    // closest in y value to the current y position
-    const highlightLineData = dataSeries.reduce((a, b) => {
-      return Math.abs(yAccessor(a[i]) - ym) < Math.abs(yAccessor(b[i]) - ym)
-        ? a
-        : b;
-    });
+    const closestCycleIndex = scan(
+      dataSeries,
+      (a, b) => Math.abs(yAccessor(a[i]) - ym) - Math.abs(yAccessor(b[i]) - ym)
+    );
 
     // setHoveringCycle({ data: highlightLineData, dataIndex: i });
+
+    // setSelectedPoint({ yearIndex: i, cycleIndex: closestCycleIndex });
 
     // Move selection dot indicator to that nearest point of cursor
     refGdot.current.setAttribute(
       'transform',
-      `translate(${xScale(i + 1)},${yScale(yAccessor(highlightLineData[i]))})`
+      `translate(${xScale(i + 1)},${yScale(
+        yAccessor(dataSeries[closestCycleIndex][i])
+      )})`
     );
   }
 
