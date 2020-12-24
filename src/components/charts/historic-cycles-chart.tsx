@@ -5,7 +5,7 @@ import { CycleStats, CycleYearData } from '../../data/calc/portfolio-calc';
 import { numToCurrencyShort } from '../../utilities/format';
 import { useChartDimensions } from '../../utilities/hooks';
 import { clamp } from '../../utilities/math';
-import { Point } from '../portfolio-graph';
+import { Point } from '../historic-portfolio-details';
 import { Axis } from './axis';
 import { Chart } from './chart';
 import { HistoricCyclesTooltip } from './historic-cycles-tooltip';

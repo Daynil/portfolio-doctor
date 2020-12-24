@@ -20,21 +20,12 @@ export interface PortfolioData {
   options: PortfolioOptions;
 }
 
-/**
- * Data formatted for chart consumption
- */
-// type ChartData = {
-//   startYear: number;
-//   values: LineData[];
-//   stats: CycleStats;
-// };
-
 export type Point = {
   cycleIndex: number;
   yearIndex: number;
 };
 
-export function PortfolioGraph({
+export function HistoricPortfolioDetails({
   lifecyclesData,
   lifecyclesStats,
   portfolioStats,

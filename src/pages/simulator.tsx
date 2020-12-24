@@ -1,6 +1,9 @@
 import { format } from 'd3-format';
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import { PortfolioData, PortfolioGraph } from '../components/portfolio-graph';
+import {
+  HistoricPortfolioDetails,
+  PortfolioData
+} from '../components/historic-portfolio-details';
 import RadioInput from '../components/radio-input';
 import SEO from '../components/seo';
 import TextInput from '../components/text-input';
@@ -180,18 +183,6 @@ export default function Simulator() {
       lifecyclesData,
       lifecyclesStats: stats.cycleStats,
       portfolioStats: stats,
-
-      // chartData: lifecyclesData.map((cycle, i) => {
-      //   return {
-      //     startYear: data[0].year + i,
-      //     values: cycle.map((year, i) => ({
-      //       x: i,
-      //       y: year.balanceInfAdjEnd,
-      //       withdrawal: year.withdrawalInfAdjust
-      //     })),
-      //     stats: stats.cycleStats[i]
-      //   };
-      // }),
       options: curPortfolio.options
     });
   }
@@ -511,34 +502,7 @@ export default function Simulator() {
             </div>
           </div>
           <div className="w-full">
-            {!portfolio ? null : <PortfolioGraph {...portfolio} />}
-            {/* {!portfolio ? null : (
-              <LineChart
-                dataSeries={portfolio.chartData.map((d) => d.values)}
-                plotWidth={1000}
-                plotHeight={600}
-                lineColorizer={function lineColorizer(
-                  line: Point[],
-                  lineMeta: CycleStats
-                ): React.CSSProperties {
-                  const lineStyle: React.CSSProperties = {
-                    stroke: '#48BB78', // Green
-                    opacity: '0.8',
-                    strokeWidth: '1.5'
-                  };
-
-                  // Red
-                  if (lineMeta.failureYear) lineStyle.stroke = '#F56565';
-                  // Yellow
-                  else if (lineMeta.nearFailure) lineStyle.stroke = '#FFD600';
-
-                  return lineStyle;
-                }}
-                allLineMeta={portfolio.lifecyclesData.map((cycle, i) => {
-                  return portfolio.stats.cycleStats[i];
-                })}
-              />
-            )} */}
+            {!portfolio ? null : <HistoricPortfolioDetails {...portfolio} />}
           </div>
         </div>
       </div>
