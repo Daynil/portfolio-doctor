@@ -29,6 +29,21 @@ export type Point = {
   yearIndex: number;
 };
 
+const colors = {
+  green: {
+    normal: '#48BB78',
+    dark: '#38A169'
+  },
+  yellow: {
+    normal: '#FFD600',
+    dark: '#FFD600'
+  },
+  red: {
+    normal: '#F56565',
+    dark: '#E53E3E'
+  }
+};
+
 export function HistoricPortfolioCyclesChart({
   dataSeries,
   aspectRatio,
@@ -69,26 +84,28 @@ export function HistoricPortfolioCyclesChart({
     .x((d) => xScale(xAccessor(d)))
     .y((d) => yScale(yAccessor(d)));
 
+  // Bottleneck, should only run when data or dimensions change
   const linePathStringArray = useMemo(
     () => dataSeries.map((line) => chartLine(line)),
     [dataSeries, dimensions.width, dimensions.height]
   );
 
-  // TODO: Add darker colors back if hovering?
-  const linePaths = dataSeries.map((lineData, i) => {
+  const linePaths = dataSeries.map((_, i) => {
+    const hoveringCycle = selectedPoint && i === selectedPoint.cycleIndex;
+
     const lineStyle: React.CSSProperties = {
-      stroke: '#48BB78', // Green
+      stroke: hoveringCycle ? colors.green.dark : colors.green.normal,
       opacity: '0.8',
       strokeWidth: '1.5'
     };
 
-    // Red
-    if (allLineMeta[i].failureYear) lineStyle.stroke = '#F56565';
-    // Yellow
-    else if (allLineMeta[i].nearFailure) lineStyle.stroke = '#FFD600';
+    if (allLineMeta[i].failureYear)
+      lineStyle.stroke = hoveringCycle ? colors.red.dark : colors.red.normal;
+    else if (allLineMeta[i].nearFailure)
+      lineStyle.stroke = colors.yellow.normal;
 
     if (selectedPoint) {
-      if (i === selectedPoint.cycleIndex) {
+      if (hoveringCycle) {
         lineStyle.opacity = '1';
         lineStyle.strokeWidth = '3';
       } else {
@@ -107,6 +124,14 @@ export function HistoricPortfolioCyclesChart({
       ></path>
     );
   });
+
+  function getCircleColor() {
+    if (!selectedPoint) return;
+    const hoveringCycleMeta = allLineMeta[selectedPoint.cycleIndex];
+    if (hoveringCycleMeta.failureYear) return colors.red.dark;
+    if (hoveringCycleMeta.nearFailure) return colors.yellow.dark;
+    return colors.green.dark;
+  }
 
   // https://observablehq.com/@d3/multi-line-chart
   function mouseMoved(e: React.MouseEvent<HTMLElement, MouseEvent>) {
@@ -195,8 +220,14 @@ export function HistoricPortfolioCyclesChart({
           >
             {linePaths}
           </g>
-          <g ref={refGdot} display={selectedPoint ? null : 'none'}>
-            <circle r="3.5"></circle>
+          <g ref={refGdot}>
+            <circle
+              r="4"
+              fill="white"
+              stroke={getCircleColor()}
+              strokeWidth="3"
+              opacity={selectedPoint ? '1' : '0'}
+            />
           </g>
         </Chart>
       </div>
