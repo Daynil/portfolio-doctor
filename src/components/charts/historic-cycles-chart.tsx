@@ -5,6 +5,7 @@ import { CycleStats, CycleYearData } from '../../data/calc/portfolio-calc';
 import { numToCurrencyShort } from '../../utilities/format';
 import { useChartDimensions } from '../../utilities/hooks';
 import { clamp } from '../../utilities/math';
+import { Point } from '../portfolio-graph';
 import { Axis } from './axis';
 import { Chart } from './chart';
 import { HistoricCyclesTooltip } from './historic-cycles-tooltip';
@@ -15,20 +16,6 @@ export type D3Selection<T extends d3.BaseType> = d3.Selection<
   null,
   undefined
 >;
-
-type Props = {
-  /** An array of points is a line, 2d array for multiple lines */
-  dataSeries: CycleYearData[][];
-  /** Chart's aspect ratio */
-  aspectRatio: number;
-  /** Additional metadata about each line */
-  allLineMeta?: CycleStats[];
-};
-
-export type Point = {
-  cycleIndex: number;
-  yearIndex: number;
-};
 
 const colors = {
   green: {
@@ -47,16 +34,31 @@ const colors = {
 
 const tooltipWidth = 325;
 
+type Props = {
+  /** An array of points is a line, 2d array for multiple lines */
+  dataSeries: CycleYearData[][];
+  /** Chart's aspect ratio */
+  aspectRatio: number;
+  /** Additional metadata about each line */
+  allLineMeta?: CycleStats[];
+  selectedPoint: Point;
+  handleSetSelectedPoint: (point: Point) => void;
+  pointFixed: boolean;
+  handleSetPointFixed: (fixed: boolean) => void;
+};
+
 export function HistoricCyclesChart({
   dataSeries,
   aspectRatio,
-  allLineMeta
+  allLineMeta,
+  selectedPoint,
+  handleSetSelectedPoint,
+  pointFixed,
+  handleSetPointFixed
 }: Props) {
   const [ref, dimensions] = useChartDimensions({}, aspectRatio);
   const refGdot = useRef<SVGGElement>(null);
   const [svgContainerRect, setContainerSvgRect] = useState<DOMRect>(null);
-  const [selectedPoint, setSelectedPoint] = useState<Point>(null);
-  const [pointFixed, setPointFixed] = useState(false);
   const [tooltipLeftAdjust, setTooltipLeftAdjust] = useState(0);
 
   useEffect(() => {
@@ -177,7 +179,7 @@ export function HistoricCyclesChart({
       (a, b) => Math.abs(yAccessor(a[i]) - ym) - Math.abs(yAccessor(b[i]) - ym)
     );
 
-    setSelectedPoint({ yearIndex: i, cycleIndex: closestCycleIndex });
+    handleSetSelectedPoint({ yearIndex: i, cycleIndex: closestCycleIndex });
 
     // Move selection dot indicator to that nearest point of cursor
     refGdot.current.setAttribute(
@@ -189,11 +191,11 @@ export function HistoricCyclesChart({
   }
 
   function mouseLeft() {
-    if (!pointFixed) setSelectedPoint(null);
+    if (!pointFixed) handleSetSelectedPoint(null);
   }
 
   function mouseClicked() {
-    setPointFixed(!pointFixed);
+    handleSetPointFixed(!pointFixed);
   }
 
   return (
@@ -212,7 +214,7 @@ export function HistoricCyclesChart({
             yearData={
               dataSeries[selectedPoint.cycleIndex][selectedPoint.yearIndex]
             }
-            cycleLength={dataSeries[selectedPoint.cycleIndex].length}
+            cycleLength={dataSeries[selectedPoint.cycleIndex].length - 1}
             pointFixed={pointFixed}
             leftAdjust={tooltipLeftAdjust}
           />

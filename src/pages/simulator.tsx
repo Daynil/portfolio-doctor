@@ -178,20 +178,21 @@ export default function Simulator() {
 
     setPortfolio({
       lifecyclesData,
-      stats,
-      chartData: lifecyclesData.map((cycle, i) => {
-        return {
-          startYear: data[0].year + i,
-          values: cycle.map((year, i) => ({
-            x: i,
-            y: year.balanceInfAdjEnd,
-            withdrawal: year.withdrawalInfAdjust
-          })),
-          stats: stats.cycleStats[i]
-        };
-      }),
-      options: curPortfolio.options,
-      startYear: data[0].year
+      lifecyclesStats: stats.cycleStats,
+      portfolioStats: stats,
+
+      // chartData: lifecyclesData.map((cycle, i) => {
+      //   return {
+      //     startYear: data[0].year + i,
+      //     values: cycle.map((year, i) => ({
+      //       x: i,
+      //       y: year.balanceInfAdjEnd,
+      //       withdrawal: year.withdrawalInfAdjust
+      //     })),
+      //     stats: stats.cycleStats[i]
+      //   };
+      // }),
+      options: curPortfolio.options
     });
   }
 

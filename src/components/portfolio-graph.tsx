@@ -1,5 +1,5 @@
 import { format } from 'd3';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   CycleStats,
   CycleYearData,
@@ -15,56 +15,43 @@ import ShareIcon from './svg/share-icon';
 
 export interface PortfolioData {
   lifecyclesData: CycleYearData[][];
-  stats: PortfolioStats;
-  chartData: ChartData[];
+  lifecyclesStats: CycleStats[];
+  portfolioStats: PortfolioStats;
   options: PortfolioOptions;
-  startYear: number;
 }
 
-type LineData = { x: number; y: number; withdrawal: number };
 /**
  * Data formatted for chart consumption
  */
-type ChartData = {
-  startYear: number;
-  values: LineData[];
-  stats: CycleStats;
-};
-// cycle start year, selected year, selected balance, year max/min, year end
-type PointData = {
-  yearsAfterPortfolioStart: number;
-  currYear: number;
-  cycleStartYear: number;
-  cycleEndYear: number;
-  currEndingBalanceInflAdj: number;
-  currYearWithdrawalInflAdj: number;
-  lastEndingBalanceInflAdj: number;
-  cycleAvgWithdrawal: number;
-  cycleMinWithdrawal: number;
-  cycleMaxWithdrawal: number;
+// type ChartData = {
+//   startYear: number;
+//   values: LineData[];
+//   stats: CycleStats;
+// };
+
+export type Point = {
+  cycleIndex: number;
+  yearIndex: number;
 };
 
 export function PortfolioGraph({
   lifecyclesData,
-  stats,
-  chartData,
-  options,
-  startYear
+  lifecyclesStats,
+  portfolioStats,
+  options
 }: PortfolioData) {
-  const refSvg = useRef<SVGSVGElement>(null);
-  const refTooltip = useRef<HTMLDivElement>(null);
   const refCopyURL = useRef<HTMLInputElement>(null);
-  const [hoveringCycle, setHoveringCycle] = useState<{
-    data: ChartData;
-    dataIndex: number;
-  }>(null);
-  const [hoveringPointData, setHoveringPointData] = useState<PointData>(null);
-  const [selectedCycle, setSelectedCycle] = useState<ChartData>(null);
-  const [selectedPointData, setSelectedPointData] = useState<PointData>(null);
-  const [showCycleDetails, setshowCycleDetails] = useState(false);
+  const [selectedPoint, setSelectedPoint] = useState<Point>(null);
+  const [pointFixed, setPointFixed] = useState(false);
+
+  const [showCycleDetails, setShowCycleDetails] = useState(false);
 
   const [copyComplete, setCopyComplete] = useState(false);
   const [copyModalActive, setCopyModalActive] = useState(false);
+
+  useEffect(() => {
+    if (!pointFixed) setShowCycleDetails(false);
+  }, [pointFixed]);
 
   function shareResults() {
     setCopyModalActive(true);
@@ -81,34 +68,25 @@ export function PortfolioGraph({
     setCopyComplete(false);
   }
 
-  const pointData = selectedPointData ? selectedPointData : hoveringPointData;
+  function getSelectedCycle() {
+    if (!selectedPoint) return null;
+    return lifecyclesData[selectedPoint.cycleIndex];
+  }
 
-  // useEffect(() => {
-  //   if (!hoveringCycle) setHoveringPointData(null);
-  //   else {
-  //     setHoveringPointData({
-  //       yearsAfterPortfolioStart: hoveringCycle.dataIndex + 1,
-  //       currYear: hoveringCycle.data.startYear + hoveringCycle.dataIndex + 1,
-  //       cycleStartYear: hoveringCycle.data.startYear,
-  //       cycleEndYear: hoveringCycle.data.startYear + memoized.xDomain.length,
-  //       currEndingBalanceInflAdj:
-  //         hoveringCycle.data.values[hoveringCycle.dataIndex].y,
-  //       currYearWithdrawalInflAdj:
-  //         hoveringCycle.data.values[hoveringCycle.dataIndex].withdrawal,
-  //       lastEndingBalanceInflAdj:
-  //         hoveringCycle.data.stats.balance.endingInflAdj,
-  //       cycleAvgWithdrawal: hoveringCycle.data.stats.withdrawals.averageInflAdj,
-  //       cycleMinWithdrawal:
-  //         hoveringCycle.data.stats.withdrawals.min.amountInflAdj,
-  //       cycleMaxWithdrawal:
-  //         hoveringCycle.data.stats.withdrawals.max.amountInflAdj
-  //     });
-  //   }
-  // }, [hoveringCycle]);
+  function getSelectedCycleStats() {
+    if (!selectedPoint) return null;
+    return lifecyclesStats[selectedPoint.cycleIndex];
+  }
+
+  function getSelectedYear() {
+    if (!selectedPoint) return null;
+    return lifecyclesData[selectedPoint.cycleIndex][selectedPoint.yearIndex];
+  }
 
   let portfolioHealthColor = 'text-green-500';
-  if (stats.successRate < 0.75) portfolioHealthColor = 'text-yellow-500';
-  if (stats.successRate < 0.5) portfolioHealthColor = 'text-red-500';
+  if (portfolioStats.successRate < 0.75)
+    portfolioHealthColor = 'text-yellow-500';
+  if (portfolioStats.successRate < 0.5) portfolioHealthColor = 'text-red-500';
 
   return !lifecyclesData ? null : (
     <div className="flex flex-row flex-wrap">
@@ -125,7 +103,11 @@ export function PortfolioGraph({
           <HistoricCyclesChart
             dataSeries={lifecyclesData}
             aspectRatio={1000 / 600}
-            allLineMeta={chartData.map((d) => d.stats)}
+            allLineMeta={lifecyclesStats}
+            selectedPoint={selectedPoint}
+            handleSetSelectedPoint={(point: Point) => setSelectedPoint(point)}
+            pointFixed={pointFixed}
+            handleSetPointFixed={(fixed: boolean) => setPointFixed(fixed)}
           />
         </div>
         <div
@@ -145,7 +127,7 @@ export function PortfolioGraph({
                   Success
                 </label>
                 <span className={'text-2xl font-bold ' + portfolioHealthColor}>
-                  {format('.2%')(stats.successRate)}
+                  {format('.2%')(portfolioStats.successRate)}
                 </span>
               </div>
             </div>
@@ -155,7 +137,7 @@ export function PortfolioGraph({
                 Average Ending Balance
               </label>
               <span className="text-xl">
-                {numToCurrency(stats.balance.averageInflAdj, 0)}
+                {numToCurrency(portfolioStats.balance.averageInflAdj, 0)}
               </span>
             </div>
             <div className="pt-2">
@@ -163,7 +145,7 @@ export function PortfolioGraph({
                 Average Withdrawal
               </label>
               <span className="text-xl">
-                {numToCurrency(stats.withdrawals.averageInflAdj, 0)}
+                {numToCurrency(portfolioStats.withdrawals.averageInflAdj, 0)}
               </span>
             </div>
             <div className="my-2 mx-auto bg-gray-500 w-5/6 h-px"></div>
@@ -262,12 +244,18 @@ export function PortfolioGraph({
                   </label>
                 </td>
                 <td className="text-right">
-                  {stats.balance.min.balanceInflAdj < 0
+                  {portfolioStats.balance.min.balanceInflAdj < 0
                     ? numToCurrency(0)
-                    : numToCurrency(stats.balance.min.balanceInflAdj, 0)}
+                    : numToCurrency(
+                        portfolioStats.balance.min.balanceInflAdj,
+                        0
+                      )}
                 </td>
                 <td className="text-right pr-4" rowSpan={3}>
-                  {numToCurrency(pointData?.lastEndingBalanceInflAdj, 0)}
+                  {numToCurrency(
+                    getSelectedCycleStats()?.balance.endingInflAdj,
+                    0
+                  )}
                 </td>
               </tr>
               <tr>
@@ -277,7 +265,7 @@ export function PortfolioGraph({
                   </label>
                 </td>
                 <td className="text-right">
-                  {numToCurrency(stats.balance.averageInflAdj, 0)}
+                  {numToCurrency(portfolioStats.balance.averageInflAdj, 0)}
                 </td>
               </tr>
               <tr>
@@ -287,7 +275,7 @@ export function PortfolioGraph({
                   </label>
                 </td>
                 <td className="text-right">
-                  {numToCurrency(stats.balance.max.balanceInflAdj, 0)}
+                  {numToCurrency(portfolioStats.balance.max.balanceInflAdj, 0)}
                 </td>
               </tr>
               <tr>
@@ -305,10 +293,16 @@ export function PortfolioGraph({
                   </label>
                 </td>
                 <td className="text-right">
-                  {numToCurrency(stats.withdrawals.min.amountInflAdj, 0)}
+                  {numToCurrency(
+                    portfolioStats.withdrawals.min.amountInflAdj,
+                    0
+                  )}
                 </td>
                 <td className="text-right pr-4">
-                  {numToCurrency(pointData?.cycleMinWithdrawal, 0)}
+                  {numToCurrency(
+                    getSelectedCycleStats()?.withdrawals.min.amountInflAdj,
+                    0
+                  )}
                 </td>
               </tr>
               <tr>
@@ -318,10 +312,13 @@ export function PortfolioGraph({
                   </label>
                 </td>
                 <td className="text-right">
-                  {numToCurrency(stats.withdrawals.averageInflAdj, 0)}
+                  {numToCurrency(portfolioStats.withdrawals.averageInflAdj, 0)}
                 </td>
                 <td className="text-right pr-4">
-                  {numToCurrency(pointData?.cycleAvgWithdrawal, 0)}
+                  {numToCurrency(
+                    getSelectedCycleStats()?.withdrawals.averageInflAdj,
+                    0
+                  )}
                 </td>
               </tr>
               <tr>
@@ -331,10 +328,16 @@ export function PortfolioGraph({
                   </label>
                 </td>
                 <td className="text-right">
-                  {numToCurrency(stats.withdrawals.max.amountInflAdj, 0)}
+                  {numToCurrency(
+                    portfolioStats.withdrawals.max.amountInflAdj,
+                    0
+                  )}
                 </td>
                 <td className="text-right pr-4">
-                  {numToCurrency(pointData?.cycleMaxWithdrawal, 0)}
+                  {numToCurrency(
+                    getSelectedCycleStats()?.withdrawals.max.amountInflAdj,
+                    0
+                  )}
                 </td>
               </tr>
               <tr>
@@ -347,15 +350,15 @@ export function PortfolioGraph({
         </div>
       </div>
       <div className="ml-6">
-        {!selectedCycle ? null : (
+        {selectedPoint && pointFixed && (
           <button
             className="btn btn-green-2"
-            onClick={() => setshowCycleDetails(!showCycleDetails)}
+            onClick={() => setShowCycleDetails(!showCycleDetails)}
           >
             {showCycleDetails ? 'Hide' : 'Show'} Cycle Details
           </button>
         )}
-        {!selectedCycle || !showCycleDetails ? null : (
+        {!selectedPoint || !showCycleDetails ? null : (
           <table className="mt-4 border-collapse">
             <thead>
               <tr className="bg-green-500 text-white text-right">
@@ -365,26 +368,22 @@ export function PortfolioGraph({
               </tr>
             </thead>
             <tbody>
-              {lifecyclesData
-                .find(
-                  (cycle) => cycle[0].cycleStartYear === selectedCycle.startYear
-                )
-                .map((yearData, i) => (
-                  <tr
-                    key={i + 1}
-                    className="group transition-colors even:bg-gray-200"
-                  >
-                    <td className="group-hover:bg-gray-400 duration-200 text-right p-2">
-                      {yearData.cycleYear}
-                    </td>
-                    <td className="group-hover:bg-gray-400 duration-200 text-right p-2">
-                      {format('$,.2f')(yearData.balanceInfAdjEnd)}
-                    </td>
-                    <td className="group-hover:bg-gray-400 duration-200 text-right p-2">
-                      {format('$,.2f')(yearData.withdrawalInfAdjust)}
-                    </td>
-                  </tr>
-                ))}
+              {lifecyclesData[selectedPoint.cycleIndex].map((yearData, i) => (
+                <tr
+                  key={i + 1}
+                  className="group transition-colors even:bg-gray-200"
+                >
+                  <td className="group-hover:bg-gray-400 duration-200 text-right p-2">
+                    {yearData.cycleYear}
+                  </td>
+                  <td className="group-hover:bg-gray-400 duration-200 text-right p-2">
+                    {format('$,.2f')(yearData.balanceInfAdjEnd)}
+                  </td>
+                  <td className="group-hover:bg-gray-400 duration-200 text-right p-2">
+                    {format('$,.2f')(yearData.withdrawalInfAdjust)}
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         )}
