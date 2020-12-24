@@ -1,5 +1,5 @@
 import { format } from 'd3';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   CycleStats,
   CycleYearData,
@@ -9,7 +9,7 @@ import {
 import { baseUrl } from '../utilities/constants';
 import { numToCurrency } from '../utilities/format';
 import { portfolioOptionsToQueryString } from '../utilities/util';
-import { HistoricPortfolioCyclesChart } from './charts/historic-portfolio-cycles-chart';
+import { HistoricCyclesChart } from './charts/historic-cycles-chart';
 import CopyIcon from './svg/copy-icon';
 import ShareIcon from './svg/share-icon';
 
@@ -63,20 +63,8 @@ export function PortfolioGraph({
   const [selectedPointData, setSelectedPointData] = useState<PointData>(null);
   const [showCycleDetails, setshowCycleDetails] = useState(false);
 
-  const [svgRect, setSvgRect] = useState<DOMRect>(null);
   const [copyComplete, setCopyComplete] = useState(false);
   const [copyModalActive, setCopyModalActive] = useState(false);
-
-  const tooltipWidth = 325;
-
-  // useEffect(() => {
-  //   function setRects() {
-  //     setSvgRect(refSvg.current.getBoundingClientRect());
-  //   }
-  //   setRects();
-  //   window.addEventListener('resize', setRects);
-  //   return () => window.removeEventListener('resize', setRects);
-  // }, []);
 
   function shareResults() {
     setCopyModalActive(true);
@@ -91,118 +79,6 @@ export function PortfolioGraph({
   function closeCopyModal() {
     setCopyModalActive(false);
     setCopyComplete(false);
-  }
-
-  // const memoized = useMemo(() => {
-  //   const xDomain = lifecyclesData[0].map((d, i) => i + 1);
-
-  //   const xScale = scaleLinear()
-  //     .domain([1, lifecyclesData[0].length])
-  //     .range([0, width]);
-
-  //   const yScale = scaleLinear()
-  //     .domain([
-  //       0,
-  //       max(lifecyclesData, (d) => max(d.map((d) => d.balanceInfAdjEnd)))
-  //     ])
-  //     .nice()
-  //     .range([height, 0]);
-
-  //   const chartLine = line<LineData>()
-  //     .x((d, i) => xScale(i + 1))
-  //     .y((d) => yScale(d.y));
-
-  //   const linePathStringArray = chartData.map((d) => chartLine(d.values));
-
-  //   return {
-  //     xDomain,
-  //     xScale,
-  //     yScale,
-  //     linePathStringArray
-  //   };
-  // }, [lifecyclesData]);
-
-  // Draw d3 axes
-  useEffect(() => {
-    setHoveringCycle(null);
-    setHoveringPointData(null);
-    setSelectedCycle(null);
-    setshowCycleDetails(false);
-    setSelectedPointData(null);
-
-    // const gxAxis = select(refGxAxis.current);
-    // const gyAxis = select(refGyAxis.current);
-
-    // gxAxis.call(xAxis);
-    // gyAxis.call(yAxis);
-  }, [lifecyclesData]);
-
-  // https://observablehq.com/@d3/multi-line-chart
-  // function mouseMoved(e: React.MouseEvent<SVGSVGElement, MouseEvent>) {
-  //   e.preventDefault();
-
-  //   if (selectedCycle) return;
-
-  //   // Move tooltip (favor left side when available)
-  //   if (refTooltip.current) {
-  //     let leftAdjust = e.clientX - svgRect.left - window.pageXOffset;
-  //     if (leftAdjust > tooltipWidth) {
-  //       leftAdjust = leftAdjust - tooltipWidth;
-  //     }
-  //     // Alternate method which favors right side when available
-  //     // if (leftAdjust > 690) {
-  //     //   leftAdjust =
-  //     //     leftAdjust - refTooltip.current.getBoundingClientRect().width;
-  //     // }
-  //     refTooltip.current.style.left = leftAdjust + 'px';
-  //   }
-
-  //   // Transform current mouse coords to domain values, adjusting for svg position and scroll
-  //   const ym = memoized.yScale.invert(
-  //     //d3.event.layerY - svgRect.top - margin.top - window.pageYOffset
-  //     e.clientY - svgRect.top - margin.top + window.pageYOffset
-  //   );
-  //   const xm = memoized.xScale.invert(
-  //     //d3.event.layerX - svgRect.left - margin.left - window.pageXOffset
-  //     e.clientX - svgRect.left - margin.left - window.pageXOffset
-  //   );
-
-  //   // Get the array index of the closest x value to current hover
-  //   const i = clamp(Math.round(xm) - 1, 0, memoized.xDomain.length - 1);
-
-  //   // Find the data for the line at the current x position
-  //   // closest in y value to the current y position
-  //   const highlightLineData = chartData.reduce((a, b) => {
-  //     return Math.abs(a.values[i].y - ym) < Math.abs(b.values[i].y - ym)
-  //       ? a
-  //       : b;
-  //   });
-
-  //   setHoveringCycle({ data: highlightLineData, dataIndex: i });
-
-  //   // Move selection dot indicator to that nearest point of cursor
-  //   refGdot.current.setAttribute(
-  //     'transform',
-  //     `translate(${memoized.xScale(memoized.xDomain[i])},${memoized.yScale(
-  //       highlightLineData.values[i].y
-  //     )})`
-  //   );
-  // }
-
-  function mouseClicked() {
-    if (selectedCycle) {
-      setSelectedCycle(null);
-      setshowCycleDetails(false);
-      setSelectedPointData(null);
-    } else {
-      setSelectedCycle(hoveringCycle.data);
-      setSelectedPointData(hoveringPointData);
-    }
-  }
-
-  function mouseLeft() {
-    setHoveringCycle(null);
-    setHoveringPointData(null);
   }
 
   const pointData = selectedPointData ? selectedPointData : hoveringPointData;
@@ -246,83 +122,11 @@ export function PortfolioGraph({
       </div>
       <div className="flex flex-wrap w-full">
         <div className="w-full">
-          <HistoricPortfolioCyclesChart
+          <HistoricCyclesChart
             dataSeries={lifecyclesData}
             aspectRatio={1000 / 600}
             allLineMeta={chartData.map((d) => d.stats)}
           />
-          {/* <svg
-            ref={refSvg}
-            width={width + margin.left + margin.right}
-            height={height + margin.top + margin.bottom}
-            onClick={mouseClicked}
-            onMouseMove={(e) => mouseMoved(e)}
-            onMouseLeave={mouseLeft}
-          >
-            <g transform={`translate(${margin.left},${margin.top})`}>
-              <g ref={refGyAxis}></g>
-              <g ref={refGxAxis} transform={`translate(0,${height})`}></g>
-              <g
-                fill="none"
-                stroke="#48bb78"
-                strokeWidth="1.5"
-                strokeLinejoin="round"
-                strokeLinecap="round"
-              >
-                {linePaths}
-              </g>
-              <g
-                ref={refGdot}
-                display={hoveringCycle || selectedCycle ? null : 'none'}
-              >
-                <circle r="3.5"></circle>
-              </g>
-            </g>
-          </svg> */}
-          {!pointData ? null : (
-            <div
-              ref={refTooltip}
-              style={{
-                width: `${tooltipWidth}px`,
-                height: '11rem',
-                top: '26px'
-              }}
-              className="absolute inset-y-0 inset-x-0 pointer-events-none bg-gray-100 rounded-md p-4 shadow-md"
-            >
-              <div className="flex justify-evenly">
-                <div className="flex flex-col">
-                  <label className="form-label my-0">Start Year</label>
-                  <span>{pointData.cycleStartYear}</span>
-                </div>
-                <div className="flex flex-col">
-                  <label className="form-label my-0">Current Year</label>
-                  <span>{pointData.currYear}</span>
-                </div>
-                <div className="flex flex-col">
-                  <label className="form-label my-0">End Year</label>
-                  <span>
-                    {pointData.cycleStartYear + options.simulationYearsLength}
-                  </span>
-                </div>
-              </div>
-              <div className="my-3 bg-gray-400 w-full h-px"></div>
-              <div className="flex justify-between mt-2">
-                <label className="form-label my-0">Balance</label>
-                <span>
-                  {numToCurrency(pointData.currEndingBalanceInflAdj, 0)}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <label className="form-label my-0">Withdrawal</label>
-                <span>
-                  {numToCurrency(pointData.currYearWithdrawalInflAdj, 0)}
-                </span>
-              </div>
-              <div className="text-gray-500 text-sm text-center mt-2 font-semibold">
-                Click to {selectedPointData ? 'release' : 'freeze'} point
-              </div>
-            </div>
-          )}
         </div>
         <div
           style={{

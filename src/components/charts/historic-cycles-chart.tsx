@@ -7,6 +7,7 @@ import { useChartDimensions } from '../../utilities/hooks';
 import { clamp } from '../../utilities/math';
 import { Axis } from './axis';
 import { Chart } from './chart';
+import { HistoricCyclesTooltip } from './historic-cycles-tooltip';
 
 export type D3Selection<T extends d3.BaseType> = d3.Selection<
   T,
@@ -44,7 +45,9 @@ const colors = {
   }
 };
 
-export function HistoricPortfolioCyclesChart({
+const tooltipWidth = 325;
+
+export function HistoricCyclesChart({
   dataSeries,
   aspectRatio,
   allLineMeta
@@ -54,6 +57,7 @@ export function HistoricPortfolioCyclesChart({
   const [svgContainerRect, setContainerSvgRect] = useState<DOMRect>(null);
   const [selectedPoint, setSelectedPoint] = useState<Point>(null);
   const [pointFixed, setPointFixed] = useState(false);
+  const [tooltipLeftAdjust, setTooltipLeftAdjust] = useState(0);
 
   useEffect(() => {
     function setRects() {
@@ -140,18 +144,16 @@ export function HistoricPortfolioCyclesChart({
     if (pointFixed) return;
 
     // Move tooltip (favor left side when available)
-    // if (refTooltip.current) {
-    //   let leftAdjust = e.clientX - svgRect.left - window.pageXOffset;
-    //   if (leftAdjust > tooltipWidth) {
-    //     leftAdjust = leftAdjust - tooltipWidth;
-    //   }
-    //   // Alternate method which favors right side when available
-    //   // if (leftAdjust > 690) {
-    //   //   leftAdjust =
-    //   //     leftAdjust - refTooltip.current.getBoundingClientRect().width;
-    //   // }
-    //   refTooltip.current.style.left = leftAdjust + 'px';
+    let leftAdjust = e.clientX - svgContainerRect.left - window.pageXOffset;
+    if (leftAdjust > tooltipWidth) {
+      leftAdjust = leftAdjust - tooltipWidth;
+    }
+    // Alternate method which favors right side when available
+    // if (leftAdjust > 690) {
+    //   leftAdjust =
+    //     leftAdjust - refTooltip.current.getBoundingClientRect().width;
     // }
+    setTooltipLeftAdjust(leftAdjust);
 
     // Transform current mouse coords to domain values, adjusting for svg position and scroll
     const ym = yScale.invert(
@@ -197,13 +199,24 @@ export function HistoricPortfolioCyclesChart({
   return (
     dataSeries && (
       <div
-        className="w-full"
+        className="w-full relative"
         style={{ maxWidth: `calc(60vh * ${aspectRatio})` }}
         onMouseMove={mouseMoved}
         onMouseLeave={mouseLeft}
         onMouseDown={mouseClicked}
         ref={ref}
       >
+        {selectedPoint && (
+          <HistoricCyclesTooltip
+            width={tooltipWidth}
+            yearData={
+              dataSeries[selectedPoint.cycleIndex][selectedPoint.yearIndex]
+            }
+            cycleLength={dataSeries[selectedPoint.cycleIndex].length}
+            pointFixed={pointFixed}
+            leftAdjust={tooltipLeftAdjust}
+          />
+        )}
         <Chart dimensions={dimensions}>
           <Axis
             orientation="left"
