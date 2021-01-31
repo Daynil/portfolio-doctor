@@ -24,12 +24,6 @@ import {
   queryStringToPortfolioOptions
 } from '../utilities/util';
 
-type Props = {
-  location: {
-    search?: string;
-  };
-};
-
 export default function Simulator() {
   const [portfolio, setPortfolio] = useState<PortfolioData>(null);
   const [data, setData] = useState<MarketYearData[]>([]);
@@ -47,6 +41,8 @@ export default function Simulator() {
   let startingOptions = { ...defaultPortfolioOptions };
   let urlOptionsValidated = false;
 
+  // This is the global window.location
+  // Next.js offers similar funtion with useRouter().query, but no point to refactor
   if (typeof location !== 'undefined' && location?.search) {
     [startingOptions, urlOptionsValidated] = queryStringToPortfolioOptions(
       location.search

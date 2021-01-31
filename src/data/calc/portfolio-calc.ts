@@ -34,6 +34,13 @@ export interface CycleYearData {
   balanceInfAdjEnd: number;
 }
 
+export interface CycleYearQuantile {
+  /** E.g. 0.25 or 0.9 */
+  quantile: number;
+  cycleYearIndex: number;
+  balance: number;
+}
+
 export interface CycleStats {
   cycleStartYear: number;
   fees: number;

@@ -1,9 +1,14 @@
 //import parse from 'csv-parse';
 //import { writeFileSync } from 'fs';
-import { deviation } from 'd3';
+import { ascending, deviation, quantile, transpose } from 'd3';
 import { mean } from 'd3-array';
 import { normSinv } from '../utilities/math';
-import { MarketDataStats, MarketYearData } from './calc/portfolio-calc';
+import {
+  CycleYearData,
+  CycleYearQuantile,
+  MarketDataStats,
+  MarketYearData
+} from './calc/portfolio-calc';
 
 export function loadFile(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -109,6 +114,29 @@ export function generateMonteCarloDataset(
   }
 
   return monteCarloYearData;
+}
+
+export function getQuantiles(
+  yearData: CycleYearData[][],
+  quantiles: number[]
+): CycleYearQuantile[][] {
+  const transposed = transpose<CycleYearData>(yearData).map((cycleData) =>
+    cycleData.map((year) => year.balanceInfAdjEnd).sort(ascending)
+  );
+  const quantileData: CycleYearQuantile[][] = [];
+  for (let i = 0; i < quantiles.length; i++) {
+    const quantileNum = quantiles[i];
+    quantileData.push(
+      transposed.map((transposedYears, yearIdx) => {
+        return {
+          quantile: quantileNum,
+          cycleYearIndex: yearIdx,
+          balance: quantile(transposedYears, quantileNum)
+        };
+      })
+    );
+  }
+  return quantileData;
 }
 
 /**

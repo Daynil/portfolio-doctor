@@ -542,6 +542,7 @@ describe('basic functionality test', () => {
 });
 
 describe('full 3-cycle portfolio tests against excel data', () => {
+  let portfolioData: CycleYearData[][];
   let portfolioStats: PortfolioStats;
   beforeAll(() => {
     const excelStatsTestSlice = fullMarketYearData.slice(
@@ -553,9 +554,9 @@ describe('full 3-cycle portfolio tests against excel data', () => {
       simulationYearsLength: 3,
       withdrawalMethod: WithdrawalMethod.InflationAdjusted
     });
-    const results = infAdjPortfolio.crunchAllCyclesData();
+    portfolioData = infAdjPortfolio.crunchAllCyclesData();
 
-    portfolioStats = infAdjPortfolio.crunchAllPortfolioStats(results);
+    portfolioStats = infAdjPortfolio.crunchAllPortfolioStats(portfolioData);
   });
 
   test('calculates each type of cycle-level statistic correctly', () => {
@@ -594,6 +595,75 @@ describe('full 3-cycle portfolio tests against excel data', () => {
     expect(portfolioStats.withdrawals.max.cycleStartYear).toEqual(2015);
     expect(portfolioStats.withdrawals.max.yearInCycle).toEqual(2017);
     expect(portfolioStats.withdrawals.max.amount).toBeCloseTo(41562.9827, 4);
+  });
+
+  test('calculates ending balance quantiles', () => {
+    const quantilePortfolio = dataHelpers.getQuantiles(portfolioData, [
+      0.25,
+      0.5,
+      0.75
+    ]);
+
+    expect(
+      quantilePortfolio.map((cycle) =>
+        cycle.map((year) => ({
+          ...year,
+          balance: round(year.balance, 4)
+        }))
+      )
+    ).toEqual([
+      [
+        {
+          quantile: 0.25,
+          cycleYearIndex: 0,
+          balance: 1002104.4473
+        },
+        {
+          quantile: 0.25,
+          cycleYearIndex: 1,
+          balance: 1021920.9142
+        },
+        {
+          quantile: 0.25,
+          cycleYearIndex: 2,
+          balance: 1150677.4876
+        }
+      ],
+      [
+        {
+          quantile: 0.5,
+          cycleYearIndex: 0,
+          balance: 1074419.3335
+        },
+        {
+          quantile: 0.5,
+          cycleYearIndex: 1,
+          balance: 1041044.2539
+        },
+        {
+          quantile: 0.5,
+          cycleYearIndex: 2,
+          balance: 1174839.3694
+        }
+      ],
+      [
+        {
+          quantile: 0.75,
+          cycleYearIndex: 0,
+          balance: 1125642.8883
+        },
+        {
+          quantile: 0.75,
+          cycleYearIndex: 1,
+          balance: 1146468.3004
+        },
+        {
+          quantile: 0.75,
+          cycleYearIndex: 2,
+          balance: 1183122.0206
+        }
+      ]
+    ]);
   });
 
   test('calculates max length single cycle nominal withdrawal', () => {
