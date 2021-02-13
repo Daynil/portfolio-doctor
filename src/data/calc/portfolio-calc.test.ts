@@ -909,28 +909,28 @@ describe('monte carlo simulation', () => {
       .map((cycles) => cycles.map((yr) => yr.balanceInfAdjEnd));
 
     const sim1Expected = [
-      [948622.7919, 879851.2861, 1047188.0095],
-      [944936.3778, 1128337.4089, 1240826.2148],
-      [1195877.8261, 1317868.7146, 1144246.5547]
+      [936286.074, 857224.388, 1029178.2179],
+      [933316.5123, 1125001.2665, 1231556.8765],
+      [1207850.8237, 1325644.8941, 1143469.8453]
     ];
 
     const sim2Expected = [
-      [1359862.7205, 1431149.4727, 1183583.6036],
-      [1057886.418, 866021.2636, 878210.9288],
-      [816012.8775, 825007.5378, 808780.2565]
+      [1437921.93665059, 1499639.62612509, 1244732.89767998],
+      [1046586.64007377, 858393.599587996, 858909.658787397],
+      [817905.095953996, 816388.161623398, 788985.075898638]
     ];
 
     const sim3Expected = [
-      [1073073.9887, 1189438.5622, 1087327.8166],
-      [1123443.1996, 1024900.5023, 1406329.5727],
-      [907286.0993, 1238295.4383, 1122781.7141]
+      [1063723.99307905, 1175858.18495723, 1063546.71677806],
+      [1120766.19503152, 1011963.63868098, 1481580.24701878],
+      [898052.69285439, 1307845.7351887, 1173055.45790684]
     ];
 
     for (let cycle = 0; cycle < sim1Expected.length; cycle++) {
       for (let year = 0; year < sim1Expected[cycle].length; year++) {
         expect(sim1yearEndBalances[cycle][year]).toBeCloseTo(
           sim1Expected[cycle][year],
-          3
+          2
         );
       }
     }
@@ -939,7 +939,7 @@ describe('monte carlo simulation', () => {
       for (let year = 0; year < sim2Expected[cycle].length; year++) {
         expect(sim2yearEndBalances[cycle][year]).toBeCloseTo(
           sim2Expected[cycle][year],
-          3
+          2
         );
       }
     }
@@ -948,7 +948,7 @@ describe('monte carlo simulation', () => {
       for (let year = 0; year < sim3Expected[cycle].length; year++) {
         expect(sim3yearEndBalances[cycle][year]).toBeCloseTo(
           sim3Expected[cycle][year],
-          3
+          2
         );
       }
     }

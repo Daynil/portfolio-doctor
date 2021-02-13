@@ -104,7 +104,7 @@ export function getMarketDataStats(
  */
 export function generateMonteCarloDataset(
   originalYearData: MarketYearData[],
-  marketDataStats: MarketDataStats
+  { meanAnnualMarketChange, stdDevAnnualMarketChange }: MarketDataStats
 ): MarketYearData[] {
   const monteCarloYearData: MarketYearData[] = [];
 
@@ -112,17 +112,18 @@ export function generateMonteCarloDataset(
     if (i === 0) {
       monteCarloYearData[i] = originalYearData[i];
     } else {
-      const randomProbability = Math.random();
-      const randomNumStdDevs = normSinv(randomProbability);
-      const simulatedMarketChange =
-        marketDataStats.meanAnnualMarketChange +
-        randomNumStdDevs * marketDataStats.stdDevAnnualMarketChange;
+      const drift =
+        meanAnnualMarketChange -
+        (stdDevAnnualMarketChange * stdDevAnnualMarketChange) / 2;
+      const randomShock = stdDevAnnualMarketChange * normSinv(Math.random());
+
       const priorYearEquitiesPrice = monteCarloYearData[i - 1].equitiesPrice;
+      const simulatedPrice =
+        priorYearEquitiesPrice * Math.exp(drift + randomShock);
+
       monteCarloYearData[i] = {
         ...originalYearData[i],
-        equitiesPrice:
-          priorYearEquitiesPrice +
-          priorYearEquitiesPrice * simulatedMarketChange
+        equitiesPrice: simulatedPrice
       };
     }
   }
