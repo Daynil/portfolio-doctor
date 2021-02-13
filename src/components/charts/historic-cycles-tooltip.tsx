@@ -1,6 +1,7 @@
 import React from 'react';
 import { CycleYearData } from '../../data/calc/portfolio-calc';
 import { numToCurrency } from '../../utilities/format';
+import { colors } from './historic-cycles-chart';
 
 type Props = {
   width: number;
@@ -51,7 +52,11 @@ export function HistoricCyclesTooltip({
         <span>{numToCurrency(yearData.withdrawalInfAdjust, 0)}</span>
       </div>
       <div className="text-gray-500 text-sm text-center mt-2 font-semibold">
-        Click to {pointFixed ? 'release' : 'freeze'} point
+        Click to{' '}
+        <span style={{ color: colors.green.dark }}>
+          {pointFixed ? 'release' : 'freeze'}
+        </span>{' '}
+        point
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import { ScaleLinear, tickFormat } from 'd3';
+import { ScaleLinear } from 'd3';
 import React, { useMemo } from 'react';
 import { Dimensions } from '../../utilities/hooks';
 import { useChartContext } from './chart';
@@ -42,6 +42,19 @@ function AxisBottom({
   }, [domain.join('-'), range.join('-')]);
   return (
     <g transform={`translate(0,${dimensions.boundedHeight})`} {...props}>
+      {label && (
+        <text
+          x={dimensions.boundedWidth / 2}
+          y={dimensions.marginBottom - 15}
+          fill="currentColor"
+          style={{
+            textAnchor: 'middle',
+            fontSize: '1rem'
+          }}
+        >
+          {label}
+        </text>
+      )}
       <path
         fill="none"
         stroke="currentColor"
@@ -89,6 +102,20 @@ function AxisLeft({
   }, [domain.join('-'), range.join('-')]);
   return (
     <g {...props}>
+      {label && (
+        <text
+          x={-dimensions.boundedHeight / 2}
+          y={-dimensions.marginLeft + 15}
+          fill="currentColor"
+          style={{
+            transform: 'rotate(-90deg)',
+            textAnchor: 'middle',
+            fontSize: '1rem'
+          }}
+        >
+          {label}
+        </text>
+      )}
       <path
         fill="none"
         stroke="currentColor"
@@ -109,7 +136,7 @@ function AxisLeft({
               textAnchor: 'end'
             }}
           >
-            {!tickFormat ? value : formatTick(value)}
+            {!formatTick ? value : formatTick(value)}
           </text>
         </g>
       ))}

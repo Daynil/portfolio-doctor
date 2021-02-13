@@ -17,7 +17,7 @@ export type D3Selection<T extends d3.BaseType> = d3.Selection<
   undefined
 >;
 
-const colors = {
+export const colors = {
   green: {
     normal: '#48BB78',
     dark: '#38A169'

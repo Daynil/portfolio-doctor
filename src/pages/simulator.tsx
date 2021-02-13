@@ -7,7 +7,6 @@ import {
 import RadioInput from '../components/radio-input';
 import SEO from '../components/seo';
 import TextInput from '../components/text-input';
-import TextLink from '../components/text-link';
 import {
   CyclePortfolio,
   getMaxSimulationLength,
@@ -357,7 +356,7 @@ export default function Simulator() {
                   </div>
                 </div>
               </div>
-              {simulationMethod === 'Historical Data' ? (
+              {/* {simulationMethod === 'Historical Data' ? (
                 <div className="flex flex-col mt-4 mb-2">
                   <label className="form-label">Currently Active Dataset</label>
                   <div className="text-base">
@@ -369,7 +368,7 @@ export default function Simulator() {
                     </TextLink>
                   </div>
                 </div>
-              ) : null}
+              ) : null} */}
             </div>
 
             <div className="flex flex-col mt-4">

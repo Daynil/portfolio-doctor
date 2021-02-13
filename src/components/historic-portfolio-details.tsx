@@ -1,4 +1,4 @@
-import { format } from 'd3';
+import { format as numFormat } from 'd3';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   CycleStats,
@@ -10,6 +10,7 @@ import { baseUrl } from '../utilities/constants';
 import { numToCurrency } from '../utilities/format';
 import { portfolioOptionsToQueryString } from '../utilities/util';
 import { HistoricCyclesChart } from './charts/historic-cycles-chart';
+import { HistoricCyclesTooltip } from './charts/historic-cycles-tooltip';
 import CopyIcon from './svg/copy-icon';
 import ShareIcon from './svg/share-icon';
 
@@ -20,10 +21,10 @@ export interface PortfolioData {
   options: PortfolioOptions;
 }
 
-export type Point = {
+export interface Point {
   cycleIndex: number;
   yearIndex: number;
-};
+}
 
 export function HistoricPortfolioDetails({
   lifecyclesData,
@@ -79,6 +80,18 @@ export function HistoricPortfolioDetails({
     portfolioHealthColor = 'text-yellow-500';
   if (portfolioStats.successRate < 0.5) portfolioHealthColor = 'text-red-500';
 
+  function getTooltip(cycle: CycleYearData) {
+    return (
+      <HistoricCyclesTooltip
+        width={325}
+        yearData={cycle}
+        cycleLength={options.simulationYearsLength}
+        pointFixed={false}
+        leftAdjust={0}
+      />
+    );
+  }
+
   return !lifecyclesData ? null : (
     <div className="flex flex-row flex-wrap">
       <div
@@ -118,7 +131,7 @@ export function HistoricPortfolioDetails({
                   Success
                 </label>
                 <span className={'text-2xl font-bold ' + portfolioHealthColor}>
-                  {format('.2%')(portfolioStats.successRate)}
+                  {numFormat('.2%')(portfolioStats.successRate)}
                 </span>
               </div>
             </div>
@@ -341,14 +354,14 @@ export function HistoricPortfolioDetails({
         </div>
       </div>
       <div className="ml-6">
-        {selectedPoint && pointFixed && (
-          <button
-            className="btn btn-green-2"
-            onClick={() => setShowCycleDetails(!showCycleDetails)}
-          >
-            {showCycleDetails ? 'Hide' : 'Show'} Cycle Details
-          </button>
-        )}
+        <button
+          className="btn btn-green-2"
+          onClick={() => setShowCycleDetails(!showCycleDetails)}
+          disabled={!selectedPoint || !pointFixed}
+        >
+          {showCycleDetails ? 'Hide' : 'Show'} Cycle Details
+        </button>
+
         {!selectedPoint || !showCycleDetails ? null : (
           <table className="mt-4 border-collapse">
             <thead>
@@ -368,10 +381,10 @@ export function HistoricPortfolioDetails({
                     {yearData.cycleYear}
                   </td>
                   <td className="group-hover:bg-gray-400 duration-200 text-right p-2">
-                    {format('$,.2f')(yearData.balanceInfAdjEnd)}
+                    {numFormat('$,.2f')(yearData.balanceInfAdjEnd)}
                   </td>
                   <td className="group-hover:bg-gray-400 duration-200 text-right p-2">
-                    {format('$,.2f')(yearData.withdrawalInfAdjust)}
+                    {numFormat('$,.2f')(yearData.withdrawalInfAdjust)}
                   </td>
                 </tr>
               ))}
