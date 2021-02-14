@@ -10,13 +10,18 @@ import TextInput from '../components/text-input';
 import {
   CyclePortfolio,
   getMaxSimulationLength,
+  MarketDataStats,
   MarketYearData,
   PortfolioOptions,
   SimulationMethod,
   WithdrawalMethod
 } from '../data/calc/portfolio-calc';
 import { DatasetContext, defaultDatasetName } from '../data/data-context';
-import { parseCSVStringToJSON } from '../data/data-helpers';
+import {
+  generateMonteCarloDataset,
+  getMarketDataStats,
+  parseCSVStringToJSON
+} from '../data/data-helpers';
 import { parseStringyNum } from '../utilities/format';
 import {
   defaultPortfolioOptions,
@@ -25,7 +30,9 @@ import {
 
 export default function Simulator() {
   const [portfolio, setPortfolio] = useState<PortfolioData>(null);
-  const [data, setData] = useState<MarketYearData[]>([]);
+  const [ogMarketData, setOgMarketData] = useState<MarketYearData[]>([]);
+  const [marketDataStats, setMarketDataStats] = useState<MarketDataStats>(null);
+  const [marketData, setMarketData] = useState<MarketYearData[]>([]);
   const [inputErr, setInputErr] = useState('');
 
   const refStartingBalance = useRef<HTMLInputElement>(null);
@@ -66,24 +73,44 @@ export default function Simulator() {
 
   useEffect(() => {
     if (preferredDataset === defaultDatasetName) {
-      if (defaultDatasetCSVStringCache)
-        setData(parseCSVStringToJSON(defaultDatasetCSVStringCache));
+      if (defaultDatasetCSVStringCache) {
+        const data = parseCSVStringToJSON(defaultDatasetCSVStringCache);
+        setOgMarketData(data);
+        setMarketData(data);
+        setMarketDataStats(getMarketDataStats(data));
+      }
     } else {
       const datasetString = storedDatasets.find(
         (d) => d.name === preferredDataset
       ).csvString;
 
-      setData(parseCSVStringToJSON(datasetString));
+      const data = parseCSVStringToJSON(datasetString);
+      setOgMarketData(data);
+      setMarketData(data);
+      setMarketDataStats(getMarketDataStats(data));
     }
   }, [defaultDatasetCSVStringCache]);
 
   useEffect(() => {
     // Auto-trigger portfolio calculation if we have valid options in the URL
-    if (urlOptionsValidated && data.length) calculatePortfolio();
-  }, [data]);
+    if (urlOptionsValidated && marketData.length) calculatePortfolio();
+  }, [marketData]);
 
   function calculatePortfolio() {
     let newPortfolioOptions = { ...defaultPortfolioOptions };
+
+    let curMarketData: MarketYearData[];
+    if (simulationMethod === 'Monte Carlo') {
+      const simulatedMarketData = generateMonteCarloDataset(
+        marketData,
+        marketDataStats
+      );
+      setMarketData(simulatedMarketData);
+      curMarketData = simulatedMarketData;
+    } else {
+      setMarketData(ogMarketData);
+      curMarketData = ogMarketData;
+    }
 
     switch (withdrawalMethod) {
       case WithdrawalMethod.InflationAdjusted:
@@ -151,10 +178,13 @@ export default function Simulator() {
       setInputErr('Minimum investment expense ratio is 0%.');
       return;
     } else if (
-      newPortfolioOptions.simulationYearsLength > getMaxSimulationLength(data)
+      newPortfolioOptions.simulationYearsLength >
+      getMaxSimulationLength(curMarketData)
     ) {
       setInputErr(
-        `Maximium simulation length is ${getMaxSimulationLength(data)} years.`
+        `Maximium simulation length is ${getMaxSimulationLength(
+          curMarketData
+        )} years.`
       );
       return;
     } else if (newPortfolioOptions.simulationYearsLength < 3) {
@@ -165,7 +195,7 @@ export default function Simulator() {
     setInputErr('');
     setPortfolioOptions(newPortfolioOptions);
 
-    const curPortfolio = new CyclePortfolio(data, newPortfolioOptions);
+    const curPortfolio = new CyclePortfolio(curMarketData, newPortfolioOptions);
     const lifecyclesData = curPortfolio.crunchAllCyclesData();
     const stats = curPortfolio.crunchAllPortfolioStats(lifecyclesData);
 
@@ -483,7 +513,7 @@ export default function Simulator() {
                 type="number"
                 defaultValue={portfolioOptions.simulationYearsLength}
                 min={5}
-                max={getMaxSimulationLength(data)}
+                max={getMaxSimulationLength(marketData)}
                 ref={refSimLength}
               />
             </div>
