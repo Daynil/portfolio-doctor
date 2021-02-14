@@ -4,11 +4,14 @@ import {
   HistoricPortfolioDetails,
   PortfolioData
 } from '../components/historic-portfolio-details';
+import { MonteCarloPortfolioDetails } from '../components/monte-carlo-portfolio-details';
 import RadioInput from '../components/radio-input';
 import SEO from '../components/seo';
 import TextInput from '../components/text-input';
 import {
   CyclePortfolio,
+  CycleYearData,
+  generateMonteCarloRuns,
   getMaxSimulationLength,
   MarketDataStats,
   MarketYearData,
@@ -17,11 +20,7 @@ import {
   WithdrawalMethod
 } from '../data/calc/portfolio-calc';
 import { DatasetContext, defaultDatasetName } from '../data/data-context';
-import {
-  generateMonteCarloDataset,
-  getMarketDataStats,
-  parseCSVStringToJSON
-} from '../data/data-helpers';
+import { getMarketDataStats, parseCSVStringToJSON } from '../data/data-helpers';
 import { parseStringyNum } from '../utilities/format';
 import {
   defaultPortfolioOptions,
@@ -30,9 +29,9 @@ import {
 
 export default function Simulator() {
   const [portfolio, setPortfolio] = useState<PortfolioData>(null);
-  const [ogMarketData, setOgMarketData] = useState<MarketYearData[]>([]);
-  const [marketDataStats, setMarketDataStats] = useState<MarketDataStats>(null);
+  const [monteCarloRuns, setMonteCarloRuns] = useState<CycleYearData[][]>([]);
   const [marketData, setMarketData] = useState<MarketYearData[]>([]);
+  const [marketDataStats, setMarketDataStats] = useState<MarketDataStats>(null);
   const [inputErr, setInputErr] = useState('');
 
   const refStartingBalance = useRef<HTMLInputElement>(null);
@@ -75,7 +74,6 @@ export default function Simulator() {
     if (preferredDataset === defaultDatasetName) {
       if (defaultDatasetCSVStringCache) {
         const data = parseCSVStringToJSON(defaultDatasetCSVStringCache);
-        setOgMarketData(data);
         setMarketData(data);
         setMarketDataStats(getMarketDataStats(data));
       }
@@ -85,7 +83,6 @@ export default function Simulator() {
       ).csvString;
 
       const data = parseCSVStringToJSON(datasetString);
-      setOgMarketData(data);
       setMarketData(data);
       setMarketDataStats(getMarketDataStats(data));
     }
@@ -98,19 +95,6 @@ export default function Simulator() {
 
   function calculatePortfolio() {
     let newPortfolioOptions = { ...defaultPortfolioOptions };
-
-    let curMarketData: MarketYearData[];
-    if (simulationMethod === 'Monte Carlo') {
-      const simulatedMarketData = generateMonteCarloDataset(
-        marketData,
-        marketDataStats
-      );
-      setMarketData(simulatedMarketData);
-      curMarketData = simulatedMarketData;
-    } else {
-      setMarketData(ogMarketData);
-      curMarketData = ogMarketData;
-    }
 
     switch (withdrawalMethod) {
       case WithdrawalMethod.InflationAdjusted:
@@ -179,11 +163,11 @@ export default function Simulator() {
       return;
     } else if (
       newPortfolioOptions.simulationYearsLength >
-      getMaxSimulationLength(curMarketData)
+      getMaxSimulationLength(marketData)
     ) {
       setInputErr(
         `Maximium simulation length is ${getMaxSimulationLength(
-          curMarketData
+          marketData
         )} years.`
       );
       return;
@@ -195,21 +179,31 @@ export default function Simulator() {
     setInputErr('');
     setPortfolioOptions(newPortfolioOptions);
 
-    const curPortfolio = new CyclePortfolio(curMarketData, newPortfolioOptions);
-    const lifecyclesData = curPortfolio.crunchAllCyclesData();
-    const stats = curPortfolio.crunchAllPortfolioStats(lifecyclesData);
+    if (simulationMethod === 'Historical Data') {
+      const curPortfolio = new CyclePortfolio(marketData, newPortfolioOptions);
+      const lifecyclesData = curPortfolio.crunchAllCyclesData();
+      const stats = curPortfolio.crunchAllPortfolioStats(lifecyclesData);
 
-    // const blob = new Blob([JSON.stringify(portfolioData)], {
-    //   type: 'application/json'
-    // });
-    // FileSaver.saveAs(blob, 'results.json');
+      // const blob = new Blob([JSON.stringify(portfolioData)], {
+      //   type: 'application/json'
+      // });
+      // FileSaver.saveAs(blob, 'results.json');
 
-    setPortfolio({
-      lifecyclesData,
-      lifecyclesStats: stats.cycleStats,
-      portfolioStats: stats,
-      options: curPortfolio.options
-    });
+      setPortfolio({
+        lifecyclesData,
+        lifecyclesStats: stats.cycleStats,
+        portfolioStats: stats,
+        options: curPortfolio.options
+      });
+    } else {
+      const simulations = generateMonteCarloRuns(
+        marketData,
+        newPortfolioOptions,
+        10,
+        marketDataStats
+      );
+      setMonteCarloRuns(simulations);
+    }
   }
 
   function getWithdrawalInputs(): JSX.Element {
@@ -325,6 +319,15 @@ export default function Simulator() {
       }
       throw e;
     }
+  }
+
+  function getPortfolioChart() {
+    if (simulationMethod === 'Historical Data') {
+      return !portfolio ? null : <HistoricPortfolioDetails {...portfolio} />;
+    } else
+      return !monteCarloRuns.length ? null : (
+        <MonteCarloPortfolioDetails lifecyclesData={monteCarloRuns} />
+      );
   }
 
   return (
@@ -526,9 +529,7 @@ export default function Simulator() {
               </button>
             </div>
           </div>
-          <div className="w-full">
-            {!portfolio ? null : <HistoricPortfolioDetails {...portfolio} />}
-          </div>
+          <div className="w-full">{getPortfolioChart()}</div>
         </div>
       </div>
     </div>

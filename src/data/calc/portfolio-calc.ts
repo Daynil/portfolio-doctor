@@ -267,9 +267,11 @@ export interface MarketDataStats {
 export function generateMonteCarloRuns(
   originalMarketYearData: MarketYearData[],
   options: PortfolioOptions,
-  numRuns: number
+  numRuns: number,
+  marketDataStats?: MarketDataStats
 ): CycleYearData[][] {
-  const marketDataStats = getMarketDataStats(originalMarketYearData);
+  if (!marketDataStats)
+    marketDataStats = getMarketDataStats(originalMarketYearData);
 
   const simulations: CycleYearData[][] = [];
   for (let i = 0; i < numRuns; i++) {

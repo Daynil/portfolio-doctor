@@ -1,5 +1,4 @@
-import { line, max, scaleLinear, scan } from 'd3';
-import { maxIndex } from 'd3-array';
+import { leastIndex, line, max, maxIndex, scaleLinear } from 'd3';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { CycleStats, CycleYearData } from '../../data/calc/portfolio-calc';
 import { numToCurrencyShort } from '../../utilities/format';
@@ -105,10 +104,12 @@ export function HistoricCyclesChart({
       strokeWidth: '1.5'
     };
 
-    if (allLineMeta[i].failureYear)
-      lineStyle.stroke = hoveringCycle ? colors.red.dark : colors.red.normal;
-    else if (allLineMeta[i].nearFailure)
-      lineStyle.stroke = colors.yellow.normal;
+    if (allLineMeta) {
+      if (allLineMeta[i].failureYear)
+        lineStyle.stroke = hoveringCycle ? colors.red.dark : colors.red.normal;
+      else if (allLineMeta[i].nearFailure)
+        lineStyle.stroke = colors.yellow.normal;
+    }
 
     if (selectedPoint) {
       if (hoveringCycle) {
@@ -133,9 +134,11 @@ export function HistoricCyclesChart({
 
   function getCircleColor() {
     if (!selectedPoint) return;
-    const hoveringCycleMeta = allLineMeta[selectedPoint.cycleIndex];
-    if (hoveringCycleMeta.failureYear) return colors.red.dark;
-    if (hoveringCycleMeta.nearFailure) return colors.yellow.dark;
+    if (allLineMeta) {
+      const hoveringCycleMeta = allLineMeta[selectedPoint.cycleIndex];
+      if (hoveringCycleMeta.failureYear) return colors.red.dark;
+      if (hoveringCycleMeta.nearFailure) return colors.yellow.dark;
+    }
     return colors.green.dark;
   }
 
@@ -174,7 +177,7 @@ export function HistoricCyclesChart({
     // Get the array index of the closest x value to current hover
     const i = clamp(Math.round(xm) - 1, 0, dataSeries[0].length - 1);
 
-    const closestCycleIndex = scan(
+    const closestCycleIndex = leastIndex(
       dataSeries,
       (a, b) => Math.abs(yAccessor(a[i]) - ym) - Math.abs(yAccessor(b[i]) - ym)
     );
