@@ -1,4 +1,4 @@
-import { maxIndex, mean, median, minIndex, sum } from 'd3-array';
+import { maxIndex, mean, median, min, minIndex, sum } from 'd3-array';
 import {
   DataColumns,
   pivotPortfolioCycles,
@@ -269,7 +269,7 @@ export function generateMonteCarloRuns(
   options: PortfolioOptions,
   numRuns: number,
   marketDataStats?: MarketDataStats
-): CycleYearData[][] {
+): { data: CycleYearData[][]; failures: number } {
   if (!marketDataStats)
     marketDataStats = getMarketDataStats(originalMarketYearData);
 
@@ -283,7 +283,12 @@ export function generateMonteCarloRuns(
     const lifecylesData = portfolio.crunchAllCyclesData();
     simulations.push(...lifecylesData);
   }
-  return simulations;
+  let numFailures = 0;
+  for (let i = 0; i < simulations.length; i++) {
+    const minBalance = min(simulations[i], (d) => d.balanceInfAdjEnd);
+    if (minBalance <= 0) numFailures++;
+  }
+  return { data: simulations, failures: numFailures };
 }
 
 export class CyclePortfolio {
@@ -724,4 +729,14 @@ export function getYearIndex(
 
 export function getMaxSimulationLength(marketData: MarketYearData[]): number {
   return marketData.length - 1;
+}
+
+export function getMaxSimulationCycles(
+  marketData: MarketYearData[],
+  simulationYearsLength: number
+): number {
+  const lastPossibleStartYear =
+    marketData[marketData.length - 1].year - simulationYearsLength;
+  // Add 1 to include start year
+  return lastPossibleStartYear - marketData[0].year + 1;
 }

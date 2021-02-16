@@ -12,6 +12,7 @@ import {
   CyclePortfolio,
   CycleYearData,
   generateMonteCarloRuns,
+  getMaxSimulationCycles,
   getMaxSimulationLength,
   MarketDataStats,
   MarketYearData,
@@ -196,13 +197,26 @@ export default function Simulator() {
         options: curPortfolio.options
       });
     } else {
+      const simsPerMarketData = getMaxSimulationCycles(
+        marketData,
+        newPortfolioOptions.simulationYearsLength
+      );
+      const desiredSimulations = 10000;
+      const runsNeeded = Math.ceil(desiredSimulations / simsPerMarketData);
+
       const simulations = generateMonteCarloRuns(
         marketData,
         newPortfolioOptions,
-        10,
+        runsNeeded,
         marketDataStats
       );
-      setMonteCarloRuns(simulations);
+      setMonteCarloRuns(simulations.data);
+      console.log(simulations.data.length);
+      console.log(simulations.failures);
+      console.log(
+        (simulations.data.length - simulations.failures) /
+          simulations.data.length
+      );
     }
   }
 

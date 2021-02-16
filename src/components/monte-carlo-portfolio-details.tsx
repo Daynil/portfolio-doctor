@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { CycleYearData, CycleYearQuantile } from '../data/calc/portfolio-calc';
 import { getQuantiles } from '../data/data-helpers';
-import { HistoricCyclesChart } from './charts/historic-cycles-chart';
+import { MonteCarloQuantilesChart } from './charts/monte-carlo-quantiles-chart';
 
 export interface PortfolioData {
   lifecyclesData: CycleYearData[][];
@@ -98,14 +98,16 @@ export function MonteCarloPortfolioDetails({ lifecyclesData }: PortfolioData) {
       </div>
       <div className="flex flex-wrap w-full">
         <div className="w-full">
-          <HistoricCyclesChart
-            dataSeries={lifecyclesData}
-            aspectRatio={1000 / 600}
-            selectedPoint={selectedPoint}
-            handleSetSelectedPoint={(point: Point) => setSelectedPoint(point)}
-            pointFixed={pointFixed}
-            handleSetPointFixed={(fixed: boolean) => setPointFixed(fixed)}
-          />
+          {quantiles && quantiles.length && (
+            <MonteCarloQuantilesChart
+              dataSeries={quantiles}
+              aspectRatio={1000 / 600}
+              selectedPoint={selectedPoint}
+              handleSetSelectedPoint={(point: Point) => setSelectedPoint(point)}
+              pointFixed={pointFixed}
+              handleSetPointFixed={(fixed: boolean) => setPointFixed(fixed)}
+            />
+          )}
         </div>
         {/* <div
           style={{
