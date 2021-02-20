@@ -12,6 +12,7 @@ import TextLink from '../components/text-link';
 import {
   CyclePortfolio,
   CycleYearData,
+  CycleYearQuantile,
   generateMonteCarloRuns,
   getMaxSimulationCycles,
   getMaxSimulationLength,
@@ -22,7 +23,11 @@ import {
   WithdrawalMethod
 } from '../data/calc/portfolio-calc';
 import { DatasetContext, defaultDatasetName } from '../data/data-context';
-import { getMarketDataStats, parseCSVStringToJSON } from '../data/data-helpers';
+import {
+  getMarketDataStats,
+  getQuantiles,
+  parseCSVStringToJSON
+} from '../data/data-helpers';
 import { parseStringyNum } from '../utilities/format';
 import {
   defaultPortfolioOptions,
@@ -34,6 +39,7 @@ export default function Simulator() {
   const [monteCarloRuns, setMonteCarloRuns] = useState<CycleYearData[][]>([]);
   const [marketData, setMarketData] = useState<MarketYearData[]>([]);
   const [marketDataStats, setMarketDataStats] = useState<MarketDataStats>(null);
+  const [quantiles, setQuantiles] = useState<CycleYearQuantile[][]>([]);
   const [inputErr, setInputErr] = useState('');
 
   const refStartingBalance = useRef<HTMLInputElement>(null);
@@ -187,6 +193,13 @@ export default function Simulator() {
       const curPortfolio = new CyclePortfolio(marketData, newPortfolioOptions);
       const lifecyclesData = curPortfolio.crunchAllCyclesData();
       const stats = curPortfolio.crunchAllPortfolioStats(lifecyclesData);
+      const quantileLines = getQuantiles(lifecyclesData, [
+        0.1,
+        0.25,
+        0.5,
+        0.75,
+        0.9
+      ]);
 
       // const blob = new Blob([JSON.stringify(portfolioData)], {
       //   type: 'application/json'
@@ -197,6 +210,7 @@ export default function Simulator() {
         lifecyclesData,
         lifecyclesStats: stats.cycleStats,
         portfolioStats: stats,
+        quantiles: quantileLines,
         options: curPortfolio.options
       });
     } else {

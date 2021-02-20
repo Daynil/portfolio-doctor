@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   CycleStats,
   CycleYearData,
+  CycleYearQuantile,
   PortfolioOptions,
   PortfolioStats
 } from '../data/calc/portfolio-calc';
@@ -10,6 +11,7 @@ import { baseUrl } from '../utilities/constants';
 import { numToCurrency } from '../utilities/format';
 import { portfolioOptionsToQueryString } from '../utilities/util';
 import { HistoricCyclesChart } from './charts/historic-cycles-chart';
+import { QuantilesChart } from './charts/quantiles-chart';
 import CopyIcon from './svg/copy-icon';
 import ShareIcon from './svg/share-icon';
 
@@ -17,6 +19,7 @@ export interface PortfolioData {
   lifecyclesData: CycleYearData[][];
   lifecyclesStats: CycleStats[];
   portfolioStats: PortfolioStats;
+  quantiles: CycleYearQuantile[][];
   options: PortfolioOptions;
 }
 
@@ -25,15 +28,19 @@ export interface Point {
   yearIndex: number;
 }
 
+export type DisplayMode = 'Full' | 'Quantiles';
+
 export function HistoricPortfolioDetails({
   lifecyclesData,
   lifecyclesStats,
   portfolioStats,
+  quantiles,
   options
 }: PortfolioData) {
   const refCopyURL = useRef<HTMLInputElement>(null);
   const [selectedPoint, setSelectedPoint] = useState<Point>(null);
   const [pointFixed, setPointFixed] = useState(false);
+  const [displayMode, setDisplayMode] = useState<DisplayMode>('Full');
 
   const [showCycleDetails, setShowCycleDetails] = useState(false);
 
@@ -80,16 +87,45 @@ export function HistoricPortfolioDetails({
         <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
       </div>
       <div className="flex flex-wrap w-full">
+        <div className="flex flex-row w-64 justify-evenly ml-8">
+          <button
+            className={
+              displayMode === 'Full' ? 'btn btn-green-2' : 'btn btn-gray'
+            }
+            onClick={() => setDisplayMode('Full')}
+          >
+            All Cycles
+          </button>
+          <button
+            className={
+              displayMode === 'Full' ? 'btn btn-gray' : 'btn btn-green-2'
+            }
+            onClick={() => setDisplayMode('Quantiles')}
+          >
+            Quantiles
+          </button>
+        </div>
         <div className="w-full">
-          <HistoricCyclesChart
-            dataSeries={lifecyclesData}
-            aspectRatio={1000 / 600}
-            allLineMeta={lifecyclesStats}
-            selectedPoint={selectedPoint}
-            handleSetSelectedPoint={(point: Point) => setSelectedPoint(point)}
-            pointFixed={pointFixed}
-            handleSetPointFixed={(fixed: boolean) => setPointFixed(fixed)}
-          />
+          {displayMode === 'Full' ? (
+            <HistoricCyclesChart
+              dataSeries={lifecyclesData}
+              aspectRatio={1000 / 600}
+              allLineMeta={lifecyclesStats}
+              selectedPoint={selectedPoint}
+              handleSetSelectedPoint={(point: Point) => setSelectedPoint(point)}
+              pointFixed={pointFixed}
+              handleSetPointFixed={(fixed: boolean) => setPointFixed(fixed)}
+            />
+          ) : (
+            <QuantilesChart
+              dataSeries={quantiles}
+              aspectRatio={1000 / 600}
+              selectedPoint={selectedPoint}
+              handleSetSelectedPoint={(point: Point) => setSelectedPoint(point)}
+              pointFixed={pointFixed}
+              handleSetPointFixed={(fixed: boolean) => setPointFixed(fixed)}
+            />
+          )}
         </div>
         <div
           style={{

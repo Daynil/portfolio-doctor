@@ -58,6 +58,13 @@ ul {
   @apply bg-green-300 focus:ring-green-400;
 }
 
+.btn-gray {
+  @apply bg-gray-100 text-gray-500 focus:ring-gray-400;
+}
+.btn-gray:hover {
+  @apply bg-gray-300 focus:ring-gray-400;
+}
+
 .form-label {
   @apply text-sm mb-2 text-gray-600 font-bold tracking-wider;
 }

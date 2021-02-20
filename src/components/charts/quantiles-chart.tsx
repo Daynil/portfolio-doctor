@@ -7,7 +7,7 @@ import { clamp } from '../../utilities/math';
 import { Point } from '../historic-portfolio-details';
 import { Axis } from './axis';
 import { Chart } from './chart';
-import { MonteCarloQuantilesTooltip } from './monte-carlo-quantiles-tooltip';
+import { MonteCarloQuantilesTooltip } from './quantiles-tooltip';
 
 export type D3Selection<T extends d3.BaseType> = d3.Selection<
   T,
@@ -52,7 +52,7 @@ type Props = {
   handleSetPointFixed: (fixed: boolean) => void;
 };
 
-export function MonteCarloQuantilesChart({
+export function QuantilesChart({
   dataSeries,
   aspectRatio,
   selectedPoint,
