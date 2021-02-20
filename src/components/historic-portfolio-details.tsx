@@ -10,7 +10,6 @@ import { baseUrl } from '../utilities/constants';
 import { numToCurrency } from '../utilities/format';
 import { portfolioOptionsToQueryString } from '../utilities/util';
 import { HistoricCyclesChart } from './charts/historic-cycles-chart';
-import { HistoricCyclesTooltip } from './charts/historic-cycles-tooltip';
 import CopyIcon from './svg/copy-icon';
 import ShareIcon from './svg/share-icon';
 
@@ -60,37 +59,15 @@ export function HistoricPortfolioDetails({
     setCopyComplete(false);
   }
 
-  function getSelectedCycle() {
-    if (!selectedPoint) return null;
-    return lifecyclesData[selectedPoint.cycleIndex];
-  }
-
   function getSelectedCycleStats() {
     if (!selectedPoint) return null;
     return lifecyclesStats[selectedPoint.cycleIndex];
-  }
-
-  function getSelectedYear() {
-    if (!selectedPoint) return null;
-    return lifecyclesData[selectedPoint.cycleIndex][selectedPoint.yearIndex];
   }
 
   let portfolioHealthColor = 'text-green-500';
   if (portfolioStats.successRate < 0.75)
     portfolioHealthColor = 'text-yellow-500';
   if (portfolioStats.successRate < 0.5) portfolioHealthColor = 'text-red-500';
-
-  function getTooltip(cycle: CycleYearData) {
-    return (
-      <HistoricCyclesTooltip
-        width={325}
-        yearData={cycle}
-        cycleLength={options.simulationYearsLength}
-        pointFixed={false}
-        leftAdjust={0}
-      />
-    );
-  }
 
   return !lifecyclesData ? null : (
     <div className="flex flex-row flex-wrap">
