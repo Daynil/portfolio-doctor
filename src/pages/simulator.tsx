@@ -8,6 +8,7 @@ import { MonteCarloPortfolioDetails } from '../components/monte-carlo-portfolio-
 import RadioInput from '../components/radio-input';
 import SEO from '../components/seo';
 import TextInput from '../components/text-input';
+import TextLink from '../components/text-link';
 import {
   CyclePortfolio,
   CycleYearData,
@@ -75,6 +76,7 @@ export default function Simulator() {
     if (preferredDataset === defaultDatasetName) {
       if (defaultDatasetCSVStringCache) {
         const data = parseCSVStringToJSON(defaultDatasetCSVStringCache);
+
         setMarketData(data);
         setMarketDataStats(getMarketDataStats(data));
       }
@@ -84,6 +86,7 @@ export default function Simulator() {
       ).csvString;
 
       const data = parseCSVStringToJSON(datasetString);
+
       setMarketData(data);
       setMarketDataStats(getMarketDataStats(data));
     }
@@ -370,7 +373,7 @@ export default function Simulator() {
             ) : null}
 
             <div className="flex flex-col mt-4">
-              <div className="text-gray-800 mt-4">
+              {/* <div className="text-gray-800 mt-4">
                 <label className="form-label">Simulation Method</label>
                 <div className="ml-2">
                   <div className="flex items-center">
@@ -402,8 +405,8 @@ export default function Simulator() {
                     </label>
                   </div>
                 </div>
-              </div>
-              {/* {simulationMethod === 'Historical Data' ? (
+              </div> */}
+              {simulationMethod === 'Historical Data' ? (
                 <div className="flex flex-col mt-4 mb-2">
                   <label className="form-label">Currently Active Dataset</label>
                   <div className="text-base">
@@ -415,7 +418,7 @@ export default function Simulator() {
                     </TextLink>
                   </div>
                 </div>
-              ) : null} */}
+              ) : null}
             </div>
 
             <div className="flex flex-col mt-4">

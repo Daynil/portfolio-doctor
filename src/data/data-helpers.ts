@@ -112,6 +112,7 @@ export function generateMonteCarloDataset(
     if (i === 0) {
       monteCarloYearData[i] = originalYearData[i];
     } else {
+      // Geometric Brownian Motion
       const drift =
         meanAnnualMarketChange -
         (stdDevAnnualMarketChange * stdDevAnnualMarketChange) / 2;
@@ -125,6 +126,19 @@ export function generateMonteCarloDataset(
         ...originalYearData[i],
         equitiesPrice: simulatedPrice
       };
+
+      // Alternate Method
+      // const randomProbability = Math.random();
+      // const randomNumStdDevs = normSinv(randomProbability);
+      // const simulatedMarketChange =
+      //   meanAnnualMarketChange + randomNumStdDevs * stdDevAnnualMarketChange;
+      // const priorYearEquitiesPrice = monteCarloYearData[i - 1].equitiesPrice;
+      // monteCarloYearData[i] = {
+      //   ...originalYearData[i],
+      //   equitiesPrice:
+      //     priorYearEquitiesPrice +
+      //     priorYearEquitiesPrice * simulatedMarketChange
+      // };
     }
   }
 

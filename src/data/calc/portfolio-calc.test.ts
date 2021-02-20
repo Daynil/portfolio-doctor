@@ -892,7 +892,7 @@ describe('monte carlo simulation', () => {
         withdrawalMethod: WithdrawalMethod.InflationAdjusted
       },
       3
-    );
+    ).data;
 
     // Split each simulation result into separate arrays
     // for testing purposes only
