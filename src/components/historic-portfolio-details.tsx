@@ -66,6 +66,12 @@ export function HistoricPortfolioDetails({
     setCopyComplete(false);
   }
 
+  function handleDisplayModeSwitch(displayMode: DisplayMode) {
+    setPointFixed(null);
+    setSelectedPoint(null);
+    setDisplayMode(displayMode);
+  }
+
   function getSelectedCycleStats() {
     if (!selectedPoint) return null;
     return lifecyclesStats[selectedPoint.cycleIndex];
@@ -87,23 +93,73 @@ export function HistoricPortfolioDetails({
         <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
       </div>
       <div className="flex flex-wrap w-full">
-        <div className="flex flex-row w-64 justify-evenly ml-8">
-          <button
-            className={
-              displayMode === 'Full' ? 'btn btn-green-2' : 'btn btn-gray'
-            }
-            onClick={() => setDisplayMode('Full')}
-          >
-            All Cycles
-          </button>
-          <button
-            className={
-              displayMode === 'Full' ? 'btn btn-gray' : 'btn btn-green-2'
-            }
-            onClick={() => setDisplayMode('Quantiles')}
-          >
-            Quantiles
-          </button>
+        <div className="flex flex-row w-full justify-between ml-20">
+          <div className="flex flex-row w-64">
+            <button
+              className={
+                displayMode === 'Full' ? 'btn btn-green-2' : 'btn btn-gray'
+              }
+              onClick={() => handleDisplayModeSwitch('Full')}
+            >
+              All Cycles
+            </button>
+            <button
+              className={
+                (displayMode === 'Full' ? 'btn btn-gray' : 'btn btn-green-2') +
+                ' ml-6'
+              }
+              onClick={() => handleDisplayModeSwitch('Quantiles')}
+            >
+              Quantiles
+            </button>
+          </div>
+          <div className="flex justify-center relative mr-12">
+            <button
+              className="btn btn-green-2 flex items-center"
+              onClick={shareResults}
+            >
+              <ShareIcon className="text-green-700 w-4" />
+              <span className="ml-2">Share</span>
+            </button>
+            <div
+              className={
+                copyModalActive
+                  ? 'absolute bg-white shadow-lg rounded-md mt-14 mr-64 text-base p-4 w-96 flex flex-col z-20'
+                  : 'hidden'
+              }
+            >
+              <div className="text-gray-900">
+                Share this portfolio run with this URL or just bookmark it for
+                future reference
+              </div>
+              <div className="flex mt-2">
+                <input
+                  type="text"
+                  className="form-input w-full"
+                  value={`${baseUrl}/simulator?${portfolioOptionsToQueryString(
+                    options
+                  )}`}
+                  readOnly
+                  ref={refCopyURL}
+                />
+                <button
+                  className="btn btn-green ml-2 flex items-center"
+                  onClick={copyURL}
+                >
+                  <CopyIcon className="text-white w-4" />
+                  <span className="ml-2">Copy</span>
+                </button>
+              </div>
+              {!copyComplete ? null : (
+                <div
+                  className="bg-green-100 border-l-4 border-green-500 text-green-700 py-2 px-4 mt-4"
+                  role="alert"
+                >
+                  Copied to clipboard!
+                </div>
+              )}
+            </div>
+          </div>
         </div>
         <div className="w-full">
           {displayMode === 'Full' ? (
@@ -139,78 +195,35 @@ export function HistoricPortfolioDetails({
           </div>
           <div className="px-2 text-center">
             <div className="text-center">
-              <div className="pt-2">
+              <div className="flex flex-col pt-2">
                 <label className="text-gray-600 font-semibold tracking-wide block">
                   Success
                 </label>
                 <span className={'text-2xl font-bold ' + portfolioHealthColor}>
                   {numFormat('.2%')(portfolioStats.successRate)}
                 </span>
+                <span className="text-gray-600 text-sm mt-1">
+                  {portfolioStats.numSuccesses} out of{' '}
+                  {portfolioStats.numFailures + portfolioStats.numSuccesses}
+                </span>
               </div>
             </div>
             <div className="my-2 mx-auto bg-gray-500 w-5/6 h-px"></div>
-            <div className="pt-2">
-              <label className="text-gray-600 font-semibold tracking-wide block">
-                Average Ending Balance
-              </label>
-              <span className="text-xl">
-                {numToCurrency(portfolioStats.balance.averageInflAdj, 0)}
-              </span>
-            </div>
-            <div className="pt-2">
-              <label className="text-gray-600 font-semibold tracking-wide block">
-                Average Withdrawal
-              </label>
-              <span className="text-xl">
-                {numToCurrency(portfolioStats.withdrawals.averageInflAdj, 0)}
-              </span>
-            </div>
-            <div className="my-2 mx-auto bg-gray-500 w-5/6 h-px"></div>
-            <div className="pt-2 w-full flex justify-center relative">
-              <button
-                className="btn btn-green-2 flex items-center"
-                onClick={shareResults}
-              >
-                <ShareIcon className="text-green-700 w-4" />
-                <span className="ml-2">Share</span>
-              </button>
-              <div
-                className={
-                  copyModalActive
-                    ? 'absolute bg-white shadow-lg rounded-md -mt-32 -mx-16 text-base p-4 flex flex-col z-20'
-                    : 'hidden'
-                }
-              >
-                <div className="text-gray-900">
-                  Share this portfolio run with this URL or just bookmark it for
-                  future reference
-                </div>
-                <div className="flex mt-2">
-                  <input
-                    type="text"
-                    className="form-input w-full"
-                    value={`${baseUrl}/simulator?${portfolioOptionsToQueryString(
-                      options
-                    )}`}
-                    readOnly
-                    ref={refCopyURL}
-                  />
-                  <button
-                    className="btn btn-green ml-2 flex items-center"
-                    onClick={copyURL}
-                  >
-                    <CopyIcon className="text-white w-4" />
-                    <span className="ml-2">Copy</span>
-                  </button>
-                </div>
-                {!copyComplete ? null : (
-                  <div
-                    className="bg-green-100 border-l-4 border-green-500 text-green-700 py-2 px-4 mt-4"
-                    role="alert"
-                  >
-                    Copied to clipboard!
-                  </div>
-                )}
+            <div className="text-center">
+              <div className="flex flex-col pt-2">
+                <label className="text-gray-600 font-semibold tracking-wide block">
+                  Low Ending Balance
+                </label>
+                <span className={'text-2xl font-bold ' + portfolioHealthColor}>
+                  {numFormat('.2%')(
+                    portfolioStats.numNearFailures /
+                      (portfolioStats.numFailures + portfolioStats.numSuccesses)
+                  )}
+                </span>
+                <span className="text-gray-600 text-sm mt-1">
+                  {portfolioStats.numNearFailures} out of{' '}
+                  {portfolioStats.numFailures + portfolioStats.numSuccesses}
+                </span>
               </div>
             </div>
           </div>

@@ -97,6 +97,7 @@ export interface CycleStats {
 export interface PortfolioStats {
   cycleStats: CycleStats[];
   numFailures: number;
+  numNearFailures: number;
   numSuccesses: number;
   successRate: number;
   /**
@@ -375,13 +376,14 @@ export class CyclePortfolio {
     );
 
     const numCycles = cycleStats.length;
-    const numFailures = cycleStats
-      .map((stats) => stats.failureYear)
-      .reduce(
-        (numFailures, failureYear) =>
-          failureYear > 0 ? numFailures + 1 : numFailures,
-        0
-      );
+
+    let numFailures = 0;
+    let numNearFailures = 0;
+    for (let i = 0; i < cycleStats.length; i++) {
+      const cycle = cycleStats[i];
+      if (cycle.failureYear > 0) numFailures++;
+      if (cycle.nearFailure) numNearFailures++;
+    }
 
     const minEndingBalanceIdx = minIndex(
       cycleStats,
@@ -412,6 +414,7 @@ export class CyclePortfolio {
     return {
       cycleStats,
       numFailures,
+      numNearFailures,
       numSuccesses: numCycles - numFailures,
       successRate: (numCycles - numFailures) / numCycles,
       investmentExpenses: {
@@ -524,9 +527,11 @@ export class CyclePortfolio {
       (balance) => balance <= 0
     );
 
-    const nearFailIdx = cycleYearDataColumns.balanceInfAdjEnd.findIndex(
-      (balance) => balance <= this.options.startBalance * 0.5
-    );
+    const nearFail =
+      cycleYearDataColumns.balanceInfAdjEnd[
+        cycleYearDataColumns.balanceInfAdjEnd.length - 1
+      ] <=
+      this.options.startBalance * 0.5;
 
     return {
       cycleStartYear: cycleYearDataColumns.cycleStartYear[0],
@@ -582,7 +587,7 @@ export class CyclePortfolio {
       },
       failureYear:
         failureYearIdx < 0 ? 0 : cycleYearDataColumns.cycleYear[failureYearIdx],
-      nearFailure: failureYearIdx < 0 && nearFailIdx >= 0
+      nearFailure: failureYearIdx < 0 && nearFail
     };
   }
 
