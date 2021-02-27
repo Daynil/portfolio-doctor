@@ -6,6 +6,11 @@ module.exports = {
     layers: ['utilities'],
     content: ['./src/**/*.tsx', './src/**/*.ts', './src/**/*.css']
   },
+  variants: {
+    extend: {
+      backgroundColor: ['even']
+    }
+  },
   theme: {
     colors: {
       ...defaultTheme.colors,

@@ -1,10 +1,11 @@
 import React from 'react';
-import { CycleYearData } from '../../data/calc/portfolio-calc';
+import { CycleStats, CycleYearData } from '../../data/calc/portfolio-calc';
 import { numToCurrency } from '../../utilities/format';
 import { colors } from './historic-cycles-chart';
 
 type Props = {
   width: number;
+  cycleStats: CycleStats;
   yearData: CycleYearData;
   cycleLength: number;
   pointFixed: boolean;
@@ -13,6 +14,7 @@ type Props = {
 
 export function HistoricCyclesTooltip({
   width,
+  cycleStats,
   yearData,
   pointFixed,
   cycleLength,
@@ -22,7 +24,7 @@ export function HistoricCyclesTooltip({
     <div
       style={{
         width: `${width}px`,
-        height: '11rem',
+        height: '20rem',
         top: '26px',
         left: `${leftAdjust}px`
       }}
@@ -43,17 +45,52 @@ export function HistoricCyclesTooltip({
         </div>
       </div>
       <div className="my-3 bg-gray-400 w-full h-px"></div>
-      <div className="flex justify-between mt-2">
-        <label className="form-label my-0">Balance</label>
-        <span>{numToCurrency(yearData.balanceInfAdjEnd, 0)}</span>
+      <div className="flex items-center">
+        <div className="text-gray-500 font-semibold text-base mr-6">Year</div>
+        <div className="flex flex-col w-full">
+          <div className="flex justify-between mt-2">
+            <div className="flex items-center">
+              <label className="form-label my-0">Balance</label>
+            </div>
+            <span>{numToCurrency(yearData.balanceInfAdjEnd, 0)}</span>
+          </div>
+          <div className="flex justify-between">
+            <div className="flex items-center">
+              <label className="form-label my-0">Withdrawal</label>
+            </div>
+            <span>{numToCurrency(yearData.withdrawalInfAdjust, 0)}</span>
+          </div>
+        </div>
       </div>
-      <div className="flex justify-between">
-        <label className="form-label my-0">Withdrawal</label>
-        <span>{numToCurrency(yearData.withdrawalInfAdjust, 0)}</span>
+      <div className="my-3 bg-gray-400 w-full h-px"></div>
+      <div className="flex items-center">
+        <div className="text-gray-500 font-semibold text-base mr-6">Cycle</div>
+        <div className="flex flex-col w-full">
+          <div className="flex justify-between mt-2">
+            <div className="flex items-center">
+              <label className="form-label my-0">Ending Balance</label>
+            </div>
+            <span>{numToCurrency(cycleStats.balance.endingInflAdj, 0)}</span>
+          </div>
+          <div className="flex justify-between">
+            <div className="flex items-center">
+              <label className="form-label my-0">Avg Balance</label>
+            </div>
+            <span>{numToCurrency(cycleStats.balance.averageInflAdj, 0)}</span>
+          </div>
+          <div className="flex justify-between">
+            <div className="flex items-center">
+              <label className="form-label my-0">Avg Withdrawal</label>
+            </div>
+            <span>
+              {numToCurrency(cycleStats.withdrawals.averageInflAdj, 0)}
+            </span>
+          </div>
+        </div>
       </div>
-      <div className="text-gray-500 text-sm text-center mt-2 font-semibold">
+      <div className="text-gray-500 text-sm text-center mt-4 font-semibold">
         Click to{' '}
-        <span style={{ color: colors.green.dark }}>
+        <span style={{ color: colors.green.dark }} className="underline">
           {pointFixed ? 'release' : 'freeze'}
         </span>{' '}
         point

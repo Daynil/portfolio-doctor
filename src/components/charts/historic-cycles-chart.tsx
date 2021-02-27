@@ -31,7 +31,7 @@ export const colors = {
   }
 };
 
-const tooltipWidth = 325;
+const tooltipWidth = 350;
 
 type Props = {
   /** An array of points is a line, 2d array for multiple lines */
@@ -149,9 +149,11 @@ export function HistoricCyclesChart({
     if (pointFixed) return;
 
     // Move tooltip (favor left side when available)
-    let leftAdjust = e.clientX - svgContainerRect.left - window.pageXOffset;
-    if (leftAdjust > tooltipWidth) {
-      leftAdjust = leftAdjust - tooltipWidth;
+    const mouseOffset = 30; // So the tooltip doesn't block the data point
+    let leftAdjust =
+      e.clientX - svgContainerRect.left - window.pageXOffset + mouseOffset;
+    if (leftAdjust > tooltipWidth + mouseOffset * 2) {
+      leftAdjust = leftAdjust - tooltipWidth - mouseOffset * 2;
     }
     // Alternate method which favors right side when available
     // if (leftAdjust > 690) {
@@ -214,6 +216,7 @@ export function HistoricCyclesChart({
         {selectedPoint && (
           <HistoricCyclesTooltip
             width={tooltipWidth}
+            cycleStats={allLineMeta[selectedPoint.cycleIndex]}
             yearData={
               dataSeries[selectedPoint.cycleIndex][selectedPoint.yearIndex]
             }

@@ -48,6 +48,11 @@ export function HistoricPortfolioDetails({
   const [copyModalActive, setCopyModalActive] = useState(false);
 
   useEffect(() => {
+    setPointFixed(null);
+    setSelectedPoint(null);
+  }, [lifecyclesData]);
+
+  useEffect(() => {
     if (!pointFixed) setShowCycleDetails(false);
   }, [pointFixed]);
 
@@ -70,11 +75,6 @@ export function HistoricPortfolioDetails({
     setPointFixed(null);
     setSelectedPoint(null);
     setDisplayMode(displayMode);
-  }
-
-  function getSelectedCycleStats() {
-    if (!selectedPoint) return null;
-    return lifecyclesStats[selectedPoint.cycleIndex];
   }
 
   let portfolioHealthColor = 'text-green-500';
@@ -185,7 +185,6 @@ export function HistoricPortfolioDetails({
         </div>
         <div
           style={{
-            width: '16rem',
             height: 'fit-content'
           }}
           className="rounded-md pb-4 border-2 border-gray-300 m-6"
@@ -193,9 +192,9 @@ export function HistoricPortfolioDetails({
           <div className="bg-gray-300 text-gray-700 font-semibold py-1 text-center w-full">
             Portfolio Health
           </div>
-          <div className="px-2 text-center">
+          <div className="flex items-center justify-center px-2 text-center">
             <div className="text-center">
-              <div className="flex flex-col pt-2">
+              <div className="flex flex-col pt-2 mx-4">
                 <label className="text-gray-600 font-semibold tracking-wide block">
                   Success
                 </label>
@@ -208,13 +207,13 @@ export function HistoricPortfolioDetails({
                 </span>
               </div>
             </div>
-            <div className="my-2 mx-auto bg-gray-500 w-5/6 h-px"></div>
+            <div className="bg-gray-500 w-px h-24"></div>
             <div className="text-center">
-              <div className="flex flex-col pt-2">
-                <label className="text-gray-600 font-semibold tracking-wide block">
+              <div className="flex flex-col pt-2 mx-4">
+                <label className="text-gray-600 font-semibold tracking-wide block w-32">
                   Low Ending Balance
                 </label>
-                <span className={'text-2xl font-bold ' + portfolioHealthColor}>
+                <span className={'text-2xl font-bold text-gray-700'}>
                   {numFormat('.2%')(
                     portfolioStats.numNearFailures /
                       (portfolioStats.numFailures + portfolioStats.numSuccesses)
@@ -222,6 +221,24 @@ export function HistoricPortfolioDetails({
                 </span>
                 <span className="text-gray-600 text-sm mt-1">
                   {portfolioStats.numNearFailures} out of{' '}
+                  {portfolioStats.numFailures + portfolioStats.numSuccesses}
+                </span>
+              </div>
+            </div>
+            <div className="bg-gray-500 w-px h-24"></div>
+            <div className="text-center">
+              <div className="flex flex-col pt-2 mx-4">
+                <label className="text-gray-600 font-semibold tracking-wide block w-32">
+                  High Ending Balance
+                </label>
+                <span className={'text-2xl font-bold text-gray-700'}>
+                  {numFormat('.2%')(
+                    portfolioStats.numHighEndBalance /
+                      (portfolioStats.numFailures + portfolioStats.numSuccesses)
+                  )}
+                </span>
+                <span className="text-gray-600 text-sm mt-1">
+                  {portfolioStats.numHighEndBalance} out of{' '}
                   {portfolioStats.numFailures + portfolioStats.numSuccesses}
                 </span>
               </div>
@@ -237,19 +254,12 @@ export function HistoricPortfolioDetails({
                 </td>
               </tr>
               <tr>
-                <th className="bg-gray-300" style={{ width: '12rem' }}></th>
                 <th
-                  colSpan={2}
-                  className="text-right text-gray-700 bg-gray-300 font-semibold"
+                  colSpan={3}
+                  className="text-center text-gray-700 bg-gray-300 font-semibold"
                   style={{ width: '14rem' }}
                 >
-                  Portfolio
-                </th>
-                <th
-                  className="text-right pr-4 text-gray-700 bg-gray-300 font-semibold"
-                  style={{ width: '10rem' }}
-                >
-                  Cycle
+                  Portfolio Stats
                 </th>
               </tr>
               <tr>
@@ -269,11 +279,11 @@ export function HistoricPortfolioDetails({
                   Ending Balance
                 </td>
                 <td>
-                  <label className="form-label my-0 font-normal block">
+                  <label className="form-label mx-10 my-0 font-normal block">
                     Minimum
                   </label>
                 </td>
-                <td className="text-right">
+                <td className="text-right pr-4">
                   {portfolioStats.balance.min.balanceInflAdj < 0
                     ? numToCurrency(0)
                     : numToCurrency(
@@ -281,30 +291,24 @@ export function HistoricPortfolioDetails({
                         0
                       )}
                 </td>
-                <td className="text-right pr-4" rowSpan={3}>
-                  {numToCurrency(
-                    getSelectedCycleStats()?.balance.endingInflAdj,
-                    0
-                  )}
-                </td>
               </tr>
               <tr>
                 <td>
-                  <label className="form-label my-0 font-normal block">
+                  <label className="form-label mx-10 my-0 font-normal block">
                     Average
                   </label>
                 </td>
-                <td className="text-right">
+                <td className="text-right pr-4">
                   {numToCurrency(portfolioStats.balance.averageInflAdj, 0)}
                 </td>
               </tr>
               <tr>
                 <td>
-                  <label className="form-label my-0 font-normal block">
+                  <label className="form-label mx-10 my-0 font-normal block">
                     Maximum
                   </label>
                 </td>
-                <td className="text-right">
+                <td className="text-right pr-4">
                   {numToCurrency(portfolioStats.balance.max.balanceInflAdj, 0)}
                 </td>
               </tr>
@@ -318,61 +322,43 @@ export function HistoricPortfolioDetails({
                   Annual Withdrawal
                 </td>
                 <td>
-                  <label className="form-label my-0 font-normal block">
+                  <label className="form-label mx-10 my-0 font-normal block">
                     Minimum
                   </label>
                 </td>
-                <td className="text-right">
+                <td className="text-right pr-4">
                   {numToCurrency(
                     portfolioStats.withdrawals.min.amountInflAdj,
                     0
                   )}
                 </td>
-                <td className="text-right pr-4">
-                  {numToCurrency(
-                    getSelectedCycleStats()?.withdrawals.min.amountInflAdj,
-                    0
-                  )}
-                </td>
               </tr>
               <tr>
                 <td>
-                  <label className="form-label my-0 font-normal block">
+                  <label className="form-label mx-10 my-0 font-normal block">
                     Average
                   </label>
                 </td>
-                <td className="text-right">
-                  {numToCurrency(portfolioStats.withdrawals.averageInflAdj, 0)}
-                </td>
                 <td className="text-right pr-4">
-                  {numToCurrency(
-                    getSelectedCycleStats()?.withdrawals.averageInflAdj,
-                    0
-                  )}
+                  {numToCurrency(portfolioStats.withdrawals.averageInflAdj, 0)}
                 </td>
               </tr>
               <tr>
                 <td>
-                  <label className="form-label my-0 font-normal block">
+                  <label className="form-label mx-10 my-0 font-normal block">
                     Maximum
                   </label>
                 </td>
-                <td className="text-right">
-                  {numToCurrency(
-                    portfolioStats.withdrawals.max.amountInflAdj,
-                    0
-                  )}
-                </td>
                 <td className="text-right pr-4">
                   {numToCurrency(
-                    getSelectedCycleStats()?.withdrawals.max.amountInflAdj,
+                    portfolioStats.withdrawals.max.amountInflAdj,
                     0
                   )}
                 </td>
               </tr>
               <tr>
                 <td colSpan={4}>
-                  <div className="my-2"></div>
+                  <div className="my-2 pr-4"></div>
                 </td>
               </tr>
             </tbody>
@@ -380,42 +366,51 @@ export function HistoricPortfolioDetails({
         </div>
       </div>
       <div className="ml-6">
-        <button
-          className="btn btn-green-2"
-          onClick={() => setShowCycleDetails(!showCycleDetails)}
-          disabled={!selectedPoint || !pointFixed}
-        >
-          {showCycleDetails ? 'Hide' : 'Show'} Cycle Details
-        </button>
-
-        {!selectedPoint || !showCycleDetails ? null : (
-          <table className="mt-4 border-collapse">
-            <thead>
-              <tr className="bg-green-500 text-white text-right">
-                <th className="p-2">Year</th>
-                <th className="p-2">Ending Balance</th>
-                <th className="p-2">Withdrawal</th>
-              </tr>
-            </thead>
-            <tbody>
-              {lifecyclesData[selectedPoint.cycleIndex].map((yearData, i) => (
-                <tr
-                  key={i + 1}
-                  className="group transition-colors even:bg-gray-200"
-                >
-                  <td className="group-hover:bg-gray-400 duration-200 text-right p-2">
-                    {yearData.cycleYear}
-                  </td>
-                  <td className="group-hover:bg-gray-400 duration-200 text-right p-2">
-                    {numFormat('$,.2f')(yearData.balanceInfAdjEnd)}
-                  </td>
-                  <td className="group-hover:bg-gray-400 duration-200 text-right p-2">
-                    {numFormat('$,.2f')(yearData.withdrawalInfAdjust)}
-                  </td>
+        {!selectedPoint ? null : (
+          <div className="rounded-md overflow-hidden border-2 m-6">
+            <table className="border-collapse">
+              <thead>
+                <tr className="bg-green-500 text-white">
+                  <th className="p-2">Year</th>
+                  <th className="p-2">Ending Balance</th>
+                  <th className="p-2">Withdrawal</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {lifecyclesData[selectedPoint.cycleIndex].map((yearData, i) => (
+                  <tr
+                    key={i + 1}
+                    className="group transition-colors even:bg-gray-200 cursor-pointer"
+                  >
+                    <td
+                      className={
+                        'group-hover:bg-green-200 duration-200 text-right py-2 px-6' +
+                        (selectedPoint.yearIndex === i ? ' bg-green-200' : '')
+                      }
+                    >
+                      {yearData.cycleYear}
+                    </td>
+                    <td
+                      className={
+                        'group-hover:bg-green-200 duration-200 text-right py-2 px-6' +
+                        (selectedPoint.yearIndex === i ? ' bg-green-200' : '')
+                      }
+                    >
+                      {numFormat('$,.2f')(yearData.balanceInfAdjEnd)}
+                    </td>
+                    <td
+                      className={
+                        'group-hover:bg-green-200 duration-200 text-right py-2 px-6' +
+                        (selectedPoint.yearIndex === i ? ' bg-green-200' : '')
+                      }
+                    >
+                      {numFormat('$,.2f')(yearData.withdrawalInfAdjust)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>
