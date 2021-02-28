@@ -94,6 +94,49 @@ export function HistoricPortfolioDetails({
     }
   }
 
+  function cycleDetailsEmptyBody() {
+    if (displayMode === 'Full') {
+      const startingYears = lifecyclesData
+        .map((d) => d.map((di) => di.cycleStartYear))
+        .map((d) => d[0]);
+      return (
+        <div className="px-4">
+          <div>Select a cycle by clicking in the chart above to view data</div>
+          <div className="mt-2">
+            <label htmlFor="cycleStartYear" className="mr-2">
+              Or, select the cycle starting in year:
+            </label>
+            <select
+              id="cycleStartYear"
+              onChange={(e) => {
+                if (e.target.value === '') return;
+                const selectedYear = parseInt(e.target.value);
+                setSelectedPoint({
+                  cycleIndex: selectedYear - startingYears[0],
+                  yearIndex: 0
+                });
+                setPointFixed(true);
+              }}
+            >
+              <option value=""></option>
+              {startingYears.map((year) => (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      );
+    } else {
+      return (
+        <span className="px-4">
+          Select a quantile by clicking in the chart above to view details
+        </span>
+      );
+    }
+  }
+
   function cycleDetailsBody() {
     const allCyclesRows = lifecyclesData[selectedPoint.cycleIndex].map(
       (yearData, i) => (
@@ -491,7 +534,7 @@ export function HistoricPortfolioDetails({
                       colSpan={3}
                       className="text-center py-2 text-base text-gray-500"
                     >
-                      Select a cycle to view details
+                      {cycleDetailsEmptyBody()}
                     </td>
                   </tr>
                 </tbody>
