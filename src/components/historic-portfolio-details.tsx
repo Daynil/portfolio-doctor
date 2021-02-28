@@ -381,6 +381,12 @@ export function HistoricPortfolioDetails({
                   <tr
                     key={i + 1}
                     className="group transition-colors even:bg-gray-200 cursor-pointer"
+                    onClick={() =>
+                      setSelectedPoint({
+                        cycleIndex: selectedPoint.cycleIndex,
+                        yearIndex: i
+                      })
+                    }
                   >
                     <td
                       className={

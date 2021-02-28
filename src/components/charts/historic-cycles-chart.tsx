@@ -132,6 +132,14 @@ export function HistoricCyclesChart({
     );
   });
 
+  useEffect(() => {
+    // This effect only occurs when the cycle table is clicked
+    // Which only happens when the point is fixed
+    if (!selectedPoint) return;
+    if (!pointFixed) return;
+    moveSvgDot(selectedPoint);
+  }, [selectedPoint]);
+
   function getCircleColor() {
     if (!selectedPoint) return;
     if (allLineMeta) {
@@ -140,6 +148,17 @@ export function HistoricCyclesChart({
       if (hoveringCycleMeta.nearFailure) return colors.yellow.dark;
     }
     return colors.green.dark;
+  }
+
+  function moveSvgDot(point: Point) {
+    // xScale(i + 1),
+    // yScale(yAccessor(dataSeries[closestCycleIndex][i]))
+    refGdot.current.setAttribute(
+      'transform',
+      `translate(${xScale(point.yearIndex + 1)},${yScale(
+        yAccessor(dataSeries[point.cycleIndex][point.yearIndex])
+      )})`
+    );
   }
 
   // https://observablehq.com/@d3/multi-line-chart
@@ -184,15 +203,16 @@ export function HistoricCyclesChart({
       (a, b) => Math.abs(yAccessor(a[i]) - ym) - Math.abs(yAccessor(b[i]) - ym)
     );
 
-    handleSetSelectedPoint({ yearIndex: i, cycleIndex: closestCycleIndex });
+    const selectedPoint = { yearIndex: i, cycleIndex: closestCycleIndex };
+
+    handleSetSelectedPoint(selectedPoint);
 
     // Move selection dot indicator to that nearest point of cursor
-    refGdot.current.setAttribute(
-      'transform',
-      `translate(${xScale(i + 1)},${yScale(
-        yAccessor(dataSeries[closestCycleIndex][i])
-      )})`
-    );
+    moveSvgDot(selectedPoint);
+    // moveSvgDot(
+    //   xScale(i + 1),
+    //   yScale(yAccessor(dataSeries[closestCycleIndex][i]))
+    // );
   }
 
   function mouseLeft() {
