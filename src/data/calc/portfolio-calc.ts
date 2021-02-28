@@ -39,6 +39,13 @@ export interface CycleYearQuantile {
   quantile: number;
   cycleYearIndex: number;
   balance: number;
+  withdrawal: number;
+}
+
+export interface QuantileStats {
+  endingBalance: number;
+  averageBalance: number;
+  averageWithdrawal: number;
 }
 
 export interface CycleStats {

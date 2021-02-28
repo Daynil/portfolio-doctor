@@ -5,7 +5,8 @@ import {
   CycleYearData,
   CycleYearQuantile,
   PortfolioOptions,
-  PortfolioStats
+  PortfolioStats,
+  QuantileStats
 } from '../data/calc/portfolio-calc';
 import { baseUrl } from '../utilities/constants';
 import { numToCurrency } from '../utilities/format';
@@ -20,6 +21,7 @@ export interface PortfolioData {
   lifecyclesStats: CycleStats[];
   portfolioStats: PortfolioStats;
   quantiles: CycleYearQuantile[][];
+  quantileStats: QuantileStats[];
   options: PortfolioOptions;
 }
 
@@ -35,6 +37,7 @@ export function HistoricPortfolioDetails({
   lifecyclesStats,
   portfolioStats,
   quantiles,
+  quantileStats,
   options
 }: PortfolioData) {
   const refCopyURL = useRef<HTMLInputElement>(null);
@@ -75,6 +78,107 @@ export function HistoricPortfolioDetails({
     setPointFixed(null);
     setSelectedPoint(null);
     setDisplayMode(displayMode);
+  }
+
+  function cycleDetailsTitle() {
+    if (displayMode === 'Full') {
+      if (!selectedPoint) return 'Cycle Details';
+      const selectedCycleStart =
+        lifecyclesData[selectedPoint.cycleIndex][0].cycleStartYear;
+      return `Cycle Starting ${selectedCycleStart} Details`;
+    } else {
+      if (!selectedPoint) return 'Quantile Details';
+      const selectedQuantile =
+        quantiles[selectedPoint.cycleIndex][0].quantile * 100;
+      return `${selectedQuantile}th Percentile Quantile Details`;
+    }
+  }
+
+  function cycleDetailsBody() {
+    const allCyclesRows = lifecyclesData[selectedPoint.cycleIndex].map(
+      (yearData, i) => (
+        <tr
+          key={i + 1}
+          className="group transition-colors even:bg-gray-200 cursor-pointer"
+          onClick={() =>
+            setSelectedPoint({
+              cycleIndex: selectedPoint.cycleIndex,
+              yearIndex: i
+            })
+          }
+        >
+          <td
+            className={
+              'group-hover:bg-green-200 duration-200 text-right py-2 px-6' +
+              (selectedPoint.yearIndex === i ? ' bg-green-200' : '')
+            }
+          >
+            {yearData.cycleYear}
+          </td>
+          <td
+            className={
+              'group-hover:bg-green-200 duration-200 text-right py-2 px-6' +
+              (selectedPoint.yearIndex === i ? ' bg-green-200' : '')
+            }
+          >
+            {numFormat('$,.2f')(yearData.balanceInfAdjEnd)}
+          </td>
+          <td
+            className={
+              'group-hover:bg-green-200 duration-200 text-right py-2 px-6' +
+              (selectedPoint.yearIndex === i ? ' bg-green-200' : '')
+            }
+          >
+            {numFormat('$,.2f')(yearData.withdrawalInfAdjust)}
+          </td>
+        </tr>
+      )
+    );
+
+    const quantilesRows =
+      displayMode === 'Full'
+        ? null
+        : quantiles[selectedPoint.cycleIndex].map((quantileData, i) => (
+            <tr
+              key={i + 1}
+              className="group transition-colors even:bg-gray-200 cursor-pointer"
+              onClick={() =>
+                setSelectedPoint({
+                  cycleIndex: selectedPoint.cycleIndex,
+                  yearIndex: i
+                })
+              }
+            >
+              <td
+                className={
+                  'group-hover:bg-green-200 duration-200 text-right py-2 px-6' +
+                  (selectedPoint.yearIndex === i ? ' bg-green-200' : '')
+                }
+              >
+                {quantileData.cycleYearIndex + 1}
+              </td>
+              <td
+                className={
+                  'group-hover:bg-green-200 duration-200 text-right py-2 px-6' +
+                  (selectedPoint.yearIndex === i ? ' bg-green-200' : '')
+                }
+              >
+                {numFormat('$,.2f')(quantileData.balance)}
+              </td>
+              <td
+                className={
+                  'group-hover:bg-green-200 duration-200 text-right py-2 px-6' +
+                  (selectedPoint.yearIndex === i ? ' bg-green-200' : '')
+                }
+              >
+                {numFormat('$,.2f')(quantileData.withdrawal)}
+              </td>
+            </tr>
+          ));
+
+    return (
+      <tbody>{displayMode === 'Full' ? allCyclesRows : quantilesRows}</tbody>
+    );
   }
 
   let portfolioHealthColor = 'text-green-500';
@@ -165,8 +269,8 @@ export function HistoricPortfolioDetails({
           {displayMode === 'Full' ? (
             <HistoricCyclesChart
               dataSeries={lifecyclesData}
-              aspectRatio={1000 / 600}
               allLineMeta={lifecyclesStats}
+              aspectRatio={1000 / 600}
               selectedPoint={selectedPoint}
               handleSetSelectedPoint={(point: Point) => setSelectedPoint(point)}
               pointFixed={pointFixed}
@@ -175,6 +279,7 @@ export function HistoricPortfolioDetails({
           ) : (
             <QuantilesChart
               dataSeries={quantiles}
+              allLineMeta={quantileStats}
               aspectRatio={1000 / 600}
               selectedPoint={selectedPoint}
               handleSetSelectedPoint={(point: Point) => setSelectedPoint(point)}
@@ -366,8 +471,11 @@ export function HistoricPortfolioDetails({
         </div>
       </div>
       <div className="ml-6">
-        {!selectedPoint ? null : (
-          <div className="rounded-md overflow-hidden border-2 m-6">
+        <div className="m-6">
+          <div className="font-bold bg-gray-300 text-gray-700 w-full text-center rounded-t-md py-2">
+            {cycleDetailsTitle()}
+          </div>
+          <div className="rounded-b-md overflow-hidden border-2">
             <table className="border-collapse">
               <thead>
                 <tr className="bg-green-500 text-white">
@@ -376,48 +484,23 @@ export function HistoricPortfolioDetails({
                   <th className="p-2">Withdrawal</th>
                 </tr>
               </thead>
-              <tbody>
-                {lifecyclesData[selectedPoint.cycleIndex].map((yearData, i) => (
-                  <tr
-                    key={i + 1}
-                    className="group transition-colors even:bg-gray-200 cursor-pointer"
-                    onClick={() =>
-                      setSelectedPoint({
-                        cycleIndex: selectedPoint.cycleIndex,
-                        yearIndex: i
-                      })
-                    }
-                  >
+              {!selectedPoint ? (
+                <tbody>
+                  <tr>
                     <td
-                      className={
-                        'group-hover:bg-green-200 duration-200 text-right py-2 px-6' +
-                        (selectedPoint.yearIndex === i ? ' bg-green-200' : '')
-                      }
+                      colSpan={3}
+                      className="text-center py-2 text-base text-gray-500"
                     >
-                      {yearData.cycleYear}
-                    </td>
-                    <td
-                      className={
-                        'group-hover:bg-green-200 duration-200 text-right py-2 px-6' +
-                        (selectedPoint.yearIndex === i ? ' bg-green-200' : '')
-                      }
-                    >
-                      {numFormat('$,.2f')(yearData.balanceInfAdjEnd)}
-                    </td>
-                    <td
-                      className={
-                        'group-hover:bg-green-200 duration-200 text-right py-2 px-6' +
-                        (selectedPoint.yearIndex === i ? ' bg-green-200' : '')
-                      }
-                    >
-                      {numFormat('$,.2f')(yearData.withdrawalInfAdjust)}
+                      Select a cycle to view details
                     </td>
                   </tr>
-                ))}
-              </tbody>
+                </tbody>
+              ) : (
+                cycleDetailsBody()
+              )}
             </table>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

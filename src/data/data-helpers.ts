@@ -1,7 +1,6 @@
 //import parse from 'csv-parse';
 //import { writeFileSync } from 'fs';
 import {
-  ascending,
   deviation,
   leastIndex,
   max,
@@ -21,7 +20,8 @@ import {
   CycleYearData,
   CycleYearQuantile,
   MarketDataStats,
-  MarketYearData
+  MarketYearData,
+  QuantileStats
 } from './calc/portfolio-calc';
 
 export function loadFile(file: File): Promise<string> {
@@ -150,8 +150,14 @@ export function getQuantiles(
   quantiles: number[]
 ): CycleYearQuantile[][] {
   const transposed = transpose<CycleYearData>(yearData).map((cycleData) =>
-    cycleData.map((year) => year.balanceInfAdjEnd).sort(ascending)
+    cycleData
+      .map((year) => ({
+        balance: year.balanceInfAdjEnd,
+        withdrawal: year.withdrawalInfAdjust
+      }))
+      .sort((a, b) => a.balance - b.balance)
   );
+
   const quantileData: CycleYearQuantile[][] = [];
   for (let i = 0; i < quantiles.length; i++) {
     const quantileNum = quantiles[i];
@@ -160,12 +166,29 @@ export function getQuantiles(
         return {
           quantile: quantileNum,
           cycleYearIndex: yearIdx,
-          balance: quantile(transposedYears, quantileNum)
+          balance: quantile(
+            transposedYears.map((d) => d.balance),
+            quantileNum
+          ),
+          withdrawal: quantile(
+            transposedYears.map((d) => d.withdrawal),
+            quantileNum
+          )
         };
       })
     );
   }
   return quantileData;
+}
+
+export function getQuantileStats(
+  quantileData: CycleYearQuantile[][]
+): QuantileStats[] {
+  return quantileData.map((yearQuantile, i) => ({
+    endingBalance: yearQuantile[yearQuantile.length - 1].balance,
+    averageBalance: mean(yearQuantile, (d) => d.balance),
+    averageWithdrawal: mean(yearQuantile, (d) => d.withdrawal)
+  }));
 }
 
 export function sortLeftMostThenLongestLine<T>(

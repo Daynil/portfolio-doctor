@@ -26,6 +26,7 @@ import { DatasetContext, defaultDatasetName } from '../data/data-context';
 import {
   getMarketDataStats,
   getQuantiles,
+  getQuantileStats,
   parseCSVStringToJSON
 } from '../data/data-helpers';
 import { parseStringyNum } from '../utilities/format';
@@ -211,6 +212,7 @@ export default function Simulator() {
         lifecyclesStats: stats.cycleStats,
         portfolioStats: stats,
         quantiles: quantileLines,
+        quantileStats: getQuantileStats(quantileLines),
         options: curPortfolio.options
       });
     } else {

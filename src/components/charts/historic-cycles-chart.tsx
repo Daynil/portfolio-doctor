@@ -209,10 +209,6 @@ export function HistoricCyclesChart({
 
     // Move selection dot indicator to that nearest point of cursor
     moveSvgDot(selectedPoint);
-    // moveSvgDot(
-    //   xScale(i + 1),
-    //   yScale(yAccessor(dataSeries[closestCycleIndex][i]))
-    // );
   }
 
   function mouseLeft() {

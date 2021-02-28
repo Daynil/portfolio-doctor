@@ -597,7 +597,7 @@ describe('full 3-cycle portfolio tests against excel data', () => {
     expect(portfolioStats.withdrawals.max.amount).toBeCloseTo(41562.9827, 4);
   });
 
-  test('calculates ending balance quantiles', () => {
+  test('calculates ending balance quantiles and stats', () => {
     const quantilePortfolio = dataHelpers.getQuantiles(portfolioData, [
       0.25,
       0.5,
@@ -616,53 +616,88 @@ describe('full 3-cycle portfolio tests against excel data', () => {
         {
           quantile: 0.25,
           cycleYearIndex: 0,
-          balance: 1002104.4473
+          balance: 1002104.4473,
+          withdrawal: 40000
         },
         {
           quantile: 0.25,
           cycleYearIndex: 1,
-          balance: 1021920.9142
+          balance: 1021920.9142,
+          withdrawal: 40000
         },
         {
           quantile: 0.25,
           cycleYearIndex: 2,
-          balance: 1150677.4876
+          balance: 1150677.4876,
+          withdrawal: 40000
         }
       ],
       [
         {
           quantile: 0.5,
           cycleYearIndex: 0,
-          balance: 1074419.3335
+          balance: 1074419.3335,
+          withdrawal: 40000
         },
         {
           quantile: 0.5,
           cycleYearIndex: 1,
-          balance: 1041044.2539
+          balance: 1041044.2539,
+          withdrawal: 40000
         },
         {
           quantile: 0.5,
           cycleYearIndex: 2,
-          balance: 1174839.3694
+          balance: 1174839.3694,
+          withdrawal: 40000
         }
       ],
       [
         {
           quantile: 0.75,
           cycleYearIndex: 0,
-          balance: 1125642.8883
+          balance: 1125642.8883,
+          withdrawal: 40000
         },
         {
           quantile: 0.75,
           cycleYearIndex: 1,
-          balance: 1146468.3004
+          balance: 1146468.3004,
+          withdrawal: 40000
         },
         {
           quantile: 0.75,
           cycleYearIndex: 2,
-          balance: 1183122.0206
+          balance: 1183122.0206,
+          withdrawal: 40000
         }
       ]
+    ]);
+
+    const quantileStats = dataHelpers.getQuantileStats(quantilePortfolio);
+
+    expect(
+      quantileStats.map((year) => ({
+        ...year,
+        endingBalance: round(year.endingBalance, 4),
+        averageBalance: round(year.averageBalance, 4)
+      }))
+    ).toEqual([
+      {
+        endingBalance: 1150677.4876,
+        averageBalance: 1058234.283,
+        averageWithdrawal: 40000
+      },
+      {
+        endingBalance: 1174839.3694,
+        averageBalance: 1096767.6523,
+        averageWithdrawal: 40000
+      },
+      {
+        endingBalance: 1183122.0206,
+        averageBalance: 1151744.4031,
+        averageWithdrawal: 40000
+      }
     ]);
   });
 

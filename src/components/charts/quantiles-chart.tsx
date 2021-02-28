@@ -1,13 +1,16 @@
 import { leastIndex, line, max, maxIndex, scaleLinear } from 'd3';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { CycleYearQuantile } from '../../data/calc/portfolio-calc';
+import {
+  CycleYearQuantile,
+  QuantileStats
+} from '../../data/calc/portfolio-calc';
 import { numToCurrencyShort } from '../../utilities/format';
 import { useChartDimensions } from '../../utilities/hooks';
 import { clamp } from '../../utilities/math';
 import { Point } from '../historic-portfolio-details';
 import { Axis } from './axis';
 import { Chart } from './chart';
-import { MonteCarloQuantilesTooltip } from './quantiles-tooltip';
+import { QuantilesTooltip } from './quantiles-tooltip';
 
 export type D3Selection<T extends d3.BaseType> = d3.Selection<
   T,
@@ -44,6 +47,7 @@ const tooltipWidth = 325;
 type Props = {
   /** An array of points is a line, 2d array for multiple lines */
   dataSeries: CycleYearQuantile[][];
+  allLineMeta: QuantileStats[];
   /** Chart's aspect ratio */
   aspectRatio: number;
   selectedPoint: Point;
@@ -55,6 +59,7 @@ type Props = {
 export function QuantilesChart({
   dataSeries,
   aspectRatio,
+  allLineMeta,
   selectedPoint,
   handleSetSelectedPoint,
   pointFixed,
@@ -245,11 +250,12 @@ export function QuantilesChart({
           />
         )} */}
         {selectedPoint && (
-          <MonteCarloQuantilesTooltip
+          <QuantilesTooltip
             width={tooltipWidth}
             quantile={
               dataSeries[selectedPoint.cycleIndex][selectedPoint.yearIndex]
             }
+            quantileStats={allLineMeta[selectedPoint.cycleIndex]}
             pointFixed={pointFixed}
             cycleLength={dataSeries[selectedPoint.cycleIndex].length - 1}
             leftAdjust={tooltipLeftAdjust}
