@@ -149,6 +149,14 @@ export function QuantilesChart({
     );
   });
 
+  useEffect(() => {
+    // This effect only occurs when the cycle table is clicked
+    // Which only happens when the point is fixed
+    if (!selectedPoint) return;
+    if (!pointFixed) return;
+    moveSvgDot(selectedPoint);
+  }, [selectedPoint]);
+
   function getCircleColor() {
     if (!selectedPoint) return;
     const pointQuantile =
@@ -167,6 +175,15 @@ export function QuantilesChart({
       color = quantileColors.red.normal;
     }
     return color;
+  }
+
+  function moveSvgDot(point: Point) {
+    refGdot.current.setAttribute(
+      'transform',
+      `translate(${xScale(point.yearIndex + 1)},${yScale(
+        yAccessor(dataSeries[point.cycleIndex][point.yearIndex])
+      )})`
+    );
   }
 
   // https://observablehq.com/@d3/multi-line-chart
@@ -209,15 +226,12 @@ export function QuantilesChart({
       (a, b) => Math.abs(yAccessor(a[i]) - ym) - Math.abs(yAccessor(b[i]) - ym)
     );
 
-    handleSetSelectedPoint({ yearIndex: i, cycleIndex: closestCycleIndex });
+    const selectedPoint = { yearIndex: i, cycleIndex: closestCycleIndex };
+
+    handleSetSelectedPoint(selectedPoint);
 
     // Move selection dot indicator to that nearest point of cursor
-    refGdot.current.setAttribute(
-      'transform',
-      `translate(${xScale(i + 1)},${yScale(
-        yAccessor(dataSeries[closestCycleIndex][i])
-      )})`
-    );
+    moveSvgDot(selectedPoint);
   }
 
   function mouseLeft() {
@@ -238,17 +252,6 @@ export function QuantilesChart({
         onMouseDown={mouseClicked}
         ref={ref}
       >
-        {/* {selectedPoint && (
-          <HistoricCyclesTooltip
-            width={tooltipWidth}
-            yearData={
-              dataSeries[selectedPoint.cycleIndex][selectedPoint.yearIndex]
-            }
-            cycleLength={dataSeries[selectedPoint.cycleIndex].length - 1}
-            pointFixed={pointFixed}
-            leftAdjust={tooltipLeftAdjust}
-          />
-        )} */}
         {selectedPoint && (
           <QuantilesTooltip
             width={tooltipWidth}

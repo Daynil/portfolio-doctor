@@ -151,8 +151,6 @@ export function HistoricCyclesChart({
   }
 
   function moveSvgDot(point: Point) {
-    // xScale(i + 1),
-    // yScale(yAccessor(dataSeries[closestCycleIndex][i]))
     refGdot.current.setAttribute(
       'transform',
       `translate(${xScale(point.yearIndex + 1)},${yScale(
