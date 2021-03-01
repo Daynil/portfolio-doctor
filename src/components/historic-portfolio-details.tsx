@@ -175,6 +175,14 @@ export function HistoricPortfolioDetails({
           >
             {numFormat('$,.2f')(yearData.withdrawalInfAdjust)}
           </td>
+          <td
+            className={
+              'group-hover:bg-green-200 duration-200 text-right py-2 px-6' +
+              (selectedPoint.yearIndex === i ? ' bg-green-200' : '')
+            }
+          >
+            {numFormat('$,.2f')(yearData.deposit)}
+          </td>
         </tr>
       )
     );
@@ -526,6 +534,7 @@ export function HistoricPortfolioDetails({
                   <th className="p-2">Year</th>
                   <th className="p-2">Ending Balance</th>
                   <th className="p-2">Withdrawal</th>
+                  {displayMode === 'Full' && <th className="p-2">Deposit</th>}
                 </tr>
               </thead>
               {!selectedPoint ? (

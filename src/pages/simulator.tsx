@@ -35,11 +35,14 @@ import {
 } from '../utilities/util';
 
 export default function Simulator() {
+  const [depositModalActive, setDepositModalActive] = useState(false);
+
   const [portfolio, setPortfolio] = useState<PortfolioData>(null);
   const [monteCarloRuns, setMonteCarloRuns] = useState<CycleYearData[][]>([]);
   const [marketData, setMarketData] = useState<MarketYearData[]>([]);
   const [marketDataStats, setMarketDataStats] = useState<MarketDataStats>(null);
   const [inputErr, setInputErr] = useState('');
+  const [depositInputErr, setDepositInputErr] = useState('');
 
   const [deposits, setDeposits] = useState<DepositInfo[]>([]);
 
@@ -52,6 +55,9 @@ export default function Simulator() {
   const refWithdrawalMax = useRef<HTMLInputElement>(null);
   const refWithdrawalStart = useRef<HTMLInputElement>(null);
   const refSimLength = useRef<HTMLInputElement>(null);
+  const refDepositAmount = useRef<HTMLInputElement>(null);
+  const refDepositStart = useRef<HTMLInputElement>(null);
+  const refDepositEnd = useRef<HTMLInputElement>(null);
 
   let startingOptions = { ...defaultPortfolioOptions };
   let urlOptionsValidated = false;
@@ -376,13 +382,35 @@ export default function Simulator() {
   }
 
   function addDeposit() {
+    setDepositModalActive(true);
+
+    if (parseStringyNum(refDepositAmount.current.value) < 1) {
+      setDepositInputErr('Invalid amount');
+      return;
+    }
+
+    if (parseInt(refDepositStart.current.value) < 1) {
+      setDepositInputErr('Invalid start year');
+      return;
+    }
+
+    if (
+      parseInt(refDepositStart.current.value) >
+      parseInt(refDepositEnd.current.value)
+    ) {
+      setDepositInputErr('Deposit start year must be less than end year');
+      return;
+    }
+
     const newDeposits = [...deposits];
     newDeposits.push({
-      amount: 10000,
-      startYearIdx: 1,
-      endYearIdx: 5
+      amount: parseStringyNum(refDepositAmount.current.value),
+      startYearIdx: parseInt(refDepositStart.current.value),
+      endYearIdx: parseInt(refDepositEnd.current.value)
     });
+    setDepositInputErr('');
     setDeposits(newDeposits);
+    setDepositModalActive(false);
   }
 
   function removeDeposit(depositIdx: number) {
@@ -406,6 +434,16 @@ export default function Simulator() {
         title="Portfolio Doctor Simulator"
         description="An app for projecting portfolio performance"
       />
+      <div
+        className={
+          depositModalActive
+            ? 'fixed inset-0 transition-opacity z-10'
+            : 'hidden'
+        }
+        onClick={() => setDepositModalActive(false)}
+      >
+        <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
+      </div>
       <div className="mt-10">
         <div className="flex justify-around">
           <div
@@ -608,7 +646,7 @@ export default function Simulator() {
             {delayWithdrawal && (
               <div className="flex flex-col mt-4">
                 <label className="form-label" htmlFor="withdrawalDelayYears">
-                  Start Withdrawls After (years)
+                  Start Withdrawls On (year)
                 </label>
                 <TextInput
                   name="withdrawalDelayYears"
@@ -650,7 +688,7 @@ export default function Simulator() {
             <div className="flex w-full justify-between mt-5">
               <button
                 className="btn btn-gray text-sm tracking-wide"
-                onClick={() => addDeposit()}
+                onClick={() => setDepositModalActive(true)}
               >
                 Add Deposit
               </button>
@@ -661,6 +699,71 @@ export default function Simulator() {
                 onClick={calculatePortfolio}
               >
                 Calculate!
+              </button>
+            </div>
+          </div>
+          <div
+            className={
+              depositModalActive
+                ? 'absolute bg-white shadow-lg rounded-md text-base p-6 w-96 flex flex-col z-20'
+                : 'hidden'
+            }
+          >
+            <h1 className="text-2xl text-gray-600">Deposit</h1>
+            <div className="h-px w-full -mt-5 mb-6 bg-gray-500"></div>
+            {depositInputErr ? (
+              <div
+                className="bg-red-100 border-l-4 border-red-500 text-red-700 py-2 px-4 my-2"
+                role="alert"
+              >
+                <p className="font-bold">Input Error</p>
+                <p className="text-sm">{depositInputErr}</p>
+              </div>
+            ) : null}
+            <div className="flex flex-col">
+              <label className="form-label" htmlFor="depositAmount">
+                Amount
+              </label>
+              <TextInput
+                symbolPrefix="$"
+                className="pl-8 w-full"
+                name="depositAmount"
+                type="text"
+                defaultValue={numFormat(',')(1000)}
+                ref={refDepositAmount}
+                onChange={(e) => handleIntegerInputChange(e, refDepositAmount)}
+              />
+            </div>
+            <div className="flex flex-col mt-4">
+              <label className="form-label" htmlFor="startDeposits">
+                Start On (year)
+              </label>
+              <TextInput
+                name="startDeposits"
+                type="number"
+                defaultValue={1}
+                min={1}
+                ref={refDepositStart}
+              />
+            </div>
+            <div className="flex flex-col mt-4">
+              <label className="form-label" htmlFor="endDeposits">
+                Stop On (year)
+              </label>
+              <TextInput
+                name="endDeposits"
+                type="number"
+                defaultValue={5}
+                min={1}
+                ref={refDepositEnd}
+              />
+            </div>
+            <div className="flex w-full justify-between mt-6">
+              <button
+                className="btn btn-green tracking-wide"
+                onClick={() => addDeposit()}
+              >
+                Save
               </button>
             </div>
           </div>
