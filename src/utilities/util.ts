@@ -14,6 +14,8 @@ export interface DataColumns {
   balanceInfAdjStart: number[];
   withdrawal: number[];
   withdrawalInfAdjust: number[];
+  deposit: number[];
+  depositInfAdjust: number[];
   startSubtotal: number[];
   equities: number[];
   equitiesGrowth: number[];
@@ -72,6 +74,8 @@ export function pivotPortfolioCycles(
       balanceInfAdjStart: [],
       withdrawal: [],
       withdrawalInfAdjust: [],
+      deposit: [],
+      depositInfAdjust: [],
       startSubtotal: [],
       equities: [],
       equitiesGrowth: [],
@@ -112,6 +116,8 @@ export function pivotPortfolioCyclesAggregate(
     balanceInfAdjStart: [],
     withdrawal: [],
     withdrawalInfAdjust: [],
+    deposit: [],
+    depositInfAdjust: [],
     startSubtotal: [],
     equities: [],
     equitiesGrowth: [],

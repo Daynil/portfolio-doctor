@@ -1,4 +1,4 @@
-import { clamp, normSinv, round } from '../utilities/math';
+import { between, clamp, normSinv, round } from '../utilities/math';
 
 describe('math helpers', () => {
   test('clamps values', () => {
@@ -16,6 +16,25 @@ describe('math helpers', () => {
     expect(round(10.12589, 3)).toEqual(10.126);
     expect(round(10.12589, 4)).toEqual(10.1259);
     expect(round(10.12589, 5)).toEqual(10.12589);
+  });
+
+  test('tests value is between two numbers', () => {
+    expect(between(999, 1, 2)).toBeFalsy();
+
+    expect(between(1, 0, 2)).toBeTruthy();
+    expect(between(1, 1, 2)).toBeTruthy();
+    expect(between(2, 1, 2)).toBeTruthy();
+
+    expect(between(-1, 0, 1)).toBeFalsy();
+    expect(between(0, -1, 1)).toBeTruthy();
+    expect(between(-1, -1, 1)).toBeTruthy();
+    expect(between(-1, -1, 1, 'inclusiveLeft')).toBeTruthy();
+    expect(between(-1, -1, 1, 'inclusiveRight')).toBeFalsy();
+
+    expect(between(1, 1, 2, 'inclusiveLeft')).toBeTruthy();
+    expect(between(1, 1, 2, 'inclusiveRight')).toBeFalsy();
+    expect(between(1, 1, 2, 'exclusive')).toBeFalsy();
+    expect(between(1, 0, 2, 'exclusive')).toBeTruthy();
   });
 
   /**

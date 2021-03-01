@@ -1,4 +1,5 @@
 import { maxIndex, mean, median, min, minIndex, sum } from 'd3-array';
+import { between } from '../../utilities/math';
 import {
   DataColumns,
   pivotPortfolioCycles,
@@ -22,6 +23,8 @@ export interface CycleYearData {
   balanceInfAdjStart: number;
   withdrawal: number;
   withdrawalInfAdjust: number;
+  deposit: number;
+  depositInfAdjust: number;
   startSubtotal: number;
   equities: number;
   equitiesGrowth: number;
@@ -240,6 +243,13 @@ export enum WithdrawalMethod {
 
 export type SimulationMethod = 'Historical Data' | 'Monte Carlo';
 
+export interface DepositInfo {
+  startYearIdx: number;
+  endYearIdx: number;
+  /** Inflation adjusted deposit amount */
+  amount: number;
+}
+
 export interface PortfolioOptions {
   simulationMethod: SimulationMethod;
   simulationYearsLength: number;
@@ -248,9 +258,11 @@ export interface PortfolioOptions {
   equitiesRatio: number;
   withdrawalMethod: WithdrawalMethod;
   withdrawal: WithdrawalOptions;
+  desposits?: DepositInfo[];
 }
 
 export interface WithdrawalOptions {
+  startYearIdx?: number;
   staticAmount?: number;
   percentage?: number;
   floor?: number;
@@ -306,6 +318,7 @@ export class CyclePortfolio {
     public marketYearData: MarketYearData[],
     public options: PortfolioOptions
   ) {
+    if (!this.options.desposits) this.options.desposits = [];
     switch (this.options.withdrawalMethod) {
       case WithdrawalMethod.Nominal:
       case WithdrawalMethod.InflationAdjusted:
@@ -327,6 +340,8 @@ export class CyclePortfolio {
       default:
         break;
     }
+    if (!this.options.withdrawal.startYearIdx)
+      this.options.withdrawal.startYearIdx = 1;
   }
 
   /**
@@ -342,6 +357,9 @@ export class CyclePortfolio {
     const firstYearCPI = this.marketYearData[cycleStartYearIndex]
       .inflationIndex;
 
+    // ** Note we are starting at 1, not 0, since it makes more sense
+    // for my squishy human brain
+    let absoluteIndex = 1;
     for (
       let currYearIndex = cycleStartYearIndex;
       currYearIndex < cycleStartYearIndex + this.options.simulationYearsLength;
@@ -354,12 +372,30 @@ export class CyclePortfolio {
           ? this.options.startBalance
           : cycleData[cycleData.length - 1].balanceEnd;
 
+      let yearDepost = 0;
+      if (this.options.desposits.length) {
+        for (let i = 0; i < this.options.desposits.length; i++) {
+          const depositData = this.options.desposits[i];
+          if (
+            between(
+              absoluteIndex,
+              depositData.startYearIdx,
+              depositData.endYearIdx
+            )
+          ) {
+            yearDepost += depositData.amount;
+          }
+        }
+      }
+
       const yearData = this.calculateYearData(
         priorBalance,
         this.marketYearData[currYearIndex],
         this.marketYearData[currYearIndex + 1],
         firstYearCPI,
-        currYearIndex === cycleStartYearIndex
+        currYearIndex === cycleStartYearIndex,
+        yearDepost,
+        absoluteIndex < this.options.withdrawal.startYearIdx
       );
 
       cycleData.push({
@@ -367,6 +403,8 @@ export class CyclePortfolio {
         cycleYear: currYear,
         cycleStartYear
       });
+
+      absoluteIndex++;
     }
     return cycleData;
   }
@@ -640,19 +678,23 @@ export class CyclePortfolio {
     dataCurrYear: MarketYearData,
     dataEndYear: MarketYearData,
     startYearCpi: number,
-    isFirstYear: boolean
+    isFirstYear: boolean,
+    depositAmount: number,
+    skipWithdrawal: boolean
   ): Omit<CycleYearData, 'cycleStartYear'> {
     let cumulativeInflation: number;
 
     if (isFirstYear) cumulativeInflation = 1;
     else cumulativeInflation = dataCurrYear.inflationIndex / startYearCpi;
 
-    const withdrawalData = this.calculateWithdrawal(
-      startingBalance,
-      cumulativeInflation
-    );
+    const withdrawalData = skipWithdrawal
+      ? { actual: 0, infAdj: 0 }
+      : this.calculateWithdrawal(startingBalance, cumulativeInflation);
 
-    const yearStartSubtotal = startingBalance - withdrawalData.actual;
+    const inflationAdjustedDeposit = depositAmount * cumulativeInflation;
+
+    const yearStartSubtotal =
+      startingBalance - withdrawalData.actual + inflationAdjustedDeposit;
 
     const equities = yearStartSubtotal * this.options.equitiesRatio;
     const equitiesGrowth =
@@ -679,6 +721,8 @@ export class CyclePortfolio {
       balanceInfAdjStart: startingBalance / cumulativeInflation,
       withdrawal: withdrawalData.actual,
       withdrawalInfAdjust: withdrawalData.infAdj,
+      deposit: depositAmount,
+      depositInfAdjust: inflationAdjustedDeposit,
       startSubtotal: startingBalance - withdrawalData.actual,
       equities,
       equitiesGrowth,

@@ -1,4 +1,5 @@
 import { readFileSync } from 'fs';
+import cloneDeep from 'lodash.clonedeep';
 import { round } from '../../utilities/math';
 import {
   DataColumns,
@@ -64,6 +65,8 @@ describe('data slicing tests', () => {
           balanceInfAdjStart: 1,
           withdrawal: 1,
           withdrawalInfAdjust: 1,
+          deposit: 1,
+          depositInfAdjust: 1,
           startSubtotal: 1,
           equities: 1,
           equitiesGrowth: 1,
@@ -83,6 +86,8 @@ describe('data slicing tests', () => {
           balanceInfAdjStart: 2,
           withdrawal: 2,
           withdrawalInfAdjust: 2,
+          deposit: 1,
+          depositInfAdjust: 1,
           startSubtotal: 2,
           equities: 2,
           equitiesGrowth: 2,
@@ -102,6 +107,8 @@ describe('data slicing tests', () => {
           balanceInfAdjStart: 3,
           withdrawal: 3,
           withdrawalInfAdjust: 3,
+          deposit: 1,
+          depositInfAdjust: 1,
           startSubtotal: 3,
           equities: 3,
           equitiesGrowth: 3,
@@ -123,6 +130,8 @@ describe('data slicing tests', () => {
           balanceInfAdjStart: 1,
           withdrawal: 1,
           withdrawalInfAdjust: 1,
+          deposit: 1,
+          depositInfAdjust: 1,
           startSubtotal: 1,
           equities: 1,
           equitiesGrowth: 1,
@@ -142,6 +151,8 @@ describe('data slicing tests', () => {
           balanceInfAdjStart: 2,
           withdrawal: 2,
           withdrawalInfAdjust: 2,
+          deposit: 1,
+          depositInfAdjust: 1,
           startSubtotal: 2,
           equities: 2,
           equitiesGrowth: 2,
@@ -161,6 +172,8 @@ describe('data slicing tests', () => {
           balanceInfAdjStart: 3,
           withdrawal: 3,
           withdrawalInfAdjust: 3,
+          deposit: 1,
+          depositInfAdjust: 1,
           startSubtotal: 3,
           equities: 3,
           equitiesGrowth: 3,
@@ -182,6 +195,8 @@ describe('data slicing tests', () => {
           balanceInfAdjStart: 1,
           withdrawal: 1,
           withdrawalInfAdjust: 1,
+          deposit: 1,
+          depositInfAdjust: 1,
           startSubtotal: 1,
           equities: 1,
           equitiesGrowth: 1,
@@ -201,6 +216,8 @@ describe('data slicing tests', () => {
           balanceInfAdjStart: 2,
           withdrawal: 2,
           withdrawalInfAdjust: 2,
+          deposit: 1,
+          depositInfAdjust: 1,
           startSubtotal: 2,
           equities: 2,
           equitiesGrowth: 2,
@@ -220,6 +237,8 @@ describe('data slicing tests', () => {
           balanceInfAdjStart: 3,
           withdrawal: 3,
           withdrawalInfAdjust: 3,
+          deposit: 1,
+          depositInfAdjust: 1,
           startSubtotal: 3,
           equities: 3,
           equitiesGrowth: 3,
@@ -243,6 +262,8 @@ describe('data slicing tests', () => {
         balanceInfAdjStart: [1, 2, 3],
         withdrawal: [1, 2, 3],
         withdrawalInfAdjust: [1, 2, 3],
+        deposit: [1, 1, 1],
+        depositInfAdjust: [1, 1, 1],
         startSubtotal: [1, 2, 3],
         equities: [1, 2, 3],
         equitiesGrowth: [1, 2, 3],
@@ -262,6 +283,8 @@ describe('data slicing tests', () => {
         balanceInfAdjStart: [1, 2, 3],
         withdrawal: [1, 2, 3],
         withdrawalInfAdjust: [1, 2, 3],
+        deposit: [1, 1, 1],
+        depositInfAdjust: [1, 1, 1],
         startSubtotal: [1, 2, 3],
         equities: [1, 2, 3],
         equitiesGrowth: [1, 2, 3],
@@ -281,6 +304,8 @@ describe('data slicing tests', () => {
         balanceInfAdjStart: [1, 2, 3],
         withdrawal: [1, 2, 3],
         withdrawalInfAdjust: [1, 2, 3],
+        deposit: [1, 1, 1],
+        depositInfAdjust: [1, 1, 1],
         startSubtotal: [1, 2, 3],
         equities: [1, 2, 3],
         equitiesGrowth: [1, 2, 3],
@@ -308,6 +333,8 @@ describe('data slicing tests', () => {
           balanceInfAdjStart: 1,
           withdrawal: 1,
           withdrawalInfAdjust: 1,
+          deposit: 1,
+          depositInfAdjust: 1,
           startSubtotal: 1,
           equities: 1,
           equitiesGrowth: 1,
@@ -327,6 +354,8 @@ describe('data slicing tests', () => {
           balanceInfAdjStart: 2,
           withdrawal: 2,
           withdrawalInfAdjust: 2,
+          deposit: 1,
+          depositInfAdjust: 1,
           startSubtotal: 2,
           equities: 2,
           equitiesGrowth: 2,
@@ -344,6 +373,73 @@ describe('data slicing tests', () => {
           cumulativeInflation: 3,
           balanceStart: 3,
           balanceInfAdjStart: 3,
+          withdrawal: 3,
+          withdrawalInfAdjust: 3,
+          deposit: 1,
+          depositInfAdjust: 1,
+          startSubtotal: 3,
+          equities: 3,
+          equitiesGrowth: 3,
+          dividendsGrowth: 3,
+          bonds: 3,
+          bondsGrowth: 3,
+          endSubtotal: 3,
+          fees: 3,
+          balanceEnd: 3,
+          balanceInfAdjEnd: 3
+        }
+      ],
+      [
+        {
+          cycleYear: 1,
+          cycleStartYear: 1,
+          cumulativeInflation: 1,
+          balanceStart: 1,
+          balanceInfAdjStart: 1,
+          withdrawal: 1,
+          withdrawalInfAdjust: 1,
+          deposit: 1,
+          depositInfAdjust: 1,
+          startSubtotal: 1,
+          equities: 1,
+          equitiesGrowth: 1,
+          dividendsGrowth: 1,
+          bonds: 1,
+          bondsGrowth: 1,
+          endSubtotal: 1,
+          fees: 1,
+          balanceEnd: 1,
+          balanceInfAdjEnd: 1
+        },
+        {
+          cycleYear: 2,
+          cycleStartYear: 2,
+          cumulativeInflation: 2,
+          balanceStart: 2,
+          balanceInfAdjStart: 2,
+          withdrawal: 2,
+          withdrawalInfAdjust: 2,
+          deposit: 1,
+          depositInfAdjust: 1,
+          startSubtotal: 2,
+          equities: 2,
+          equitiesGrowth: 2,
+          dividendsGrowth: 2,
+          bonds: 2,
+          bondsGrowth: 2,
+          endSubtotal: 2,
+          fees: 2,
+          balanceEnd: 2,
+          balanceInfAdjEnd: 2
+        },
+        {
+          cycleYear: 3,
+          cycleStartYear: 3,
+          cumulativeInflation: 3,
+          balanceStart: 3,
+          balanceInfAdjStart: 3,
+          deposit: 1,
+          depositInfAdjust: 1,
           withdrawal: 3,
           withdrawalInfAdjust: 3,
           startSubtotal: 3,
@@ -367,6 +463,8 @@ describe('data slicing tests', () => {
           balanceInfAdjStart: 1,
           withdrawal: 1,
           withdrawalInfAdjust: 1,
+          deposit: 1,
+          depositInfAdjust: 1,
           startSubtotal: 1,
           equities: 1,
           equitiesGrowth: 1,
@@ -386,6 +484,8 @@ describe('data slicing tests', () => {
           balanceInfAdjStart: 2,
           withdrawal: 2,
           withdrawalInfAdjust: 2,
+          deposit: 1,
+          depositInfAdjust: 1,
           startSubtotal: 2,
           equities: 2,
           equitiesGrowth: 2,
@@ -405,65 +505,8 @@ describe('data slicing tests', () => {
           balanceInfAdjStart: 3,
           withdrawal: 3,
           withdrawalInfAdjust: 3,
-          startSubtotal: 3,
-          equities: 3,
-          equitiesGrowth: 3,
-          dividendsGrowth: 3,
-          bonds: 3,
-          bondsGrowth: 3,
-          endSubtotal: 3,
-          fees: 3,
-          balanceEnd: 3,
-          balanceInfAdjEnd: 3
-        }
-      ],
-      [
-        {
-          cycleYear: 1,
-          cycleStartYear: 1,
-          cumulativeInflation: 1,
-          balanceStart: 1,
-          balanceInfAdjStart: 1,
-          withdrawal: 1,
-          withdrawalInfAdjust: 1,
-          startSubtotal: 1,
-          equities: 1,
-          equitiesGrowth: 1,
-          dividendsGrowth: 1,
-          bonds: 1,
-          bondsGrowth: 1,
-          endSubtotal: 1,
-          fees: 1,
-          balanceEnd: 1,
-          balanceInfAdjEnd: 1
-        },
-        {
-          cycleYear: 2,
-          cycleStartYear: 2,
-          cumulativeInflation: 2,
-          balanceStart: 2,
-          balanceInfAdjStart: 2,
-          withdrawal: 2,
-          withdrawalInfAdjust: 2,
-          startSubtotal: 2,
-          equities: 2,
-          equitiesGrowth: 2,
-          dividendsGrowth: 2,
-          bonds: 2,
-          bondsGrowth: 2,
-          endSubtotal: 2,
-          fees: 2,
-          balanceEnd: 2,
-          balanceInfAdjEnd: 2
-        },
-        {
-          cycleYear: 3,
-          cycleStartYear: 3,
-          cumulativeInflation: 3,
-          balanceStart: 3,
-          balanceInfAdjStart: 3,
-          withdrawal: 3,
-          withdrawalInfAdjust: 3,
+          deposit: 1,
+          depositInfAdjust: 1,
           startSubtotal: 3,
           equities: 3,
           equitiesGrowth: 3,
@@ -486,6 +529,8 @@ describe('data slicing tests', () => {
       balanceInfAdjStart: [1, 2, 3, 1, 2, 3, 1, 2, 3],
       withdrawal: [1, 2, 3, 1, 2, 3, 1, 2, 3],
       withdrawalInfAdjust: [1, 2, 3, 1, 2, 3, 1, 2, 3],
+      deposit: [1, 1, 1, 1, 1, 1, 1, 1, 1],
+      depositInfAdjust: [1, 1, 1, 1, 1, 1, 1, 1, 1],
       startSubtotal: [1, 2, 3, 1, 2, 3, 1, 2, 3],
       equities: [1, 2, 3, 1, 2, 3, 1, 2, 3],
       equitiesGrowth: [1, 2, 3, 1, 2, 3, 1, 2, 3],
@@ -550,13 +595,40 @@ describe('full 3-cycle portfolio tests against excel data', () => {
       getYearIndex(fullMarketYearData, 2018) + 1
     );
     const infAdjPortfolio = new CyclePortfolio(excelStatsTestSlice, {
-      ...starterOptions,
+      ...cloneDeep(starterOptions),
       simulationYearsLength: 3,
       withdrawalMethod: WithdrawalMethod.InflationAdjusted
     });
     portfolioData = infAdjPortfolio.crunchAllCyclesData();
 
     portfolioStats = infAdjPortfolio.crunchAllPortfolioStats(portfolioData);
+  });
+
+  test('calculates with deferred withdrawal start and deposits', () => {
+    const portfolio = new CyclePortfolio(
+      fullMarketYearData.slice(
+        getYearIndex(fullMarketYearData, 2013),
+        getYearIndex(fullMarketYearData, 2018) + 1
+      ),
+      {
+        ...cloneDeep(starterOptions),
+        simulationYearsLength: 3,
+        withdrawalMethod: WithdrawalMethod.InflationAdjusted,
+        withdrawal: {
+          startYearIdx: 2,
+          staticAmount: 40000
+        },
+        desposits: [
+          { startYearIdx: 1, endYearIdx: 2, amount: 10000 },
+          { startYearIdx: 3, endYearIdx: 3, amount: 12000 }
+        ]
+      }
+    );
+
+    const data = portfolio.crunchAllCyclesData();
+
+    const lastInfAdjEndingBalance = data[2][2].balanceInfAdjEnd;
+    expect(lastInfAdjEndingBalance).toBeCloseTo(1287739.0607, 4);
   });
 
   test('calculates each type of cycle-level statistic correctly', () => {
@@ -708,7 +780,7 @@ describe('full 3-cycle portfolio tests against excel data', () => {
     );
 
     const portfolio = new CyclePortfolio(longTestData, {
-      ...starterOptions,
+      ...cloneDeep(starterOptions),
       simulationYearsLength: getMaxSimulationLength(longTestData),
       withdrawalMethod: WithdrawalMethod.Nominal
     });
@@ -742,7 +814,7 @@ describe('full 3-cycle portfolio tests against excel data', () => {
     );
 
     const portfolio = new CyclePortfolio(longTestData, {
-      ...starterOptions,
+      ...cloneDeep(starterOptions),
       simulationYearsLength: getMaxSimulationLength(longTestData),
       withdrawalMethod: WithdrawalMethod.InflationAdjusted
     });
@@ -776,7 +848,7 @@ describe('full 3-cycle portfolio tests against excel data', () => {
     );
 
     const portfolio = new CyclePortfolio(longTestData, {
-      ...starterOptions,
+      ...cloneDeep(starterOptions),
       simulationYearsLength: getMaxSimulationLength(longTestData),
       withdrawalMethod: WithdrawalMethod.PercentPortfolio,
       withdrawal: { percentage: 0.04 }
@@ -811,7 +883,7 @@ describe('full 3-cycle portfolio tests against excel data', () => {
     );
 
     const portfolio = new CyclePortfolio(longTestData, {
-      ...starterOptions,
+      ...cloneDeep(starterOptions),
       simulationYearsLength: getMaxSimulationLength(longTestData),
       withdrawalMethod: WithdrawalMethod.PercentPortfolioClamped,
       withdrawal: { percentage: 0.04, floor: 30000, ceiling: 60000 }
@@ -922,7 +994,7 @@ describe('monte carlo simulation', () => {
     const simulations = generateMonteCarloRuns(
       excelStatsTestSlice,
       {
-        ...starterOptions,
+        ...cloneDeep(starterOptions),
         simulationYearsLength: 3,
         withdrawalMethod: WithdrawalMethod.InflationAdjusted
       },

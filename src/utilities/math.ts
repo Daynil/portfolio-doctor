@@ -7,6 +7,23 @@ export function round(num: number, places: number) {
   return Math.round(num * multiplier) / multiplier;
 }
 
+export function between(
+  val: number,
+  min: number,
+  max: number,
+  type?: 'inclusiveLeft' | 'inclusiveRight' | 'exclusive'
+): boolean {
+  if (!type) return val >= min && val <= max;
+  switch (type) {
+    case 'inclusiveLeft':
+      return val >= min && val < max;
+    case 'inclusiveRight':
+      return val > min && val <= max;
+    case 'exclusive':
+      return val > min && val < max;
+  }
+}
+
 /**
  * Get the inverse of the standard normal cumulative distribution
  * (a distribution with a mean of zero and a standard deviation of one).
