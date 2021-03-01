@@ -108,6 +108,7 @@ export function HistoricPortfolioDetails({
             </label>
             <select
               id="cycleStartYear"
+              className="rounded-md shadow-sm bg-gray-100 border-gray-300 transition-colors duration-75 hover:border-green-300 focus:bg-transparent focus:border-green-400 focus:ring focus:ring-green-300 focus:ring-opacity-50"
               onChange={(e) => {
                 if (e.target.value === '') return;
                 const selectedYear = parseInt(e.target.value);

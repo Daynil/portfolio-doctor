@@ -1,4 +1,4 @@
-import { format } from 'd3-format';
+import { format as numFormat } from 'd3-format';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import {
   HistoricPortfolioDetails,
@@ -8,11 +8,10 @@ import { MonteCarloPortfolioDetails } from '../components/monte-carlo-portfolio-
 import RadioInput from '../components/radio-input';
 import SEO from '../components/seo';
 import TextInput from '../components/text-input';
-import TextLink from '../components/text-link';
 import {
   CyclePortfolio,
   CycleYearData,
-  CycleYearQuantile,
+  DepositInfo,
   generateMonteCarloRuns,
   getMaxSimulationCycles,
   getMaxSimulationLength,
@@ -40,8 +39,9 @@ export default function Simulator() {
   const [monteCarloRuns, setMonteCarloRuns] = useState<CycleYearData[][]>([]);
   const [marketData, setMarketData] = useState<MarketYearData[]>([]);
   const [marketDataStats, setMarketDataStats] = useState<MarketDataStats>(null);
-  const [quantiles, setQuantiles] = useState<CycleYearQuantile[][]>([]);
   const [inputErr, setInputErr] = useState('');
+
+  const [deposits, setDeposits] = useState<DepositInfo[]>([]);
 
   const refStartingBalance = useRef<HTMLInputElement>(null);
   const refStockRatio = useRef<HTMLInputElement>(null);
@@ -50,6 +50,7 @@ export default function Simulator() {
   const refWithdrawalPercent = useRef<HTMLInputElement>(null);
   const refWithdrawalMin = useRef<HTMLInputElement>(null);
   const refWithdrawalMax = useRef<HTMLInputElement>(null);
+  const refWithdrawalStart = useRef<HTMLInputElement>(null);
   const refSimLength = useRef<HTMLInputElement>(null);
 
   let startingOptions = { ...defaultPortfolioOptions };
@@ -72,6 +73,7 @@ export default function Simulator() {
   const [withdrawalMethod, setWithdrawalMethod] = useState<WithdrawalMethod>(
     startingOptions.withdrawalMethod
   );
+  const [delayWithdrawal, setDelayWithdrawal] = useState(false);
 
   const {
     preferredDataset,
@@ -141,6 +143,17 @@ export default function Simulator() {
         break;
     }
 
+    if (delayWithdrawal) {
+      newPortfolioOptions.withdrawal.startYearIdx = parseInt(
+        refWithdrawalStart.current.value
+      );
+
+      if (newPortfolioOptions.withdrawal.startYearIdx < 0) {
+        setInputErr('Cannot have a negative withdrawal start.');
+        return;
+      }
+    } else newPortfolioOptions.withdrawal.startYearIdx = 1;
+
     newPortfolioOptions.simulationMethod = simulationMethod;
     newPortfolioOptions.startBalance = parseStringyNum(
       refStartingBalance.current.value
@@ -185,6 +198,12 @@ export default function Simulator() {
     } else if (newPortfolioOptions.simulationYearsLength < 3) {
       setInputErr('Minimum simulation length is 3 years.');
       return;
+    }
+
+    if (deposits.length) {
+      newPortfolioOptions.desposits = deposits;
+    } else {
+      newPortfolioOptions.desposits = undefined;
     }
 
     setInputErr('');
@@ -248,14 +267,14 @@ export default function Simulator() {
             className="flex flex-col mt-4"
           >
             <label className="form-label" htmlFor="withdrawalAmount">
-              Withdrawal Amount
+              Amount
             </label>
             <TextInput
               symbolPrefix="$"
               className="pl-8 w-full"
               name="withdrawalAmount"
               type="text"
-              defaultValue={format(',')(
+              defaultValue={numFormat(',')(
                 portfolioOptions.withdrawal.staticAmount
               )}
               ref={refWithdrawalAmount}
@@ -270,7 +289,7 @@ export default function Simulator() {
             className="flex flex-col mt-4"
           >
             <label className="form-label" htmlFor="withdrawalPercent">
-              Withdrawal Percent
+              Percent
             </label>
             <TextInput
               symbolSuffix="%"
@@ -287,7 +306,7 @@ export default function Simulator() {
           <div key={WithdrawalMethod.PercentPortfolioClamped}>
             <div className="flex flex-col mt-4">
               <label className="form-label" htmlFor="withdrawalPercent">
-                Withdrawal Percent
+                Percent
               </label>
               <TextInput
                 symbolSuffix="%"
@@ -300,28 +319,30 @@ export default function Simulator() {
             </div>
             <div className="flex flex-col mt-4">
               <label className="form-label" htmlFor="withdrawalMin">
-                Withdrawal Minimum
+                Minimum
               </label>
               <TextInput
                 symbolPrefix="$"
                 className="pl-8 w-full"
                 name="withdrawalMin"
                 type="text"
-                defaultValue={format(',')(portfolioOptions.withdrawal.floor)}
+                defaultValue={numFormat(',')(portfolioOptions.withdrawal.floor)}
                 ref={refWithdrawalMin}
                 onChange={(e) => handleIntegerInputChange(e, refWithdrawalMin)}
               />
             </div>
             <div className="flex flex-col mt-4">
               <label className="form-label" htmlFor="withdrawalMax">
-                Withdrawal Maximum
+                Maximum
               </label>
               <TextInput
                 symbolPrefix="$"
                 className="pl-8 w-full"
                 name="withdrawalMax"
                 type="text"
-                defaultValue={format(',')(portfolioOptions.withdrawal.ceiling)}
+                defaultValue={numFormat(',')(
+                  portfolioOptions.withdrawal.ceiling
+                )}
                 ref={refWithdrawalMax}
                 onChange={(e) => handleIntegerInputChange(e, refWithdrawalMax)}
               />
@@ -341,7 +362,7 @@ export default function Simulator() {
     e.preventDefault();
     const input = e.target.value;
     try {
-      const num = format(',')(parseStringyNum(input));
+      const num = numFormat(',')(parseStringyNum(input));
       refEl.current.value = num;
     } catch (e) {
       if ((e as Error).message !== undefined) {
@@ -352,6 +373,22 @@ export default function Simulator() {
       }
       throw e;
     }
+  }
+
+  function addDeposit() {
+    const newDeposits = [...deposits];
+    newDeposits.push({
+      amount: 10000,
+      startYearIdx: 1,
+      endYearIdx: 5
+    });
+    setDeposits(newDeposits);
+  }
+
+  function removeDeposit(depositIdx: number) {
+    const newDeposits = [...deposits];
+    newDeposits.splice(depositIdx, 1);
+    setDeposits(newDeposits);
   }
 
   function getPortfolioChart() {
@@ -422,7 +459,7 @@ export default function Simulator() {
                   </div>
                 </div>
               </div> */}
-              {simulationMethod === 'Historical Data' ? (
+              {/* {simulationMethod === 'Historical Data' ? (
                 <div className="flex flex-col mt-4 mb-2">
                   <label className="form-label">Currently Active Dataset</label>
                   <div className="text-base">
@@ -434,7 +471,7 @@ export default function Simulator() {
                     </TextLink>
                   </div>
                 </div>
-              ) : null}
+              ) : null} */}
             </div>
 
             <div className="flex flex-col mt-4">
@@ -446,7 +483,7 @@ export default function Simulator() {
                 className="pl-8 w-full"
                 name="startBalance"
                 type="text"
-                defaultValue={format(',')(portfolioOptions.startBalance)}
+                defaultValue={numFormat(',')(portfolioOptions.startBalance)}
                 ref={refStartingBalance}
                 onChange={(e) =>
                   handleIntegerInputChange(e, refStartingBalance)
@@ -479,8 +516,24 @@ export default function Simulator() {
                 ref={refExpenseRatio}
               />
             </div>
-            <div className="text-gray-800 mt-4">
-              <label className="form-label">Withdrawal Method</label>
+            <div className="flex flex-col mt-4">
+              <label className="form-label" htmlFor="simLength">
+                Simulation Length (years)
+              </label>
+              <TextInput
+                name="simLength"
+                type="number"
+                defaultValue={portfolioOptions.simulationYearsLength}
+                min={5}
+                max={getMaxSimulationLength(marketData)}
+                ref={refSimLength}
+              />
+            </div>
+            <h3 className="text-base mt-6 tracking-wider text-gray-700 font-semibold border-solid border-b-2 border-gray-300">
+              Withdrawals
+            </h3>
+            <div className="text-gray-800 mt-2">
+              <label className="form-label">Method</label>
               <div className="ml-2">
                 <div className="flex items-center">
                   <RadioInput
@@ -540,22 +593,71 @@ export default function Simulator() {
               </div>
             </div>
             {getWithdrawalInputs()}
-            <div className="flex flex-col mt-4">
-              <label className="form-label" htmlFor="simLength">
-                Simulation Length (years)
-              </label>
-              <TextInput
-                name="simLength"
-                type="number"
-                defaultValue={portfolioOptions.simulationYearsLength}
-                min={5}
-                max={getMaxSimulationLength(marketData)}
-                ref={refSimLength}
+            <div className="flex flex-row items-center mt-5">
+              <input
+                type="checkbox"
+                id="delayWithdrawal"
+                className="text-green-500 focus:ring-green-400"
+                checked={delayWithdrawal}
+                onChange={() => setDelayWithdrawal(!delayWithdrawal)}
               />
+              <label htmlFor="delayWithdrawal" className="ml-2 text-sm">
+                Delay Withdrawal Start
+              </label>
             </div>
-            <div className="flex w-full justify-between">
+            {delayWithdrawal && (
+              <div className="flex flex-col mt-4">
+                <label className="form-label" htmlFor="withdrawalDelayYears">
+                  Start Withdrawls After (years)
+                </label>
+                <TextInput
+                  name="withdrawalDelayYears"
+                  type="number"
+                  defaultValue={portfolioOptions.withdrawal.startYearIdx}
+                  max={getMaxSimulationLength(marketData)}
+                  ref={refWithdrawalStart}
+                />
+              </div>
+            )}
+            <h3 className="text-base mt-6 tracking-wider text-gray-700 font-semibold border-solid border-b-2 border-gray-300">
+              Deposits
+            </h3>
+            <div className="flex flex-col mt-3">
+              {!deposits.length ? (
+                <div className="text-sm italic text-gray-400">No deposits</div>
+              ) : (
+                deposits.map((deposit, i) => (
+                  <div className="flex items-center justify-around mt-4 border rounded-md border-gray-200 p-2">
+                    <div className="flex items-center text-base">
+                      <span className="text-base">
+                        {numFormat('$,.0f')(deposit.amount)}
+                      </span>
+                      <div className="flex flex-col ml-6">
+                        <div>Starting Year {deposit.startYearIdx}</div>
+                        <div>Ending Year {deposit.endYearIdx}</div>
+                      </div>
+                    </div>
+                    <button
+                      className="font-bold text-red-500 hover:text-red-400 transition-colors duration-75"
+                      onClick={() => removeDeposit(i)}
+                    >
+                      X
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+            <div className="flex w-full justify-between mt-5">
               <button
-                className="btn btn-green mt-4"
+                className="btn btn-gray text-sm tracking-wide"
+                onClick={() => addDeposit()}
+              >
+                Add Deposit
+              </button>
+            </div>
+            <div className="flex w-full justify-between mt-12">
+              <button
+                className="btn btn-green tracking-wide"
                 onClick={calculatePortfolio}
               >
                 Calculate!

@@ -245,7 +245,7 @@ export function QuantilesChart({
   return (
     dataSeries && (
       <div
-        className="w-full relative"
+        className="w-full relative cursor-pointer"
         style={{ maxWidth: `calc(60vh * ${aspectRatio})` }}
         onMouseMove={mouseMoved}
         onMouseLeave={mouseLeft}
