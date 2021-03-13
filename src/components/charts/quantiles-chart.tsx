@@ -193,9 +193,11 @@ export function QuantilesChart({
     if (pointFixed) return;
 
     // Move tooltip (favor left side when available)
-    let leftAdjust = e.clientX - svgContainerRect.left - window.pageXOffset;
-    if (leftAdjust > tooltipWidth) {
-      leftAdjust = leftAdjust - tooltipWidth;
+    const mouseOffset = 30; // So the tooltip doesn't block the data point
+    let leftAdjust =
+      e.clientX - svgContainerRect.left - window.pageXOffset + mouseOffset;
+    if (leftAdjust > tooltipWidth + mouseOffset * 2) {
+      leftAdjust = leftAdjust - tooltipWidth - mouseOffset * 2;
     }
     // Alternate method which favors right side when available
     // if (leftAdjust > 690) {
@@ -244,52 +246,106 @@ export function QuantilesChart({
 
   return (
     dataSeries && (
-      <div
-        className="w-full relative cursor-pointer"
-        style={{ maxWidth: `calc(60vh * ${aspectRatio})` }}
-        onMouseMove={mouseMoved}
-        onMouseLeave={mouseLeft}
-        onMouseDown={mouseClicked}
-        ref={ref}
-      >
-        {selectedPoint && (
-          <QuantilesTooltip
-            width={tooltipWidth}
-            quantile={
-              dataSeries[selectedPoint.cycleIndex][selectedPoint.yearIndex]
-            }
-            quantileStats={allLineMeta[selectedPoint.cycleIndex]}
-            pointFixed={pointFixed}
-            cycleLength={dataSeries[selectedPoint.cycleIndex].length - 1}
-            leftAdjust={tooltipLeftAdjust}
-          />
-        )}
-        <Chart dimensions={dimensions}>
-          <Axis
-            orientation="left"
-            scale={yScale}
-            formatTick={(d: number) => numToCurrencyShort(d)}
-          />
-          <Axis orientation="bottom" scale={xScale} />
-          <g
-            fill="none"
-            stroke="#48bb78"
-            strokeWidth="1.5"
-            strokeLinejoin="round"
-            strokeLinecap="round"
-          >
-            {linePaths}
-          </g>
-          <g ref={refGdot}>
-            <circle
-              r="4"
-              fill="white"
-              stroke={getCircleColor()}
-              strokeWidth="3"
-              opacity={selectedPoint ? '1' : '0'}
+      <div>
+        <div
+          className="w-full relative cursor-pointer"
+          style={{ maxWidth: `calc(60vh * ${aspectRatio})` }}
+          onMouseMove={mouseMoved}
+          onMouseLeave={mouseLeft}
+          onMouseDown={mouseClicked}
+          ref={ref}
+        >
+          {selectedPoint && (
+            <QuantilesTooltip
+              width={tooltipWidth}
+              quantile={
+                dataSeries[selectedPoint.cycleIndex][selectedPoint.yearIndex]
+              }
+              quantileStats={allLineMeta[selectedPoint.cycleIndex]}
+              pointFixed={pointFixed}
+              cycleLength={dataSeries[selectedPoint.cycleIndex].length - 1}
+              leftAdjust={tooltipLeftAdjust}
             />
-          </g>
-        </Chart>
+          )}
+          <Chart dimensions={dimensions}>
+            <Axis
+              orientation="left"
+              scale={yScale}
+              formatTick={(d: number) => numToCurrencyShort(d)}
+            />
+            <Axis orientation="bottom" scale={xScale} />
+            <g
+              fill="none"
+              stroke="#48bb78"
+              strokeWidth="1.5"
+              strokeLinejoin="round"
+              strokeLinecap="round"
+            >
+              {linePaths}
+            </g>
+            <g ref={refGdot}>
+              <circle
+                r="4"
+                fill="white"
+                stroke={getCircleColor()}
+                strokeWidth="3"
+                opacity={selectedPoint ? '1' : '0'}
+              />
+            </g>
+          </Chart>
+        </div>
+        <div className="flex flex-row justify-center">
+          <div className="flex flex-row items-center ml-8">
+            <div
+              style={{
+                width: '15px',
+                height: '15px',
+                backgroundColor: quantileColors.green.normal
+              }}
+            ></div>
+            <div className="ml-2 text-sm">90th Percentile</div>
+          </div>
+          <div className="flex flex-row items-center ml-8">
+            <div
+              style={{
+                width: '15px',
+                height: '15px',
+                backgroundColor: quantileColors.blue.normal
+              }}
+            ></div>
+            <div className="ml-2 text-sm">75th Percentile</div>
+          </div>
+          <div className="flex flex-row items-center ml-8">
+            <div
+              style={{
+                width: '15px',
+                height: '15px',
+                backgroundColor: quantileColors.purple.normal
+              }}
+            ></div>
+            <div className="ml-2 text-sm">50th Percentile</div>
+          </div>
+          <div className="flex flex-row items-center ml-8">
+            <div
+              style={{
+                width: '15px',
+                height: '15px',
+                backgroundColor: quantileColors.yellow.normal
+              }}
+            ></div>
+            <div className="ml-2 text-sm">25th Percentile</div>
+          </div>
+          <div className="flex flex-row items-center ml-8">
+            <div
+              style={{
+                width: '15px',
+                height: '15px',
+                backgroundColor: quantileColors.red.normal
+              }}
+            ></div>
+            <div className="ml-2 text-sm">10th Percentile</div>
+          </div>
+        </div>
       </div>
     )
   );
