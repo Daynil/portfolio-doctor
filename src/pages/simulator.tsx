@@ -79,7 +79,18 @@ export default function Simulator() {
   const [withdrawalMethod, setWithdrawalMethod] = useState<WithdrawalMethod>(
     startingOptions.withdrawalMethod
   );
-  const [delayWithdrawal, setDelayWithdrawal] = useState(false);
+
+  /**
+   * Note: Hydration issue workaround
+   * If server renders this as false
+   * But then it is set to true prior to first client render
+   * There is a hydration mismatch, which causes bizarre UI bugs (like buttons getting incorrect classes assigned, etc)
+   * Instead, default to a true then uncheck if needed.
+   */
+  const [delayWithdrawal, setDelayWithdrawal] = useState(true);
+  useEffect(() => {
+    setDelayWithdrawal(startingOptions.withdrawal.startYearIdx > 1);
+  }, []);
 
   const {
     preferredDataset,
@@ -154,8 +165,8 @@ export default function Simulator() {
         refWithdrawalStart.current.value
       );
 
-      if (newPortfolioOptions.withdrawal.startYearIdx < 0) {
-        setInputErr('Cannot have a negative withdrawal start.');
+      if (newPortfolioOptions.withdrawal.startYearIdx < 1) {
+        setInputErr('Invalid withdrawal start.');
         return;
       }
     } else newPortfolioOptions.withdrawal.startYearIdx = 1;
@@ -697,6 +708,7 @@ export default function Simulator() {
               <button
                 className="btn btn-green tracking-wide"
                 onClick={calculatePortfolio}
+                disabled={!marketData.length}
               >
                 Calculate!
               </button>

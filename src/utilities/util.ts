@@ -39,6 +39,7 @@ export interface UrlQuery {
   withdrawalFloor?: string;
   withdrawalCeiling?: string;
   simulationYearsLength: string;
+  withdrawalStartIdx?: string;
 }
 
 export const defaultPortfolioOptions: PortfolioOptions = {
@@ -156,6 +157,7 @@ export function queryStringToPortfolioOptions(
   options.withdrawalMethod = parseInt(
     query.withdrawalMethod
   ) as WithdrawalMethod;
+  options.withdrawal.startYearIdx = parseInt(query.withdrawalStartIdx);
 
   if (options.withdrawalMethod === WithdrawalMethod.InflationAdjusted) {
     options.withdrawal.staticAmount = parseInt(query.withdrawalStaticAmount);
@@ -217,6 +219,11 @@ export function portfolioOptionsToQueryString(
     queryObj.withdrawalFloor = options.withdrawal.floor + '';
     queryObj.withdrawalCeiling = options.withdrawal.ceiling + '';
   }
+
+  if (options.withdrawal.startYearIdx)
+    queryObj.withdrawalStartIdx = options.withdrawal.startYearIdx + '';
+  else queryObj.withdrawalStartIdx = '1';
+
   // @ts-ignore (this works fine, type defs seem insufficient)
   return stringify(queryObj);
 }
