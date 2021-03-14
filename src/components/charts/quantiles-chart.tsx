@@ -54,6 +54,7 @@ type Props = {
   handleSetSelectedPoint: (point: Point) => void;
   pointFixed: boolean;
   handleSetPointFixed: (fixed: boolean) => void;
+  adjInflation: boolean;
 };
 
 export function QuantilesChart({
@@ -63,7 +64,8 @@ export function QuantilesChart({
   selectedPoint,
   handleSetSelectedPoint,
   pointFixed,
-  handleSetPointFixed
+  handleSetPointFixed,
+  adjInflation
 }: Props) {
   const [ref, dimensions] = useChartDimensions({}, aspectRatio);
   const refGdot = useRef<SVGGElement>(null);
@@ -80,7 +82,8 @@ export function QuantilesChart({
   }, []);
 
   const xAccessor = (d: CycleYearQuantile) => d.cycleYearIndex + 1;
-  const yAccessor = (d: CycleYearQuantile) => d.balance;
+  const yAccessor = (d: CycleYearQuantile) =>
+    adjInflation ? d.balanceInfAdj : d.balance;
 
   const longestLine = dataSeries[maxIndex(dataSeries, (line) => line.length)];
 
@@ -102,7 +105,7 @@ export function QuantilesChart({
   // Bottleneck, should only run when data or dimensions change
   const linePathStringArray = useMemo(
     () => dataSeries.map((line) => chartLine(line)),
-    [dataSeries, dimensions.width, dimensions.height]
+    [dataSeries, dimensions.width, dimensions.height, adjInflation]
   );
 
   const linePaths = dataSeries.map((d, i) => {
@@ -265,6 +268,7 @@ export function QuantilesChart({
               pointFixed={pointFixed}
               cycleLength={dataSeries[selectedPoint.cycleIndex].length - 1}
               leftAdjust={tooltipLeftAdjust}
+              adjInflation={adjInflation}
             />
           )}
           <Chart dimensions={dimensions}>

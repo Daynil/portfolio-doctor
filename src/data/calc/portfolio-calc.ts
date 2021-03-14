@@ -42,13 +42,18 @@ export interface CycleYearQuantile {
   quantile: number;
   cycleYearIndex: number;
   balance: number;
+  balanceInfAdj: number;
   withdrawal: number;
+  withdrawalInfAdj: number;
 }
 
 export interface QuantileStats {
   endingBalance: number;
+  endingBalanceInfAdj: number;
   averageBalance: number;
+  averageBalanceInfAdj: number;
   averageWithdrawal: number;
+  averageWithdrawalInfAdj: number;
 }
 
 export interface CycleStats {
@@ -586,7 +591,7 @@ export class CyclePortfolio {
     const highEndBalance =
       cycleYearDataColumns.balanceInfAdjEnd[
         cycleYearDataColumns.balanceInfAdjEnd.length - 1
-      ] <=
+      ] >=
       this.options.startBalance * 3;
 
     return {

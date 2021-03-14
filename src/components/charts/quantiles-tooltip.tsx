@@ -13,6 +13,7 @@ type Props = {
   cycleLength: number;
   pointFixed: boolean;
   leftAdjust: number;
+  adjInflation: boolean;
 };
 
 export function QuantilesTooltip({
@@ -21,7 +22,8 @@ export function QuantilesTooltip({
   quantileStats,
   pointFixed,
   cycleLength,
-  leftAdjust
+  leftAdjust,
+  adjInflation
 }: Props) {
   return (
     <div
@@ -51,13 +53,23 @@ export function QuantilesTooltip({
             <div className="flex items-center">
               <label className="form-label my-0">Balance</label>
             </div>
-            <span>{numToCurrency(quantile.balance, 0)}</span>
+            <span>
+              {numToCurrency(
+                adjInflation ? quantile.balanceInfAdj : quantile.balance,
+                0
+              )}
+            </span>
           </div>
           <div className="flex justify-between">
             <div className="flex items-center">
               <label className="form-label my-0">Withdrawal</label>
             </div>
-            <span>{numToCurrency(quantile.withdrawal, 0)}</span>
+            <span>
+              {numToCurrency(
+                adjInflation ? quantile.withdrawalInfAdj : quantile.withdrawal,
+                0
+              )}
+            </span>
           </div>
         </div>
       </div>
@@ -69,19 +81,40 @@ export function QuantilesTooltip({
             <div className="flex items-center">
               <label className="form-label my-0">Ending Balance</label>
             </div>
-            <span>{numToCurrency(quantileStats.endingBalance, 0)}</span>
+            <span>
+              {numToCurrency(
+                adjInflation
+                  ? quantileStats.endingBalanceInfAdj
+                  : quantileStats.endingBalance,
+                0
+              )}
+            </span>
           </div>
           <div className="flex justify-between">
             <div className="flex items-center">
               <label className="form-label my-0">Avg Balance</label>
             </div>
-            <span>{numToCurrency(quantileStats.averageBalance, 0)}</span>
+            <span>
+              {numToCurrency(
+                adjInflation
+                  ? quantileStats.averageBalanceInfAdj
+                  : quantileStats.averageBalance,
+                0
+              )}
+            </span>
           </div>
           <div className="flex justify-between">
             <div className="flex items-center">
               <label className="form-label my-0">Avg Withdrawal</label>
             </div>
-            <span>{numToCurrency(quantileStats.averageWithdrawal, 0)}</span>
+            <span>
+              {numToCurrency(
+                adjInflation
+                  ? quantileStats.averageWithdrawalInfAdj
+                  : quantileStats.averageWithdrawal,
+                0
+              )}
+            </span>
           </div>
         </div>
       </div>

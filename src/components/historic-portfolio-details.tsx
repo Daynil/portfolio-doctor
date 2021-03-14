@@ -359,6 +359,7 @@ export function HistoricPortfolioDetails({
               handleSetSelectedPoint={(point: Point) => setSelectedPoint(point)}
               pointFixed={pointFixed}
               handleSetPointFixed={(fixed: boolean) => setPointFixed(fixed)}
+              adjInflation={adjInflation}
             />
           )}
         </div>

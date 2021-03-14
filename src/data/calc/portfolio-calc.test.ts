@@ -679,8 +679,10 @@ describe('full 3-cycle portfolio tests against excel data', () => {
     expect(
       quantilePortfolio.map((cycle) =>
         cycle.map((year) => ({
-          ...year,
-          balance: round(year.balance, 4)
+          quantile: year.quantile,
+          cycleYearIndex: year.cycleYearIndex,
+          balanceInfAdj: round(year.balanceInfAdj, 4),
+          withdrawalInfAdj: year.withdrawalInfAdj
         }))
       )
     ).toEqual([
@@ -688,60 +690,60 @@ describe('full 3-cycle portfolio tests against excel data', () => {
         {
           quantile: 0.25,
           cycleYearIndex: 0,
-          balance: 1002104.4473,
-          withdrawal: 40000
+          balanceInfAdj: 1002104.4473,
+          withdrawalInfAdj: 40000
         },
         {
           quantile: 0.25,
           cycleYearIndex: 1,
-          balance: 1021920.9142,
-          withdrawal: 40000
+          balanceInfAdj: 1021920.9142,
+          withdrawalInfAdj: 40000
         },
         {
           quantile: 0.25,
           cycleYearIndex: 2,
-          balance: 1150677.4876,
-          withdrawal: 40000
+          balanceInfAdj: 1150677.4876,
+          withdrawalInfAdj: 40000
         }
       ],
       [
         {
           quantile: 0.5,
           cycleYearIndex: 0,
-          balance: 1074419.3335,
-          withdrawal: 40000
+          balanceInfAdj: 1074419.3335,
+          withdrawalInfAdj: 40000
         },
         {
           quantile: 0.5,
           cycleYearIndex: 1,
-          balance: 1041044.2539,
-          withdrawal: 40000
+          balanceInfAdj: 1041044.2539,
+          withdrawalInfAdj: 40000
         },
         {
           quantile: 0.5,
           cycleYearIndex: 2,
-          balance: 1174839.3694,
-          withdrawal: 40000
+          balanceInfAdj: 1174839.3694,
+          withdrawalInfAdj: 40000
         }
       ],
       [
         {
           quantile: 0.75,
           cycleYearIndex: 0,
-          balance: 1125642.8883,
-          withdrawal: 40000
+          balanceInfAdj: 1125642.8883,
+          withdrawalInfAdj: 40000
         },
         {
           quantile: 0.75,
           cycleYearIndex: 1,
-          balance: 1146468.3004,
-          withdrawal: 40000
+          balanceInfAdj: 1146468.3004,
+          withdrawalInfAdj: 40000
         },
         {
           quantile: 0.75,
           cycleYearIndex: 2,
-          balance: 1183122.0206,
-          withdrawal: 40000
+          balanceInfAdj: 1183122.0206,
+          withdrawalInfAdj: 40000
         }
       ]
     ]);
@@ -750,25 +752,25 @@ describe('full 3-cycle portfolio tests against excel data', () => {
 
     expect(
       quantileStats.map((year) => ({
-        ...year,
-        endingBalance: round(year.endingBalance, 4),
-        averageBalance: round(year.averageBalance, 4)
+        endingBalanceInfAdj: round(year.endingBalanceInfAdj, 4),
+        averageBalanceInfAdj: round(year.averageBalanceInfAdj, 4),
+        averageWithdrawalInfAdj: year.averageWithdrawalInfAdj
       }))
     ).toEqual([
       {
-        endingBalance: 1150677.4876,
-        averageBalance: 1058234.283,
-        averageWithdrawal: 40000
+        endingBalanceInfAdj: 1150677.4876,
+        averageBalanceInfAdj: 1058234.283,
+        averageWithdrawalInfAdj: 40000
       },
       {
-        endingBalance: 1174839.3694,
-        averageBalance: 1096767.6523,
-        averageWithdrawal: 40000
+        endingBalanceInfAdj: 1174839.3694,
+        averageBalanceInfAdj: 1096767.6523,
+        averageWithdrawalInfAdj: 40000
       },
       {
-        endingBalance: 1183122.0206,
-        averageBalance: 1151744.4031,
-        averageWithdrawal: 40000
+        endingBalanceInfAdj: 1183122.0206,
+        averageBalanceInfAdj: 1151744.4031,
+        averageWithdrawalInfAdj: 40000
       }
     ]);
   });

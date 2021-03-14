@@ -152,8 +152,10 @@ export function getQuantiles(
   const transposed = transpose<CycleYearData>(yearData).map((cycleData) =>
     cycleData
       .map((year) => ({
-        balance: year.balanceInfAdjEnd,
-        withdrawal: year.withdrawalInfAdjust
+        balance: year.balanceEnd,
+        balanceInfAdj: year.balanceInfAdjEnd,
+        withdrawal: year.withdrawal,
+        withdrawalInfAdj: year.withdrawalInfAdjust
       }))
       .sort((a, b) => a.balance - b.balance)
   );
@@ -170,8 +172,16 @@ export function getQuantiles(
             transposedYears.map((d) => d.balance),
             quantileNum
           ),
+          balanceInfAdj: quantile(
+            transposedYears.map((d) => d.balanceInfAdj),
+            quantileNum
+          ),
           withdrawal: quantile(
             transposedYears.map((d) => d.withdrawal),
+            quantileNum
+          ),
+          withdrawalInfAdj: quantile(
+            transposedYears.map((d) => d.withdrawalInfAdj),
             quantileNum
           )
         };
@@ -186,8 +196,11 @@ export function getQuantileStats(
 ): QuantileStats[] {
   return quantileData.map((yearQuantile, i) => ({
     endingBalance: yearQuantile[yearQuantile.length - 1].balance,
+    endingBalanceInfAdj: yearQuantile[yearQuantile.length - 1].balanceInfAdj,
     averageBalance: mean(yearQuantile, (d) => d.balance),
-    averageWithdrawal: mean(yearQuantile, (d) => d.withdrawal)
+    averageBalanceInfAdj: mean(yearQuantile, (d) => d.balanceInfAdj),
+    averageWithdrawal: mean(yearQuantile, (d) => d.withdrawal),
+    averageWithdrawalInfAdj: mean(yearQuantile, (d) => d.withdrawalInfAdj)
   }));
 }
 
