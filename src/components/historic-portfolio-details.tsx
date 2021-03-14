@@ -10,7 +10,7 @@ import {
 } from '../data/calc/portfolio-calc';
 import { baseUrl } from '../utilities/constants';
 import { numToCurrency } from '../utilities/format';
-import { portfolioOptionsToQueryString } from '../utilities/util';
+import { clsx, portfolioOptionsToQueryString } from '../utilities/util';
 import { HistoricCyclesChart } from './charts/historic-cycles-chart';
 import { QuantilesChart } from './charts/quantiles-chart';
 import CopyIcon from './svg/copy-icon';
@@ -44,6 +44,7 @@ export function HistoricPortfolioDetails({
   const [selectedPoint, setSelectedPoint] = useState<Point>(null);
   const [pointFixed, setPointFixed] = useState(false);
   const [displayMode, setDisplayMode] = useState<DisplayMode>('Full');
+  const [adjInflation, setAdjInflation] = useState(true);
 
   const [showCycleDetails, setShowCycleDetails] = useState(false);
 
@@ -165,7 +166,9 @@ export function HistoricPortfolioDetails({
               (selectedPoint.yearIndex === i ? ' bg-green-200' : '')
             }
           >
-            {numFormat('$,.2f')(yearData.balanceInfAdjEnd)}
+            {numFormat('$,.2f')(
+              adjInflation ? yearData.balanceInfAdjEnd : yearData.balanceEnd
+            )}
           </td>
           <td
             className={
@@ -173,7 +176,9 @@ export function HistoricPortfolioDetails({
               (selectedPoint.yearIndex === i ? ' bg-green-200' : '')
             }
           >
-            {numFormat('$,.2f')(yearData.withdrawalInfAdjust)}
+            {numFormat('$,.2f')(
+              adjInflation ? yearData.withdrawalInfAdjust : yearData.withdrawal
+            )}
           </td>
           <td
             className={
@@ -250,24 +255,37 @@ export function HistoricPortfolioDetails({
       </div>
       <div className="flex flex-wrap w-full">
         <div className="flex flex-row w-full justify-between ml-20">
-          <div className="flex flex-row w-64">
+          <div className="flex flex-row">
             <button
-              className={
-                displayMode === 'Full' ? 'btn btn-green-2' : 'btn btn-gray'
-              }
+              className={clsx(
+                'btn',
+                displayMode === 'Full' ? 'btn-green-2' : 'btn-gray'
+              )}
               onClick={() => handleDisplayModeSwitch('Full')}
             >
               All Cycles
             </button>
             <button
-              className={
-                (displayMode === 'Full' ? 'btn btn-gray' : 'btn btn-green-2') +
-                ' ml-6'
-              }
+              className={clsx(
+                'btn ml-6',
+                displayMode === 'Full' ? 'btn-gray' : 'btn-green-2'
+              )}
               onClick={() => handleDisplayModeSwitch('Quantiles')}
             >
               Quantiles
             </button>
+            <div className="flex flex-row items-center ml-6">
+              <input
+                type="checkbox"
+                id="adjInflation"
+                className="text-green-500 focus:ring-green-400"
+                checked={adjInflation}
+                onChange={() => setAdjInflation(!adjInflation)}
+              />
+              <label htmlFor="adjInflation" className="ml-2 text-sm">
+                Display Inflation Adjusted Values
+              </label>
+            </div>
           </div>
           <div className="flex justify-center relative mr-12">
             <button
@@ -318,6 +336,9 @@ export function HistoricPortfolioDetails({
           </div>
         </div>
         <div className="w-full">
+          <div className="text-sm text-gray-500 mt-10 -mb-7 ml-16">
+            {`Portfolio (${adjInflation ? 'Inflation-Adjusted' : 'Nominal'} $)`}
+          </div>
           {displayMode === 'Full' ? (
             <HistoricCyclesChart
               dataSeries={lifecyclesData}
@@ -327,6 +348,7 @@ export function HistoricPortfolioDetails({
               handleSetSelectedPoint={(point: Point) => setSelectedPoint(point)}
               pointFixed={pointFixed}
               handleSetPointFixed={(fixed: boolean) => setPointFixed(fixed)}
+              adjInflation={adjInflation}
             />
           ) : (
             <QuantilesChart
@@ -444,7 +466,9 @@ export function HistoricPortfolioDetails({
                   {portfolioStats.balance.min.balanceInflAdj < 0
                     ? numToCurrency(0)
                     : numToCurrency(
-                        portfolioStats.balance.min.balanceInflAdj,
+                        adjInflation
+                          ? portfolioStats.balance.min.balanceInflAdj
+                          : portfolioStats.balance.min.balance,
                         0
                       )}
                 </td>
@@ -456,7 +480,12 @@ export function HistoricPortfolioDetails({
                   </label>
                 </td>
                 <td className="text-right pr-4">
-                  {numToCurrency(portfolioStats.balance.averageInflAdj, 0)}
+                  {numToCurrency(
+                    adjInflation
+                      ? portfolioStats.balance.averageInflAdj
+                      : portfolioStats.balance.average,
+                    0
+                  )}
                 </td>
               </tr>
               <tr>
@@ -466,7 +495,12 @@ export function HistoricPortfolioDetails({
                   </label>
                 </td>
                 <td className="text-right pr-4">
-                  {numToCurrency(portfolioStats.balance.max.balanceInflAdj, 0)}
+                  {numToCurrency(
+                    adjInflation
+                      ? portfolioStats.balance.max.balanceInflAdj
+                      : portfolioStats.balance.max.balance,
+                    0
+                  )}
                 </td>
               </tr>
               <tr>
@@ -485,7 +519,9 @@ export function HistoricPortfolioDetails({
                 </td>
                 <td className="text-right pr-4">
                   {numToCurrency(
-                    portfolioStats.withdrawals.min.amountInflAdj,
+                    adjInflation
+                      ? portfolioStats.withdrawals.min.amountInflAdj
+                      : portfolioStats.withdrawals.min.amount,
                     0
                   )}
                 </td>
@@ -497,7 +533,12 @@ export function HistoricPortfolioDetails({
                   </label>
                 </td>
                 <td className="text-right pr-4">
-                  {numToCurrency(portfolioStats.withdrawals.averageInflAdj, 0)}
+                  {numToCurrency(
+                    adjInflation
+                      ? portfolioStats.withdrawals.averageInflAdj
+                      : portfolioStats.withdrawals.average,
+                    0
+                  )}
                 </td>
               </tr>
               <tr>
@@ -508,7 +549,9 @@ export function HistoricPortfolioDetails({
                 </td>
                 <td className="text-right pr-4">
                   {numToCurrency(
-                    portfolioStats.withdrawals.max.amountInflAdj,
+                    adjInflation
+                      ? portfolioStats.withdrawals.max.amountInflAdj
+                      : portfolioStats.withdrawals.max.amount,
                     0
                   )}
                 </td>

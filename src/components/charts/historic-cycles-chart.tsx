@@ -44,6 +44,7 @@ type Props = {
   handleSetSelectedPoint: (point: Point) => void;
   pointFixed: boolean;
   handleSetPointFixed: (fixed: boolean) => void;
+  adjInflation: boolean;
 };
 
 export function HistoricCyclesChart({
@@ -53,7 +54,8 @@ export function HistoricCyclesChart({
   selectedPoint,
   handleSetSelectedPoint,
   pointFixed,
-  handleSetPointFixed
+  handleSetPointFixed,
+  adjInflation
 }: Props) {
   const [ref, dimensions] = useChartDimensions({}, aspectRatio);
   const refGdot = useRef<SVGGElement>(null);
@@ -70,7 +72,8 @@ export function HistoricCyclesChart({
   }, []);
 
   const xAccessor = (d: CycleYearData) => d.cycleYear - d.cycleStartYear + 1;
-  const yAccessor = (d: CycleYearData) => d.balanceInfAdjEnd;
+  const yAccessor = (d: CycleYearData) =>
+    adjInflation ? d.balanceInfAdjEnd : d.balanceEnd;
 
   const longestLine = dataSeries[maxIndex(dataSeries, (line) => line.length)];
 
@@ -92,7 +95,7 @@ export function HistoricCyclesChart({
   // Bottleneck, should only run when data or dimensions change
   const linePathStringArray = useMemo(
     () => dataSeries.map((line) => chartLine(line)),
-    [dataSeries, dimensions.width, dimensions.height]
+    [dataSeries, dimensions.width, dimensions.height, adjInflation]
   );
 
   const linePaths = dataSeries.map((_, i) => {
@@ -138,7 +141,7 @@ export function HistoricCyclesChart({
     if (!selectedPoint) return;
     if (!pointFixed) return;
     moveSvgDot(selectedPoint);
-  }, [selectedPoint]);
+  }, [selectedPoint, adjInflation]);
 
   function getCircleColor() {
     if (!selectedPoint) return;
@@ -237,6 +240,7 @@ export function HistoricCyclesChart({
             cycleLength={dataSeries[selectedPoint.cycleIndex].length - 1}
             pointFixed={pointFixed}
             leftAdjust={tooltipLeftAdjust}
+            adjInflation={adjInflation}
           />
         )}
         <Chart dimensions={dimensions}>

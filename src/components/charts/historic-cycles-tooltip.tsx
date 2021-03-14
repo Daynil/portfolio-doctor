@@ -10,6 +10,7 @@ type Props = {
   cycleLength: number;
   pointFixed: boolean;
   leftAdjust: number;
+  adjInflation: boolean;
 };
 
 export function HistoricCyclesTooltip({
@@ -18,7 +19,8 @@ export function HistoricCyclesTooltip({
   yearData,
   pointFixed,
   cycleLength,
-  leftAdjust
+  leftAdjust,
+  adjInflation
 }: Props) {
   return (
     <div
@@ -52,13 +54,25 @@ export function HistoricCyclesTooltip({
             <div className="flex items-center">
               <label className="form-label my-0">Balance</label>
             </div>
-            <span>{numToCurrency(yearData.balanceInfAdjEnd, 0)}</span>
+            <span>
+              {numToCurrency(
+                adjInflation ? yearData.balanceInfAdjEnd : yearData.balanceEnd,
+                0
+              )}
+            </span>
           </div>
           <div className="flex justify-between">
             <div className="flex items-center">
               <label className="form-label my-0">Withdrawal</label>
             </div>
-            <span>{numToCurrency(yearData.withdrawalInfAdjust, 0)}</span>
+            <span>
+              {numToCurrency(
+                adjInflation
+                  ? yearData.withdrawalInfAdjust
+                  : yearData.withdrawal,
+                0
+              )}
+            </span>
           </div>
         </div>
       </div>
@@ -70,20 +84,39 @@ export function HistoricCyclesTooltip({
             <div className="flex items-center">
               <label className="form-label my-0">Ending Balance</label>
             </div>
-            <span>{numToCurrency(cycleStats.balance.endingInflAdj, 0)}</span>
+            <span>
+              {numToCurrency(
+                adjInflation
+                  ? cycleStats.balance.endingInflAdj
+                  : cycleStats.balance.ending,
+                0
+              )}
+            </span>
           </div>
           <div className="flex justify-between">
             <div className="flex items-center">
               <label className="form-label my-0">Avg Balance</label>
             </div>
-            <span>{numToCurrency(cycleStats.balance.averageInflAdj, 0)}</span>
+            <span>
+              {numToCurrency(
+                adjInflation
+                  ? cycleStats.balance.averageInflAdj
+                  : cycleStats.balance.average,
+                0
+              )}
+            </span>
           </div>
           <div className="flex justify-between">
             <div className="flex items-center">
               <label className="form-label my-0">Avg Withdrawal</label>
             </div>
             <span>
-              {numToCurrency(cycleStats.withdrawals.averageInflAdj, 0)}
+              {numToCurrency(
+                adjInflation
+                  ? cycleStats.withdrawals.averageInflAdj
+                  : cycleStats.withdrawals.average,
+                0
+              )}
             </span>
           </div>
         </div>
