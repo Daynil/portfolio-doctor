@@ -158,7 +158,7 @@ export function QuantilesChart({
     if (!selectedPoint) return;
     if (!pointFixed) return;
     moveSvgDot(selectedPoint);
-  }, [selectedPoint]);
+  }, [selectedPoint, adjInflation]);
 
   function getCircleColor() {
     if (!selectedPoint) return;
