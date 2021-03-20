@@ -1,5 +1,6 @@
 import { format as numFormat } from 'd3-format';
 import cloneDeep from 'lodash.clonedeep';
+import isEqual from 'lodash.isequal';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import {
   HistoricPortfolioDetails,
@@ -58,7 +59,7 @@ export default function Simulator() {
   const refDepositStart = useRef<HTMLInputElement>(null);
   const refDepositEnd = useRef<HTMLInputElement>(null);
 
-  let parsedOptions = cloneDeep(defaultPortfolioOptions); //{ ...defaultPortfolioOptions };
+  let parsedOptions = cloneDeep(defaultPortfolioOptions);
   let urlOptionsValidated = false;
 
   // This is the global window.location
@@ -69,8 +70,6 @@ export default function Simulator() {
     );
   }
 
-  console.log(parsedOptions);
-
   const [portfolioOptions, setPortfolioOptions] = useState<PortfolioOptions>(
     defaultPortfolioOptions
   );
@@ -80,29 +79,21 @@ export default function Simulator() {
   const [withdrawalMethod, setWithdrawalMethod] = useState<WithdrawalMethod>(
     defaultPortfolioOptions.withdrawalMethod
   );
-  const [delayWithdrawal, setDelayWithdrawal] = useState(true);
+  const [delayWithdrawal, setDelayWithdrawal] = useState(false);
   const [deposits, setDeposits] = useState<DepositInfo[]>(
     defaultPortfolioOptions.deposits
   );
 
+  // To avoid hydration issues, wait for after first render to change options if present
   useEffect(() => {
-    setPortfolioOptions(parsedOptions);
-    setSimulationMethod(parsedOptions.simulationMethod);
-    setWithdrawalMethod(parsedOptions.withdrawalMethod);
-    setDelayWithdrawal(parsedOptions.withdrawal.startYearIdx > 1);
-    setDeposits(parsedOptions.deposits);
+    if (!isEqual(defaultPortfolioOptions, parsedOptions)) {
+      setPortfolioOptions(parsedOptions);
+      setSimulationMethod(parsedOptions.simulationMethod);
+      setWithdrawalMethod(parsedOptions.withdrawalMethod);
+      setDelayWithdrawal(parsedOptions.withdrawal.startYearIdx > 1);
+      setDeposits(parsedOptions.deposits);
+    }
   }, []);
-
-  /**
-   * Note: Hydration issue workaround
-   * If server renders this as false
-   * But then it is set to true prior to first client render
-   * There is a hydration mismatch, which causes bizarre UI bugs (like buttons getting incorrect classes assigned, etc)
-   * Instead, default to a true then uncheck if needed.
-   */
-  // useEffect(() => {
-  //   setDelayWithdrawal(startingOptions.withdrawal.startYearIdx > 1);
-  // }, []);
 
   const {
     preferredDataset,
