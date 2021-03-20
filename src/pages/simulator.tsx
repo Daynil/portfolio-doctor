@@ -252,7 +252,8 @@ export default function Simulator() {
         portfolioStats: stats,
         quantiles: quantileLines,
         quantileStats: getQuantileStats(quantileLines),
-        options: curPortfolio.options
+        options: curPortfolio.options,
+        marketData
       });
     } else {
       const simsPerMarketData = getMaxSimulationCycles(

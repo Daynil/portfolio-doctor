@@ -13,6 +13,8 @@ export interface MarketYearData {
   equitiesDividend: number;
   inflationIndex: number;
   fixedIncomeInterest: number;
+  event: string;
+  eventLink: string;
 }
 
 export interface CycleYearData {

@@ -42,6 +42,8 @@ export function loadFile(file: File): Promise<string> {
  * Dividend Per Equity Share: float
  * Inflation Index: float
  * Fixed Income Interest: float
+ * Event: string (optional)
+ * Event Link: string (optional)
  *
  */
 export async function parseCSVFileToJSON(
@@ -66,7 +68,9 @@ export function parseCSVStringToJSON(
       equitiesPrice: parseFloat(columns[1]),
       equitiesDividend: parseFloat(columns[2]),
       inflationIndex: parseFloat(columns[3]),
-      fixedIncomeInterest: parseFloat(columns[4])
+      fixedIncomeInterest: parseFloat(columns[4]),
+      event: columns[5],
+      eventLink: columns[6]
     };
   });
   // Toss the trailing newline if it exists

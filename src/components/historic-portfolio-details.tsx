@@ -4,6 +4,7 @@ import {
   CycleStats,
   CycleYearData,
   CycleYearQuantile,
+  MarketYearData,
   PortfolioOptions,
   PortfolioStats,
   QuantileStats
@@ -15,6 +16,7 @@ import { HistoricCyclesChart } from './charts/historic-cycles-chart';
 import { QuantilesChart } from './charts/quantiles-chart';
 import CopyIcon from './svg/copy-icon';
 import ShareIcon from './svg/share-icon';
+import TextLink from './text-link';
 
 export interface PortfolioData {
   lifecyclesData: CycleYearData[][];
@@ -23,6 +25,7 @@ export interface PortfolioData {
   quantiles: CycleYearQuantile[][];
   quantileStats: QuantileStats[];
   options: PortfolioOptions;
+  marketData: MarketYearData[];
 }
 
 export interface Point {
@@ -38,7 +41,8 @@ export function HistoricPortfolioDetails({
   portfolioStats,
   quantiles,
   quantileStats,
-  options
+  options,
+  marketData
 }: PortfolioData) {
   const refCopyURL = useRef<HTMLInputElement>(null);
   const [selectedPoint, setSelectedPoint] = useState<Point>(null);
@@ -95,6 +99,10 @@ export function HistoricPortfolioDetails({
     }
   }
 
+  function getYearMarketInfo(cycleYear: number): MarketYearData {
+    return marketData.find((d) => d.year === cycleYear);
+  }
+
   function cycleDetailsEmptyBody() {
     if (displayMode === 'Full') {
       const startingYears = lifecyclesData
@@ -141,57 +149,72 @@ export function HistoricPortfolioDetails({
 
   function cycleDetailsBody() {
     const allCyclesRows = lifecyclesData[selectedPoint.cycleIndex].map(
-      (yearData, i) => (
-        <tr
-          key={i + 1}
-          className="group transition-colors even:bg-gray-200 cursor-pointer"
-          onClick={() =>
-            setSelectedPoint({
-              cycleIndex: selectedPoint.cycleIndex,
-              yearIndex: i
-            })
-          }
-        >
-          <td
-            className={
-              'group-hover:bg-green-200 duration-200 text-right py-2 px-6' +
-              (selectedPoint.yearIndex === i ? ' bg-green-200' : '')
+      (yearData, i) => {
+        const marketYearInfo = getYearMarketInfo(yearData.cycleYear);
+        return (
+          <tr
+            key={i + 1}
+            className="group transition-colors even:bg-gray-200 cursor-pointer"
+            onClick={() =>
+              setSelectedPoint({
+                cycleIndex: selectedPoint.cycleIndex,
+                yearIndex: i
+              })
             }
           >
-            {yearData.cycleYear}
-          </td>
-          <td
-            className={
-              'group-hover:bg-green-200 duration-200 text-right py-2 px-6' +
-              (selectedPoint.yearIndex === i ? ' bg-green-200' : '')
-            }
-          >
-            {numFormat('$,.2f')(
-              adjInflation ? yearData.balanceInfAdjEnd : yearData.balanceEnd
-            )}
-          </td>
-          <td
-            className={
-              'group-hover:bg-green-200 duration-200 text-right py-2 px-6' +
-              (selectedPoint.yearIndex === i ? ' bg-green-200' : '')
-            }
-          >
-            {numFormat('$,.2f')(
-              adjInflation ? yearData.withdrawalInfAdjust : yearData.withdrawal
-            )}
-          </td>
-          <td
-            className={
-              'group-hover:bg-green-200 duration-200 text-right py-2 px-6' +
-              (selectedPoint.yearIndex === i ? ' bg-green-200' : '')
-            }
-          >
-            {numFormat('$,.2f')(
-              adjInflation ? yearData.depositInfAdjust : yearData.deposit
-            )}
-          </td>
-        </tr>
-      )
+            <td
+              className={
+                'group-hover:bg-green-200 duration-200 text-right py-2 px-6' +
+                (selectedPoint.yearIndex === i ? ' bg-green-200' : '')
+              }
+            >
+              {yearData.cycleYear}
+            </td>
+            <td
+              className={
+                'group-hover:bg-green-200 duration-200 text-right py-2 px-6' +
+                (selectedPoint.yearIndex === i ? ' bg-green-200' : '')
+              }
+            >
+              {numFormat('$,.2f')(
+                adjInflation ? yearData.balanceInfAdjEnd : yearData.balanceEnd
+              )}
+            </td>
+            <td
+              className={
+                'group-hover:bg-green-200 duration-200 text-right py-2 px-6' +
+                (selectedPoint.yearIndex === i ? ' bg-green-200' : '')
+              }
+            >
+              {numFormat('$,.2f')(
+                adjInflation
+                  ? yearData.withdrawalInfAdjust
+                  : yearData.withdrawal
+              )}
+            </td>
+            <td
+              className={
+                'group-hover:bg-green-200 duration-200 text-right py-2 px-6' +
+                (selectedPoint.yearIndex === i ? ' bg-green-200' : '')
+              }
+            >
+              {numFormat('$,.2f')(
+                adjInflation ? yearData.depositInfAdjust : yearData.deposit
+              )}
+            </td>
+            <td
+              className={
+                'group-hover:bg-green-200 duration-200 text-right py-2 px-6' +
+                (selectedPoint.yearIndex === i ? ' bg-green-200' : '')
+              }
+            >
+              <TextLink href={marketYearInfo.eventLink}>
+                {marketYearInfo.event}
+              </TextLink>
+            </td>
+          </tr>
+        );
+      }
     );
 
     const quantilesRows =
@@ -581,6 +604,9 @@ export function HistoricPortfolioDetails({
                   <th className="p-2">Ending Balance</th>
                   <th className="p-2">Withdrawal</th>
                   {displayMode === 'Full' && <th className="p-2">Deposit</th>}
+                  {displayMode === 'Full' && (
+                    <th className="p-2">Notable Events</th>
+                  )}
                 </tr>
               </thead>
               {!selectedPoint ? (
