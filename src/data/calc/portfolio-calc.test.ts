@@ -618,7 +618,7 @@ describe('full 3-cycle portfolio tests against excel data', () => {
           startYearIdx: 2,
           staticAmount: 40000
         },
-        desposits: [
+        deposits: [
           { startYearIdx: 1, endYearIdx: 2, amount: 10000 },
           { startYearIdx: 3, endYearIdx: 3, amount: 12000 }
         ]

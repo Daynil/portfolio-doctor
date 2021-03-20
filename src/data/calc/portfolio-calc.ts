@@ -263,7 +263,7 @@ export interface PortfolioOptions {
   equitiesRatio: number;
   withdrawalMethod: WithdrawalMethod;
   withdrawal: WithdrawalOptions;
-  desposits?: DepositInfo[];
+  deposits?: DepositInfo[];
 }
 
 export interface WithdrawalOptions {
@@ -323,7 +323,7 @@ export class CyclePortfolio {
     public marketYearData: MarketYearData[],
     public options: PortfolioOptions
   ) {
-    if (!this.options.desposits) this.options.desposits = [];
+    if (!this.options.deposits) this.options.deposits = [];
     switch (this.options.withdrawalMethod) {
       case WithdrawalMethod.Nominal:
       case WithdrawalMethod.InflationAdjusted:
@@ -378,9 +378,9 @@ export class CyclePortfolio {
           : cycleData[cycleData.length - 1].balanceEnd;
 
       let yearDepost = 0;
-      if (this.options.desposits.length) {
-        for (let i = 0; i < this.options.desposits.length; i++) {
-          const depositData = this.options.desposits[i];
+      if (this.options.deposits.length) {
+        for (let i = 0; i < this.options.deposits.length; i++) {
+          const depositData = this.options.deposits[i];
           if (
             between(
               absoluteIndex,

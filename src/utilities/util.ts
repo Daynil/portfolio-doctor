@@ -1,3 +1,4 @@
+import cloneDeep from 'lodash.clonedeep';
 import { parse, stringify } from 'query-string';
 import {
   CycleYearData,
@@ -40,6 +41,7 @@ export interface UrlQuery {
   withdrawalCeiling?: string;
   simulationYearsLength: string;
   withdrawalStartIdx?: string;
+  deposits?: string;
 }
 
 export const defaultPortfolioOptions: PortfolioOptions = {
@@ -54,7 +56,8 @@ export const defaultPortfolioOptions: PortfolioOptions = {
     floor: 30000,
     ceiling: 60000
   },
-  simulationYearsLength: 60
+  simulationYearsLength: 60,
+  deposits: []
 };
 
 /**
@@ -146,7 +149,7 @@ export function queryStringToPortfolioOptions(
   queryString: string
 ): [PortfolioOptions, boolean] {
   const query = (parse(queryString) as unknown) as UrlQuery;
-  let options = { ...defaultPortfolioOptions };
+  let options = cloneDeep(defaultPortfolioOptions);
   let validatedOptionPresent = false;
 
   options.simulationMethod = query.simulationMethod as SimulationMethod;
@@ -170,9 +173,20 @@ export function queryStringToPortfolioOptions(
     options.withdrawal.ceiling = parseInt(query.withdrawalCeiling);
   }
 
+  if (query.deposits) {
+    try {
+      // We need to hint to JSON.parse that we're passing in a string
+      // Oddly works without the hint in console but not in the app itself
+      options.deposits = JSON.parse(query.deposits + '');
+    } catch (error) {
+      console.log('Url parse error', error);
+    }
+  }
+
   // Check if we have any valid options parsed from query, else reset them to default
   for (const key in options) {
     if (options.hasOwnProperty(key)) {
+      if (key === 'withdrawal' || key === 'deposits') continue;
       if (isNaN(options[key]) || typeof options[key] === 'undefined') {
         options[key] = defaultPortfolioOptions[key];
       } else {
@@ -223,6 +237,15 @@ export function portfolioOptionsToQueryString(
   if (options.withdrawal.startYearIdx)
     queryObj.withdrawalStartIdx = options.withdrawal.startYearIdx + '';
   else queryObj.withdrawalStartIdx = '1';
+
+  if (options.deposits && options.deposits.length) {
+    queryObj.deposits = JSON.stringify(options.deposits);
+    // let stringifiedDeposits = '';
+    // for (let i = 0; i < options.deposits.length; i++) {
+    //   const deposit = options.deposits[i];
+    //   stringifiedDeposits += `startYearIdx:${deposit.startYearIdx}`
+    // }
+  }
 
   // @ts-ignore (this works fine, type defs seem insufficient)
   return stringify(queryObj);

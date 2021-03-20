@@ -1,4 +1,5 @@
 import { format as numFormat } from 'd3-format';
+import cloneDeep from 'lodash.clonedeep';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import {
   HistoricPortfolioDetails,
@@ -44,8 +45,6 @@ export default function Simulator() {
   const [inputErr, setInputErr] = useState('');
   const [depositInputErr, setDepositInputErr] = useState('');
 
-  const [deposits, setDeposits] = useState<DepositInfo[]>([]);
-
   const refStartingBalance = useRef<HTMLInputElement>(null);
   const refStockRatio = useRef<HTMLInputElement>(null);
   const refExpenseRatio = useRef<HTMLInputElement>(null);
@@ -59,26 +58,40 @@ export default function Simulator() {
   const refDepositStart = useRef<HTMLInputElement>(null);
   const refDepositEnd = useRef<HTMLInputElement>(null);
 
-  let startingOptions = { ...defaultPortfolioOptions };
+  let parsedOptions = cloneDeep(defaultPortfolioOptions); //{ ...defaultPortfolioOptions };
   let urlOptionsValidated = false;
 
   // This is the global window.location
   // Next.js offers similar funtion with useRouter().query, but no point to refactor
   if (typeof location !== 'undefined' && location?.search) {
-    [startingOptions, urlOptionsValidated] = queryStringToPortfolioOptions(
+    [parsedOptions, urlOptionsValidated] = queryStringToPortfolioOptions(
       location.search
     );
   }
 
+  console.log(parsedOptions);
+
   const [portfolioOptions, setPortfolioOptions] = useState<PortfolioOptions>(
-    startingOptions
+    defaultPortfolioOptions
   );
   const [simulationMethod, setSimulationMethod] = useState<SimulationMethod>(
-    startingOptions.simulationMethod
+    defaultPortfolioOptions.simulationMethod
   );
   const [withdrawalMethod, setWithdrawalMethod] = useState<WithdrawalMethod>(
-    startingOptions.withdrawalMethod
+    defaultPortfolioOptions.withdrawalMethod
   );
+  const [delayWithdrawal, setDelayWithdrawal] = useState(true);
+  const [deposits, setDeposits] = useState<DepositInfo[]>(
+    defaultPortfolioOptions.deposits
+  );
+
+  useEffect(() => {
+    setPortfolioOptions(parsedOptions);
+    setSimulationMethod(parsedOptions.simulationMethod);
+    setWithdrawalMethod(parsedOptions.withdrawalMethod);
+    setDelayWithdrawal(parsedOptions.withdrawal.startYearIdx > 1);
+    setDeposits(parsedOptions.deposits);
+  }, []);
 
   /**
    * Note: Hydration issue workaround
@@ -87,10 +100,9 @@ export default function Simulator() {
    * There is a hydration mismatch, which causes bizarre UI bugs (like buttons getting incorrect classes assigned, etc)
    * Instead, default to a true then uncheck if needed.
    */
-  const [delayWithdrawal, setDelayWithdrawal] = useState(true);
-  useEffect(() => {
-    setDelayWithdrawal(startingOptions.withdrawal.startYearIdx > 1);
-  }, []);
+  // useEffect(() => {
+  //   setDelayWithdrawal(startingOptions.withdrawal.startYearIdx > 1);
+  // }, []);
 
   const {
     preferredDataset,
@@ -218,9 +230,9 @@ export default function Simulator() {
     }
 
     if (deposits.length) {
-      newPortfolioOptions.desposits = deposits;
+      newPortfolioOptions.deposits = deposits;
     } else {
-      newPortfolioOptions.desposits = undefined;
+      newPortfolioOptions.deposits = undefined;
     }
 
     setInputErr('');
