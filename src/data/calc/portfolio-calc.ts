@@ -251,7 +251,6 @@ export type SimulationMethod = 'Historical Data' | 'Monte Carlo';
 export interface DepositInfo {
   startYearIdx: number;
   endYearIdx: number;
-  /** Inflation adjusted deposit amount */
   amount: number;
 }
 

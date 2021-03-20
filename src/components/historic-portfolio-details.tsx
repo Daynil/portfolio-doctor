@@ -186,7 +186,9 @@ export function HistoricPortfolioDetails({
               (selectedPoint.yearIndex === i ? ' bg-green-200' : '')
             }
           >
-            {numFormat('$,.2f')(yearData.deposit)}
+            {numFormat('$,.2f')(
+              adjInflation ? yearData.depositInfAdjust : yearData.deposit
+            )}
           </td>
         </tr>
       )
