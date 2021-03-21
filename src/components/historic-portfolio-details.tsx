@@ -50,12 +50,18 @@ export function HistoricPortfolioDetails({
   const [displayMode, setDisplayMode] = useState<DisplayMode>('Full');
   const [adjInflation, setAdjInflation] = useState(true);
 
+  const [zoomView, setZoomView] = useState(false);
+  const [unzoomedCycleIndex, setUnzoomedCycleIndex] = useState(0);
+  const [zoomedYearIndex, setZoomedYearIndex] = useState(0);
+
   const [showCycleDetails, setShowCycleDetails] = useState(false);
 
   const [copyComplete, setCopyComplete] = useState(false);
   const [copyModalActive, setCopyModalActive] = useState(false);
 
   useEffect(() => {
+    setZoomView(false);
+    setUnzoomedCycleIndex(0);
     setPointFixed(null);
     setSelectedPoint(null);
   }, [lifecyclesData]);
@@ -79,18 +85,105 @@ export function HistoricPortfolioDetails({
     setCopyComplete(false);
   }
 
-  function handleDisplayModeSwitch(displayMode: DisplayMode) {
-    setPointFixed(null);
-    setSelectedPoint(null);
-    setDisplayMode(displayMode);
+  function handleDisplayModeSwitch(newDisplayMode: DisplayMode) {
+    if (newDisplayMode === 'Full' && zoomView) {
+      // We can only leave zoom view to here, so reset cached cycle index
+      setZoomView(false);
+      if (pointFixed) {
+        setSelectedPoint({
+          cycleIndex: unzoomedCycleIndex,
+          yearIndex: zoomedYearIndex
+        });
+      }
+    } else {
+      // We're leaving to/from quantiles, reset both
+      setPointFixed(null);
+      setSelectedPoint(null);
+      setZoomView(false);
+    }
+    setDisplayMode(newDisplayMode);
+  }
+
+  function getZoomButtonDisabled() {
+    if (zoomView) return false;
+    return !(selectedPoint && pointFixed && displayMode === 'Full');
+  }
+
+  function toggleZoomView() {
+    // Cache this so we can retrieve it again when we unzoom again
+    setUnzoomedCycleIndex(selectedPoint.cycleIndex);
+    setZoomedYearIndex(selectedPoint.yearIndex);
+    setZoomView(true);
+  }
+
+  function setSelectedZoomPoint(point: Point) {
+    if (!point) {
+      setSelectedPoint(null);
+      setZoomedYearIndex(null);
+    } else {
+      setZoomedYearIndex(point.yearIndex);
+    }
+  }
+
+  function getYearMarketInfo(cycleYear: number): MarketYearData {
+    return marketData.find((d) => d.year === cycleYear);
+  }
+
+  function chartView() {
+    if (displayMode === 'Full' && !zoomView) {
+      return (
+        <HistoricCyclesChart
+          dataSeries={lifecyclesData}
+          allLineMeta={lifecyclesStats}
+          aspectRatio={1000 / 600}
+          selectedPoint={selectedPoint}
+          handleSetSelectedPoint={(point: Point) => setSelectedPoint(point)}
+          pointFixed={pointFixed}
+          handleSetPointFixed={(fixed: boolean) => setPointFixed(fixed)}
+          adjInflation={adjInflation}
+        />
+      );
+    } else if (displayMode === 'Full' && zoomView) {
+      return (
+        <HistoricCyclesChart
+          dataSeries={[lifecyclesData[unzoomedCycleIndex]]}
+          allLineMeta={[lifecyclesStats[unzoomedCycleIndex]]}
+          aspectRatio={1000 / 600}
+          selectedPoint={
+            zoomedYearIndex === 0 || zoomedYearIndex
+              ? { cycleIndex: 0, yearIndex: zoomedYearIndex }
+              : null
+          }
+          handleSetSelectedPoint={(point: Point) => setSelectedZoomPoint(point)}
+          pointFixed={pointFixed}
+          handleSetPointFixed={(fixed: boolean) => setPointFixed(fixed)}
+          adjInflation={adjInflation}
+        />
+      );
+    } else {
+      return (
+        <QuantilesChart
+          dataSeries={quantiles}
+          allLineMeta={quantileStats}
+          aspectRatio={1000 / 600}
+          selectedPoint={selectedPoint}
+          handleSetSelectedPoint={(point: Point) => setSelectedPoint(point)}
+          pointFixed={pointFixed}
+          handleSetPointFixed={(fixed: boolean) => setPointFixed(fixed)}
+          adjInflation={adjInflation}
+        />
+      );
+    }
   }
 
   function cycleDetailsTitle() {
-    if (displayMode === 'Full') {
+    if (displayMode === 'Full' && !zoomView) {
       if (!selectedPoint) return 'Cycle Details';
       const selectedCycleStart =
         lifecyclesData[selectedPoint.cycleIndex][0].cycleStartYear;
       return `Cycle Starting ${selectedCycleStart} Details`;
+    } else if (displayMode === 'Full' && zoomView) {
+      return `Cycle Starting ${lifecyclesData[unzoomedCycleIndex][0].cycleStartYear} Details`;
     } else {
       if (!selectedPoint) return 'Quantile Details';
       const selectedQuantile =
@@ -99,15 +192,25 @@ export function HistoricPortfolioDetails({
     }
   }
 
-  function getYearMarketInfo(cycleYear: number): MarketYearData {
-    return marketData.find((d) => d.year === cycleYear);
+  function getTableBody() {
+    let shouldShowDetails = false;
+    if (!zoomView && selectedPoint) shouldShowDetails = true;
+    if (zoomView) shouldShowDetails = true;
+    return !shouldShowDetails ? (
+      <tbody>
+        <tr>
+          <td colSpan={3} className="text-center py-2 text-base text-gray-500">
+            {cycleDetailsEmptyBody()}
+          </td>
+        </tr>
+      </tbody>
+    ) : (
+      cycleDetailsBody()
+    );
   }
 
   function cycleDetailsEmptyBody() {
     if (displayMode === 'Full') {
-      const startingYears = lifecyclesData
-        .map((d) => d.map((di) => di.cycleStartYear))
-        .map((d) => d[0]);
       return (
         <div className="px-4">
           <div>Select a cycle by clicking in the chart above to view data</div>
@@ -122,16 +225,18 @@ export function HistoricPortfolioDetails({
                 if (e.target.value === '') return;
                 const selectedYear = parseInt(e.target.value);
                 setSelectedPoint({
-                  cycleIndex: selectedYear - startingYears[0],
+                  cycleIndex: selectedYear - marketData[0].year,
                   yearIndex: 0
                 });
                 setPointFixed(true);
               }}
             >
               <option value=""></option>
-              {startingYears.map((year) => (
-                <option key={year} value={year}>
-                  {year}
+              {marketData.map((yearData) => (
+                <option key={yearData.year} value={yearData.year}>
+                  {yearData.event
+                    ? `${yearData.year} - ${yearData.event}`
+                    : yearData.year}
                 </option>
               ))}
             </select>
@@ -148,24 +253,31 @@ export function HistoricPortfolioDetails({
   }
 
   function cycleDetailsBody() {
-    const allCyclesRows = lifecyclesData[selectedPoint.cycleIndex].map(
+    const allCyclesRows = lifecyclesData[unzoomedCycleIndex].map(
       (yearData, i) => {
         const marketYearInfo = getYearMarketInfo(yearData.cycleYear);
+        const rowSelected = !zoomView
+          ? selectedPoint.yearIndex === i
+          : zoomedYearIndex === i;
         return (
           <tr
             key={i + 1}
             className="group transition-colors even:bg-gray-200 cursor-pointer"
-            onClick={() =>
-              setSelectedPoint({
-                cycleIndex: selectedPoint.cycleIndex,
-                yearIndex: i
-              })
-            }
+            onClick={() => {
+              if (!zoomView) {
+                setSelectedPoint({
+                  cycleIndex: selectedPoint.cycleIndex,
+                  yearIndex: i
+                });
+              } else {
+                setZoomedYearIndex(i);
+              }
+            }}
           >
             <td
               className={
                 'group-hover:bg-green-200 duration-200 text-right py-2 px-6' +
-                (selectedPoint.yearIndex === i ? ' bg-green-200' : '')
+                (rowSelected ? ' bg-green-200' : '')
               }
             >
               {yearData.cycleYear}
@@ -173,7 +285,7 @@ export function HistoricPortfolioDetails({
             <td
               className={
                 'group-hover:bg-green-200 duration-200 text-right py-2 px-6' +
-                (selectedPoint.yearIndex === i ? ' bg-green-200' : '')
+                (rowSelected ? ' bg-green-200' : '')
               }
             >
               {numFormat('$,.2f')(
@@ -183,7 +295,7 @@ export function HistoricPortfolioDetails({
             <td
               className={
                 'group-hover:bg-green-200 duration-200 text-right py-2 px-6' +
-                (selectedPoint.yearIndex === i ? ' bg-green-200' : '')
+                (rowSelected ? ' bg-green-200' : '')
               }
             >
               {numFormat('$,.2f')(
@@ -195,7 +307,7 @@ export function HistoricPortfolioDetails({
             <td
               className={
                 'group-hover:bg-green-200 duration-200 text-right py-2 px-6' +
-                (selectedPoint.yearIndex === i ? ' bg-green-200' : '')
+                (rowSelected ? ' bg-green-200' : '')
               }
             >
               {numFormat('$,.2f')(
@@ -205,7 +317,7 @@ export function HistoricPortfolioDetails({
             <td
               className={
                 'group-hover:bg-green-200 duration-200 text-right py-2 px-6' +
-                (selectedPoint.yearIndex === i ? ' bg-green-200' : '')
+                (rowSelected ? ' bg-green-200' : '')
               }
             >
               <TextLink href={marketYearInfo.eventLink}>
@@ -284,11 +396,21 @@ export function HistoricPortfolioDetails({
             <button
               className={clsx(
                 'btn',
-                displayMode === 'Full' ? 'btn-green-2' : 'btn-gray'
+                displayMode === 'Full' && !zoomView ? 'btn-green-2' : 'btn-gray'
               )}
               onClick={() => handleDisplayModeSwitch('Full')}
             >
               All Cycles
+            </button>
+            <button
+              className={clsx(
+                'btn ml-6',
+                displayMode === 'Full' && zoomView ? 'btn-green-2' : 'btn-gray'
+              )}
+              disabled={getZoomButtonDisabled()}
+              onClick={() => toggleZoomView()}
+            >
+              Zoom Cycle
             </button>
             <button
               className={clsx(
@@ -364,29 +486,7 @@ export function HistoricPortfolioDetails({
           <div className="text-sm text-gray-500 mt-10 -mb-7 ml-16">
             {`Portfolio (${adjInflation ? 'Inflation-Adjusted' : 'Nominal'} $)`}
           </div>
-          {displayMode === 'Full' ? (
-            <HistoricCyclesChart
-              dataSeries={lifecyclesData}
-              allLineMeta={lifecyclesStats}
-              aspectRatio={1000 / 600}
-              selectedPoint={selectedPoint}
-              handleSetSelectedPoint={(point: Point) => setSelectedPoint(point)}
-              pointFixed={pointFixed}
-              handleSetPointFixed={(fixed: boolean) => setPointFixed(fixed)}
-              adjInflation={adjInflation}
-            />
-          ) : (
-            <QuantilesChart
-              dataSeries={quantiles}
-              allLineMeta={quantileStats}
-              aspectRatio={1000 / 600}
-              selectedPoint={selectedPoint}
-              handleSetSelectedPoint={(point: Point) => setSelectedPoint(point)}
-              pointFixed={pointFixed}
-              handleSetPointFixed={(fixed: boolean) => setPointFixed(fixed)}
-              adjInflation={adjInflation}
-            />
-          )}
+          {chartView()}
         </div>
         <div
           style={{
@@ -609,20 +709,7 @@ export function HistoricPortfolioDetails({
                   )}
                 </tr>
               </thead>
-              {!selectedPoint ? (
-                <tbody>
-                  <tr>
-                    <td
-                      colSpan={3}
-                      className="text-center py-2 text-base text-gray-500"
-                    >
-                      {cycleDetailsEmptyBody()}
-                    </td>
-                  </tr>
-                </tbody>
-              ) : (
-                cycleDetailsBody()
-              )}
+              {getTableBody()}
             </table>
           </div>
         </div>
