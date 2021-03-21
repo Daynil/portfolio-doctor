@@ -1,4 +1,5 @@
 import { format as numFormat } from 'd3';
+import FileSaver from 'file-saver';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   CycleStats,
@@ -9,12 +10,14 @@ import {
   PortfolioStats,
   QuantileStats
 } from '../data/calc/portfolio-calc';
+import { lifecyclesToCSV } from '../data/data-helpers';
 import { baseUrl } from '../utilities/constants';
 import { numToCurrency } from '../utilities/format';
 import { clsx, portfolioOptionsToQueryString } from '../utilities/util';
 import { HistoricCyclesChart } from './charts/historic-cycles-chart';
 import { QuantilesChart } from './charts/quantiles-chart';
 import CopyIcon from './svg/copy-icon';
+import DownloadIcon from './svg/dl-icon';
 import ShareIcon from './svg/share-icon';
 import TextLink from './text-link';
 
@@ -83,6 +86,21 @@ export function HistoricPortfolioDetails({
   function closeCopyModal() {
     setCopyModalActive(false);
     setCopyComplete(false);
+  }
+
+  function downloadResults() {
+    const blob = new Blob(
+      [
+        lifecyclesToCSV(
+          lifecyclesData,
+          `${baseUrl}/simulator?${portfolioOptionsToQueryString(options)}`
+        )
+      ],
+      {
+        type: 'text/csv'
+      }
+    );
+    FileSaver.saveAs(blob, 'results.csv');
   }
 
   function handleDisplayModeSwitch(newDisplayMode: DisplayMode) {
@@ -391,8 +409,8 @@ export function HistoricPortfolioDetails({
         <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
       </div>
       <div className="flex flex-wrap w-full">
-        <div className="flex flex-row w-full justify-between ml-20">
-          <div className="flex flex-row">
+        <div className="flex flex-row w-full justify-between ml-20 flex-wrap">
+          <div className="flex flex-row flex-wrap">
             <button
               className={clsx(
                 'btn',
@@ -421,7 +439,7 @@ export function HistoricPortfolioDetails({
             >
               Quantiles
             </button>
-            <div className="flex flex-row items-center ml-6">
+            <div className="flex flex-row items-center ml-6 w-40">
               <input
                 type="checkbox"
                 id="adjInflation"
@@ -434,9 +452,18 @@ export function HistoricPortfolioDetails({
               </label>
             </div>
           </div>
+          <div className="flex justify-center relative">
+            <button
+              className="btn btn-green-2 flex items-center text-sm"
+              onClick={downloadResults}
+            >
+              <DownloadIcon className="text-green-700 w-4" />
+              <span className="ml-2">Download</span>
+            </button>
+          </div>
           <div className="flex justify-center relative mr-12">
             <button
-              className="btn btn-green-2 flex items-center"
+              className="btn btn-green-2 flex items-center text-sm"
               onClick={shareResults}
             >
               <ShareIcon className="text-green-700 w-4" />

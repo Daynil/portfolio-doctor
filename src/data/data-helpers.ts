@@ -446,6 +446,32 @@ export function getSeriesDomainExtent<T>(
   };
 }
 
+export function lifecyclesToCSV(
+  lifecyclesData: CycleYearData[][],
+  resultUrl: string
+) {
+  const lineTerm = '\r\n';
+
+  let csvString = 'Result URL:' + lineTerm + resultUrl + lineTerm + lineTerm;
+
+  const headerRow =
+    'Year,CumulativeInflation,PortfolioStart,PortfolioInflAdjStart,ActualSpend,InflAdjSpend,ActualDeposit,InflAdjDeposit,Equities,Bonds,EquitiesGrowth,DividendsGrowth,BondsGrowth,Fees,PortfolioEnd,PortfolioInflAdjEnd' +
+    lineTerm;
+
+  let firstCycle = true;
+  for (const cycle of lifecyclesData) {
+    if (!firstCycle) csvString += lineTerm + lineTerm;
+    csvString += `Cycle Starting ${cycle[0].cycleStartYear}` + lineTerm;
+    csvString += headerRow;
+    for (const yearData of cycle) {
+      csvString += `${yearData.cycleYear},${yearData.cumulativeInflation},${yearData.balanceStart},${yearData.balanceInfAdjStart},${yearData.withdrawal},${yearData.withdrawalInfAdjust},${yearData.deposit},${yearData.depositInfAdjust},${yearData.equities},${yearData.bonds},${yearData.equitiesGrowth},${yearData.dividendsGrowth},${yearData.bondsGrowth},${yearData.fees},${yearData.balanceEnd},${yearData.balanceInfAdjEnd}${lineTerm}`;
+    }
+    if (firstCycle) firstCycle = false;
+  }
+
+  return csvString;
+}
+
 /**
  * Create a 3d array string of portfolio data for exportation
  */
