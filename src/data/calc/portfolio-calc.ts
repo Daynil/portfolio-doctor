@@ -785,6 +785,10 @@ export class CyclePortfolio {
     return year - this.marketYearData[0].year;
   }
 
+  /**
+   * Last simulation must end on the year before the last available data year
+   * We need the following year's market performance to determine market change
+   */
   getMaxSimulationCycles(): number {
     const lastPossibleStartYear =
       this.marketYearData[this.marketYearData.length - 1].year -
@@ -805,6 +809,10 @@ export function getMaxSimulationLength(marketData: MarketYearData[]): number {
   return marketData.length - 1;
 }
 
+/**
+ * Last simulation must end on the year before the last available data year
+ * We need the following year's market performance to determine market change
+ */
 export function getMaxSimulationCycles(
   marketData: MarketYearData[],
   simulationYearsLength: number

@@ -241,11 +241,6 @@ export default function Simulator() {
         0.9
       ]);
 
-      // const blob = new Blob([JSON.stringify(portfolioData)], {
-      //   type: 'application/json'
-      // });
-      // FileSaver.saveAs(blob, 'results.json');
-
       setPortfolio({
         lifecyclesData,
         lifecyclesStats: stats.cycleStats,

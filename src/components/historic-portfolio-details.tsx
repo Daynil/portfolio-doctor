@@ -5,6 +5,7 @@ import {
   CycleStats,
   CycleYearData,
   CycleYearQuantile,
+  getMaxSimulationCycles,
   MarketYearData,
   PortfolioOptions,
   PortfolioStats,
@@ -250,13 +251,21 @@ export function HistoricPortfolioDetails({
               }}
             >
               <option value=""></option>
-              {marketData.map((yearData) => (
-                <option key={yearData.year} value={yearData.year}>
-                  {yearData.event
-                    ? `${yearData.year} - ${yearData.event}`
-                    : yearData.year}
-                </option>
-              ))}
+              {marketData
+                .slice(
+                  0,
+                  getMaxSimulationCycles(
+                    marketData,
+                    options.simulationYearsLength
+                  )
+                )
+                .map((yearData) => (
+                  <option key={yearData.year} value={yearData.year}>
+                    {yearData.event
+                      ? `${yearData.year} - ${yearData.event}`
+                      : yearData.year}
+                  </option>
+                ))}
             </select>
           </div>
         </div>
@@ -271,81 +280,81 @@ export function HistoricPortfolioDetails({
   }
 
   function cycleDetailsBody() {
-    const allCyclesRows = lifecyclesData[unzoomedCycleIndex].map(
-      (yearData, i) => {
-        const marketYearInfo = getYearMarketInfo(yearData.cycleYear);
-        const rowSelected = !zoomView
-          ? selectedPoint.yearIndex === i
-          : zoomedYearIndex === i;
-        return (
-          <tr
-            key={i + 1}
-            className="group transition-colors even:bg-gray-200 cursor-pointer"
-            onClick={() => {
-              if (!zoomView) {
-                setSelectedPoint({
-                  cycleIndex: selectedPoint.cycleIndex,
-                  yearIndex: i
-                });
-              } else {
-                setZoomedYearIndex(i);
-              }
-            }}
+    const cycleIndex = !zoomView
+      ? selectedPoint.cycleIndex
+      : unzoomedCycleIndex;
+    const allCyclesRows = lifecyclesData[cycleIndex].map((yearData, i) => {
+      const marketYearInfo = getYearMarketInfo(yearData.cycleYear);
+      const rowSelected = !zoomView
+        ? selectedPoint.yearIndex === i
+        : zoomedYearIndex === i;
+      return (
+        <tr
+          key={i + 1}
+          className="group transition-colors even:bg-gray-200 cursor-pointer"
+          onClick={() => {
+            if (!zoomView) {
+              setSelectedPoint({
+                cycleIndex: selectedPoint.cycleIndex,
+                yearIndex: i
+              });
+            } else {
+              if (!pointFixed) setPointFixed(true);
+              setZoomedYearIndex(i);
+            }
+          }}
+        >
+          <td
+            className={
+              'group-hover:bg-green-200 duration-200 text-right py-2 px-6' +
+              (rowSelected ? ' bg-green-200' : '')
+            }
           >
-            <td
-              className={
-                'group-hover:bg-green-200 duration-200 text-right py-2 px-6' +
-                (rowSelected ? ' bg-green-200' : '')
-              }
-            >
-              {yearData.cycleYear}
-            </td>
-            <td
-              className={
-                'group-hover:bg-green-200 duration-200 text-right py-2 px-6' +
-                (rowSelected ? ' bg-green-200' : '')
-              }
-            >
-              {numFormat('$,.2f')(
-                adjInflation ? yearData.balanceInfAdjEnd : yearData.balanceEnd
-              )}
-            </td>
-            <td
-              className={
-                'group-hover:bg-green-200 duration-200 text-right py-2 px-6' +
-                (rowSelected ? ' bg-green-200' : '')
-              }
-            >
-              {numFormat('$,.2f')(
-                adjInflation
-                  ? yearData.withdrawalInfAdjust
-                  : yearData.withdrawal
-              )}
-            </td>
-            <td
-              className={
-                'group-hover:bg-green-200 duration-200 text-right py-2 px-6' +
-                (rowSelected ? ' bg-green-200' : '')
-              }
-            >
-              {numFormat('$,.2f')(
-                adjInflation ? yearData.depositInfAdjust : yearData.deposit
-              )}
-            </td>
-            <td
-              className={
-                'group-hover:bg-green-200 duration-200 text-right py-2 px-6' +
-                (rowSelected ? ' bg-green-200' : '')
-              }
-            >
-              <TextLink href={marketYearInfo.eventLink}>
-                {marketYearInfo.event}
-              </TextLink>
-            </td>
-          </tr>
-        );
-      }
-    );
+            {yearData.cycleYear}
+          </td>
+          <td
+            className={
+              'group-hover:bg-green-200 duration-200 text-right py-2 px-6' +
+              (rowSelected ? ' bg-green-200' : '')
+            }
+          >
+            {numFormat('$,.2f')(
+              adjInflation ? yearData.balanceInfAdjEnd : yearData.balanceEnd
+            )}
+          </td>
+          <td
+            className={
+              'group-hover:bg-green-200 duration-200 text-right py-2 px-6' +
+              (rowSelected ? ' bg-green-200' : '')
+            }
+          >
+            {numFormat('$,.2f')(
+              adjInflation ? yearData.withdrawalInfAdjust : yearData.withdrawal
+            )}
+          </td>
+          <td
+            className={
+              'group-hover:bg-green-200 duration-200 text-right py-2 px-6' +
+              (rowSelected ? ' bg-green-200' : '')
+            }
+          >
+            {numFormat('$,.2f')(
+              adjInflation ? yearData.depositInfAdjust : yearData.deposit
+            )}
+          </td>
+          <td
+            className={
+              'group-hover:bg-green-200 duration-200 text-right py-2 px-6' +
+              (rowSelected ? ' bg-green-200' : '')
+            }
+          >
+            <TextLink href={marketYearInfo.eventLink}>
+              {marketYearInfo.event}
+            </TextLink>
+          </td>
+        </tr>
+      );
+    });
 
     const quantilesRows =
       displayMode === 'Full'
