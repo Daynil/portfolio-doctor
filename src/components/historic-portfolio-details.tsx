@@ -461,60 +461,62 @@ export function HistoricPortfolioDetails({
               </label>
             </div>
           </div>
-          <div className="flex justify-center relative">
-            <button
-              className="btn btn-green-2 flex items-center text-sm"
-              onClick={downloadResults}
-            >
-              <DownloadIcon className="text-green-700 w-4" />
-              <span className="ml-2">Download</span>
-            </button>
-          </div>
-          <div className="flex justify-center relative mr-12">
-            <button
-              className="btn btn-green-2 flex items-center text-sm"
-              onClick={shareResults}
-            >
-              <ShareIcon className="text-green-700 w-4" />
-              <span className="ml-2">Share</span>
-            </button>
-            <div
-              className={
-                copyModalActive
-                  ? 'absolute bg-white shadow-lg rounded-md mt-14 mr-64 text-base p-4 w-96 flex flex-col z-20'
-                  : 'hidden'
-              }
-            >
-              <div className="text-gray-900">
-                Share this portfolio run with this URL or just bookmark it for
-                future reference
-              </div>
-              <div className="flex mt-2">
-                <input
-                  type="text"
-                  className="form-input w-full"
-                  value={`${baseUrl}/simulator?${portfolioOptionsToQueryString(
-                    options
-                  )}`}
-                  readOnly
-                  ref={refCopyURL}
-                />
-                <button
-                  className="btn btn-green ml-2 flex items-center"
-                  onClick={copyURL}
-                >
-                  <CopyIcon className="text-white w-4" />
-                  <span className="ml-2">Copy</span>
-                </button>
-              </div>
-              {!copyComplete ? null : (
-                <div
-                  className="bg-green-100 border-l-4 border-green-500 text-green-700 py-2 px-4 mt-4"
-                  role="alert"
-                >
-                  Copied to clipboard!
+          <div className="flex mt-6 xl:mt-0">
+            <div className="flex justify-center relative">
+              <button
+                className="btn btn-green-2 flex items-center text-sm"
+                onClick={downloadResults}
+              >
+                <DownloadIcon className="text-green-700 w-4" />
+                <span className="ml-2">Download</span>
+              </button>
+            </div>
+            <div className="flex justify-center relative ml-6 mr-12">
+              <button
+                className="btn btn-green-2 flex items-center text-sm"
+                onClick={shareResults}
+              >
+                <ShareIcon className="text-green-700 w-4" />
+                <span className="ml-2">Share</span>
+              </button>
+              <div
+                className={
+                  copyModalActive
+                    ? 'absolute bg-white shadow-lg rounded-md mt-14 mr-64 text-base p-4 w-96 flex flex-col z-20'
+                    : 'hidden'
+                }
+              >
+                <div className="text-gray-900">
+                  Share this portfolio run with this URL or just bookmark it for
+                  future reference
                 </div>
-              )}
+                <div className="flex mt-2">
+                  <input
+                    type="text"
+                    className="form-input w-full"
+                    value={`${baseUrl}/simulator?${portfolioOptionsToQueryString(
+                      options
+                    )}`}
+                    readOnly
+                    ref={refCopyURL}
+                  />
+                  <button
+                    className="btn btn-green ml-2 flex items-center"
+                    onClick={copyURL}
+                  >
+                    <CopyIcon className="text-white w-4" />
+                    <span className="ml-2">Copy</span>
+                  </button>
+                </div>
+                {!copyComplete ? null : (
+                  <div
+                    className="bg-green-100 border-l-4 border-green-500 text-green-700 py-2 px-4 mt-4"
+                    role="alert"
+                  >
+                    Copied to clipboard!
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
