@@ -11,11 +11,11 @@ export default function Home() {
       <div className="mt-20 text-center">
         <h2 className="text-3xl">Simulate your portfolio's performance</h2>
         <p className="-mt-4">
-          Input some information about your portfolio and see how it's likely to
-          do over the years!
+          Financial independence (FI) is the point at which your current annual
+          expenditure can reasonably be supported by Input some information
+          about your portfolio and see how it's likely to do over the years!
         </p>
       </div>
-      <div>Homepage!</div>
     </div>
   );
 }

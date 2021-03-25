@@ -123,7 +123,9 @@ export default function Simulator() {
 
   useEffect(() => {
     // Auto-trigger portfolio calculation if we have valid options in the URL
-    if (urlOptionsValidated && marketData.length) calculatePortfolio();
+    // if (urlOptionsValidated && marketData.length) calculatePortfolio();
+    // Always trigger calculation on landing once data is parsed
+    if (marketData.length) calculatePortfolio();
   }, [marketData]);
 
   function calculatePortfolio() {
