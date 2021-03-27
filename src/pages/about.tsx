@@ -11,10 +11,18 @@ export default function About() {
       />
       <h1 className="mt-20 text-center">About FI Portfolio Doctor</h1>
       <p>
+        Hi! I'm <TextLink href="https://dlibin.net/">Danny Libin</TextLink>, and
+        I built this app to help me understand the mechanics behind using a
+        portfolio to fund financial independence and retirement. I wanted clean,
+        interactive way to view my results, and the ability to iterate on
+        various scenarios quickly and easily.
+      </p>
+      <p>
         Financial independence (FI) is the point at which your current annual
-        expenditure can reasonably be supported by your current savings nest
-        egg. In other words, you can retire if you choose to do so, regardless
-        of your age.
+        expenditure can reasonably be supported by your current savings nest egg
+        for the rest of your life (or indefinitely). In other words, you can
+        retire if you choose to do so, regardless of your age (as in FIRE -
+        Financially Independent Retired Early).
       </p>
       <p>
         The concept behind this simulator is to determine the success rate
@@ -136,8 +144,190 @@ export default function About() {
         for fun to see some really high numbers.
       </p>
       <h2>Historical Data Used</h2>
+      <p>
+        The historical data used in FI Porftolio Doctor is compiled by{' '}
+        <TextLink href="http://www.econ.yale.edu/~shiller/data.htm">
+          Robert Shiller
+        </TextLink>
+        , a Nobel Laureate. Dividends and earnings data before 1926 are from{' '}
+        <TextLink href="https://cowles.yale.edu/sites/default/files/files/pub/mon/m03-2-all.pdf">
+          Crowles and associates
+        </TextLink>
+        . After 1926,{' '}
+        <TextLink href="https://en.wikipedia.org/wiki/S%26P_500">
+          S&P index data
+        </TextLink>{' '}
+        is used.
+      </p>
       <h2>How to Use</h2>
-      <h3>Detailed stuff about withdrawal strats</h3>
+      <p>
+        I designed FI Portfolio doctor as a way to iterate on various scenarious
+        quickly, and to view the details of each run interactively with details.
+      </p>
+      <p>
+        On the left side are your portfolio inputs. Each time you adjust any
+        inputs, just press "Calculate!" and the results data will refresh.
+      </p>
+      <h3 className="text-lg font-semibold mb-2">Expense Ratio</h3>
+      <p>
+        The expense ratio of your portfolio may vary depending on the way you
+        invest. If you're using mutual funds, it may be as high as 1%. If you're
+        using straight{' '}
+        <TextLink href="https://investor.vanguard.com/mutual-funds/profile/vtsax">
+          Vanguard index funds
+        </TextLink>
+        , it may be as low as 0.04%. Personally, I use{' '}
+        <TextLink href="https://www.betterment.com/">Betterment</TextLink>,
+        which charges 0.25% in exchange for automating global diversification
+        according to{' '}
+        <TextLink href="https://en.wikipedia.org/wiki/Modern_portfolio_theory">
+          modern portfolio theory
+        </TextLink>
+        .
+      </p>
+      <h3 className="text-lg font-semibold mb-2">Simulation Length</h3>
+      <p>
+        Adjust this number for the planned length of your retirement. The longer
+        the retirement length, the fewer cycles we can run against the available
+        historical data. If you're an early retiree, this number might be
+        something like 60 years, which allows for 90 different simulated cycles
+        of retirement (as of 2021).
+      </p>
+      <h3 className="text-lg font-semibold mb-2">Withdrawals</h3>
+      <p>
+        Other than your starting balance, your withdrawal strategy can make the
+        biggest impact on your portfolio's health.
+      </p>
+      <p>
+        <b className="text-base font-bold">Fixed -</b> The 4% rule is a popular
+        guideline to start with. According to{' '}
+        <TextLink href="https://en.wikipedia.org/wiki/William_Bengen">
+          this guideline
+        </TextLink>
+        , if you withdraw a fixed 4% of your starting portfolio, adjusted for
+        inflation, you have a high chance of success across a range of
+        scenarios. So, if your starting portfolio is $1M, you would withdrawl
+        $40,000 inflation-adjusted dollars annually for the duration of your
+        retirement.
+      </p>
+      <p>
+        <b className="text-base font-bold">Percent of Portfolio -</b> Another
+        option to is to dynamically adjust your portfolio based on market
+        performance. In other words, the better the market does, the more you
+        withdraw, and vice versa.
+      </p>
+      <p>
+        This withdrawal method is the the safest - you won't find a single
+        failure in any scenario! This is because you can only ever spend a
+        fraction of your portfolio! You also have the potential to spend the
+        most with this method - as your portfolio grows, so does your spending.
+        However, if you have no way to support very low spend years, this method
+        isn't as practical.
+      </p>
+      <p>
+        <b className="text-base font-bold">Clamped Percent of Portfolio -</b> My
+        favorite plan for retirement spending is a hybrid of the above two
+        rules, a{' '}
+        <TextLink href="https://advisors.vanguard.com/insights/article/spendingguidelinestohelpeaseretireesmarketworries">
+          dynamic spending
+        </TextLink>{' '}
+        approach. With this method, you set a ceiling and a floor for spending
+        each year, and allow market performance to dictate where your spending
+        falls on the scale. This way, you don't have to worry about withdrawals
+        below your minimum projected expenses, but you can also spend more on
+        good years than you would with a fixed strategy. This reduces the odds
+        of failure as well as reducing the odds of having an enormous nest egg
+        late in your life.
+      </p>
+      <h3 className="text-lg font-semibold mb-2">
+        Withdrawal Delays and Deposits
+      </h3>
+      <p>
+        You can further fine tune your inputs by specifying a period to delay
+        withdrawls. If you are nearing retirement and are not happy with your
+        portfolio health at your given inputs, you can try delaying retirement
+        for a few years to see how much closer it can get you.
+      </p>
+      <p>
+        Additionally, you can account for deposits you know you'll be making the
+        future. Perhaps you're expecting to collect Social Security 10 years
+        into your retirement, or perhaps you know you'll have some income from a
+        side-gig.
+      </p>
+      <p>
+        If you want to have a bit of fun, you can even use it as an investment
+        calculator by{' '}
+        <TextLink href="http://fiportfoliodoc.com/simulator?deposits=%5B%7B%22amount%22%3A2400%2C%22startYearIdx%22%3A1%2C%22endYearIdx%22%3A60%7D%5D&equitiesRatio=0.9&investmentExpenseRatio=0.0025&simulationMethod=Historical%20Data&simulationYearsLength=60&startBalance=100000&withdrawalMethod=1&withdrawalStartIdx=100&withdrawalStaticAmount=40000">
+          delaying withdrawals indefinitely and setting periodic
+        </TextLink>{' '}
+        deposits instead!
+      </p>
+      <h3 className="text-lg font-semibold mb-2">Results</h3>
+      <p>
+        On the right, you'll see the results of your current simulation, which
+        includes a graph and various statistics.
+      </p>
+      <p>
+        <b className="text-base font-bold">All Cycles View -</b> In this view,
+        you'll see detailed lines in the graph which show each simulated cycle's
+        portfolio ending balance based on your inputs. However and click around
+        on the graph to view the details of each cycle and year.
+      </p>
+      <p>
+        A table with the selected cycle's view shows up below the graph, which
+        shows you ending balances, withdrawals, deposits, as well as notable
+        events during each period. If you're interested in a cycle starting on a
+        particular year (say, right before the great depression), you can select
+        it in the blank table (while no other cycle is selected).
+      </p>
+      <p>
+        <b className="text-base font-bold">Zoom Cycle View -</b> Some of the
+        lower and median balance cycles are a bit dwarfed by the cycles that did
+        exceedingly well (hurray for compounding interest! 💸) so it is hard to
+        see the minutia. To remedy this, select he cycle you want to drill down
+        to and select the "Zoom Cycle" view.
+      </p>
+      <p>
+        <b className="text-base font-bold">Quantiles View -</b> This view will
+        give you a bird's eye view of each portfolio's performance that's a bit
+        cleaner, but less detailed than the all cycles view. 80% of cycles lie
+        between the top and bottom lines (90th and 10th percentiles). The middle
+        line is the "median" case (50th percentile).
+      </p>
+      <p>
+        <b className="text-base font-bold">Portfolio Health -</b> This is
+        ultimately the most important section, the health of your portfolio, as
+        diagnosed by FI Portfolio Doctor 👨‍⚕️! If the large majority of the
+        simulations end in success, you can consider your inputs able to
+        accomidate most historical circumstances.
+      </p>
+      <p>
+        Don't forget to consider the amount of cycles with low ending balances
+        (inflation-adjusted ending balance less than half the original balance)
+        and high ending balances (inflation-adjusted ending balance more than 3
+        times the original balance). If enough of your balances end precariously
+        low, you may want to consider tweaking your inputs to be a bit safer.
+        Likewise, if you have many very high ending balances and you'd rather
+        use your money during your lifespan, you can consider being more liberal
+        with your spending.
+      </p>
+      <h2>Share, Save, Download</h2>
+      <p>
+        You can share, save, and download all of your results right from the
+        results screen.
+      </p>
+      <p>
+        Press the share button to generate a link which contains all of your
+        input parameters. You can either share this with anyone else to show off
+        your portfolio run, or you can save the link for future reference and
+        rerun it any time by pasting it into the browser.
+      </p>
+      <p>
+        If you want to see the details behind the cycles and calculations made
+        in the simulation, you can click download, which returns a CSV file with
+        all of the data.
+      </p>
+      <h2>What about...</h2>
     </div>
   );
 }
