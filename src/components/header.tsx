@@ -38,7 +38,7 @@ export default function Header({ menuOpen, handleMenuOpen }: Props) {
       <div className="flex items-center justify-between md:h-16">
         <div className="w-full justify-between flex flex-col md:flex-row md:items-center">
           <div className="flex justify-between">
-            <Link href="/">
+            <Link href="/simulator">
               <a className="px-3 py-2 rounded-md text-3xl font-medium text-gray-900">
                 <span className="flex flex-row items-center">
                   <img
@@ -47,7 +47,7 @@ export default function Header({ menuOpen, handleMenuOpen }: Props) {
                   />
                   <span className="ml-2 hidden sm:inline-block">
                     {' '}
-                    Portfolio Doctor
+                    FI Portfolio Doctor
                   </span>
                 </span>
               </a>
@@ -92,13 +92,13 @@ export default function Header({ menuOpen, handleMenuOpen }: Props) {
               >
                 Simulator
               </HeaderLink>
-              <HeaderLink
+              {/* <HeaderLink
                 href="/blog/"
                 isMobile={false}
                 isActive={router.asPath.match(/(^\/blog)/i)?.length > 0}
               >
                 Blog
-              </HeaderLink>
+              </HeaderLink> */}
               <HeaderLink
                 href="/about/"
                 isMobile={false}
@@ -152,13 +152,13 @@ export default function Header({ menuOpen, handleMenuOpen }: Props) {
               >
                 Simulator
               </HeaderLink>
-              <HeaderLink
+              {/* <HeaderLink
                 href="/blog/"
                 isMobile={true}
                 isActive={router.asPath.match(/(^\/blog)/i)?.length > 0}
               >
                 Blog
-              </HeaderLink>
+              </HeaderLink> */}
               <HeaderLink
                 href="/about/"
                 isMobile={true}

@@ -1,16 +1,63 @@
 import React from 'react';
 import SEO from '../components/seo';
 import TextLink from '../components/text-link';
+import { baseUrl } from '../utilities/constants';
 
+// TODO: create a nav section for this page and a way to link to each (so I can link from simulator too)
+
+const aboutContents = [
+  { depth: 1, text: 'How It Works' },
+  { depth: 1, text: 'Portfolio Risk Management' },
+  { depth: 1, text: 'What about Inflation' },
+  { depth: 1, text: 'Historical Data Used' },
+  { depth: 1, text: 'How to Use' },
+  { depth: 2, text: 'Expense Ratio' },
+  { depth: 2, text: 'Simulation Length' },
+  { depth: 2, text: 'Withdrawals' },
+  { depth: 2, text: 'Withdrawal Delays and Deposits' },
+  { depth: 2, text: 'Results' },
+  { depth: 1, text: 'Share, Save, Download' }
+];
+function getTitleLink(title: string) {
+  title = title.split(' ').join('-');
+  title = title.split(',').join('');
+  return title;
+}
 export default function About() {
+  function tableOfContents() {
+    return aboutContents.map((item) => {
+      const depthClass = item.depth > 1 ? `ml-${2 * item.depth}` : '';
+      return (
+        <a
+          key={item.text}
+          href={`${baseUrl}/about#${getTitleLink(item.text)}`}
+          className={depthClass}
+        >
+          {item.text}
+        </a>
+      );
+    });
+  }
+  function getLinkHeader(idx: number) {
+    const item = aboutContents[idx];
+    return item.depth === 1 ? (
+      <h2 id={getTitleLink(item.text)}>{item.text}</h2>
+    ) : (
+      <h3 id={getTitleLink(item.text)} className="text-lg font-semibold mb-2">
+        {item.text}
+      </h3>
+    );
+  }
+  function headerLink() {}
   return (
     <div>
       <SEO
         title="About - FI Portfolio Doctor"
         description="An app for projecting portfolio performance"
       />
+      <div className="inline-flex flex-col">{tableOfContents()}</div>
       <h1 className="mt-20 text-center">About FI Portfolio Doctor</h1>
-      <p>
+      <p className="mt-14">
         Hi! I'm <TextLink href="https://dlibin.net/">Danny Libin</TextLink>, and
         I built this app to help me understand the mechanics behind using a
         portfolio to fund financial independence and retirement. I wanted clean,
@@ -31,7 +78,7 @@ export default function About() {
         healthy portfolio should be able to weather most of the worst case
         scenarios experienced in the history of the market.
       </p>
-      <h2>How it Works</h2>
+      {getLinkHeader(0)}
       <blockquote className="mx-4 py-2 px-4 border-l-4 border-green-500 mb-6">
         <p className="mb-4">
           Past performance is no guarantee of future results.
@@ -41,12 +88,12 @@ export default function About() {
       <p>
         If we're using historical data to determine our success rates, and we
         know past performance is no guarentee of future results, how does this
-        even work?
+        even work?!
       </p>
       <p>
-        When it comes to any sort of stock market simulation, especially in the
-        long term, we can't expect any sort of guarantees. The name of the game
-        is risk management, which is where the historical data comes in.
+        When it comes to any stock market simulation, especially in the long
+        term, we can't expect any sort of guarantees. The name of the game is
+        risk management, which is where the historical data comes in.
       </p>
       <p>
         This simulator takes all available historical data and runs the length
@@ -62,7 +109,7 @@ export default function About() {
           ?
         </li>
         <li>
-          What about if I had experience the{' '}
+          What about if I had experienced the{' '}
           <TextLink href="https://en.wikipedia.org/wiki/Dot-com_bubble">
             Dot-com bubble
           </TextLink>{' '}
@@ -73,9 +120,9 @@ export default function About() {
           How often would I end up with a massive surplus at the end of my life?
         </li>
       </ul>
-      <h2>Portfolio Risk Management</h2>
+      {getLinkHeader(1)}
       <p>
-        Regardless of how many retirment cycles we simulate, we can never
+        Regardless of how many retirement cycles we simulate, we can never
         eliminate risk completely. However, we can develop a familiarity with
         the various methods we have at our disposal for risk management.
       </p>
@@ -86,10 +133,10 @@ export default function About() {
         </TextLink>{' '}
         famously produced the concept known as the "safe withdrawal rate". They
         used a similar simulation to determine the maximum withdrawal rate that
-        avoids portfolio failure during a 30 year period. This produced the "4%
-        rule", which became a useful rule of thumb for retirement simulation. So
-        if you had a $1M portfolio, you could safely withdrawal 4%, $40,000,
-        annually with minimal risk of portfolio failure.
+        avoids most portfolio failures during a 30 year period. This produced
+        the "4% rule", which became a useful rule of thumb for retirement
+        simulation. So if you had a $1M portfolio, you could safely withdrawal
+        4%, $40,000, annually with minimal risk of portfolio failure.
       </p>
       <p>
         However, things get a bit dicier for early retirees. The longer you
@@ -97,13 +144,14 @@ export default function About() {
         of the results, which you can see by the gradual divergence of the
         portfolio ending balances in this simulator.
       </p>
-      <p>Luckily, we have plenty of other options to manage risk:</p>
+      <p>Luckily, we have plenty of options to manage risk:</p>
       <ul>
-        <li>Start with a higher portfolio</li>
+        <li>Start with a higher portfolio (the obvious choice...)</li>
+        <li>Delay your retirement</li>
         <li>Reduce your withdrawal percentage</li>
         <li>
           Adjust your annual withdrawals based on market performance rather than
-          continuously withdrawing the same (inflation-adjust) amount
+          continuously withdrawing the same (inflation-adjusted) amount
         </li>
         <li>
           Produce any kind of income throughout retirement to reduce withdrawals
@@ -114,10 +162,10 @@ export default function About() {
         A healthy portfolio is really a combination of the portfolio itself and
         the withdrawal strategy.
       </p>
-      <h2>What about Inflation?</h2>
+      {getLinkHeader(2)}
       <p>
         Over a long time horizon, inflation is an extremely important
-        consideration in simulations and is easy to underestimate.
+        consideration in simulations and it is easy to underestimate.
       </p>
       <p>
         There are several ways to track inflation. FI Portfolio Doctor measures
@@ -143,7 +191,7 @@ export default function About() {
         inflation. However, you can uncheck the inflation-adjustment checkbox
         for fun to see some really high numbers.
       </p>
-      <h2>Historical Data Used</h2>
+      {getLinkHeader(3)}
       <p>
         The historical data used in FI Porftolio Doctor is compiled by{' '}
         <TextLink href="http://www.econ.yale.edu/~shiller/data.htm">
@@ -159,7 +207,24 @@ export default function About() {
         </TextLink>{' '}
         is used.
       </p>
-      <h2>How to Use</h2>
+      <h3 className="text-lg font-semibold mb-2">
+        What about international data? I'm globally diversified!
+      </h3>
+      <p>
+        US market data is the most robust available, especially going back as
+        far as Shiller's data does, so that's what FI Portfolio Doctor uses.
+        However, global diversification would actually produce a reduced asset
+        correlation, and thus has the potential to produce equal or better
+        results with less risk (according to{' '}
+        <TextLink href="https://en.wikipedia.org/wiki/Modern_portfolio_theory">
+          modern portfolio theory
+        </TextLink>
+        ). As such, if you're efficiently globally diversified, particularly
+        among less correlated asset classes (emerging markets, etc), your actual
+        portfolio may well do better than those based strictly on US data, at
+        least in terms of volatility.
+      </p>
+      {getLinkHeader(4)}
       <p>
         I designed FI Portfolio doctor as a way to iterate on various scenarious
         quickly, and to view the details of each run interactively with details.
@@ -168,7 +233,7 @@ export default function About() {
         On the left side are your portfolio inputs. Each time you adjust any
         inputs, just press "Calculate!" and the results data will refresh.
       </p>
-      <h3 className="text-lg font-semibold mb-2">Expense Ratio</h3>
+      {getLinkHeader(5)}
       <p>
         The expense ratio of your portfolio may vary depending on the way you
         invest. If you're using mutual funds, it may be as high as 1%. If you're
@@ -185,7 +250,7 @@ export default function About() {
         </TextLink>
         .
       </p>
-      <h3 className="text-lg font-semibold mb-2">Simulation Length</h3>
+      {getLinkHeader(6)}
       <p>
         Adjust this number for the planned length of your retirement. The longer
         the retirement length, the fewer cycles we can run against the available
@@ -193,18 +258,19 @@ export default function About() {
         something like 60 years, which allows for 90 different simulated cycles
         of retirement (as of 2021).
       </p>
-      <h3 className="text-lg font-semibold mb-2">Withdrawals</h3>
+      {getLinkHeader(7)}
       <p>
         Other than your starting balance, your withdrawal strategy can make the
-        biggest impact on your portfolio's health.
+        biggest impact on your portfolio's health, and there are many
+        strategies.
       </p>
       <p>
-        <b className="text-base font-bold">Fixed -</b> The 4% rule is a popular
-        guideline to start with. According to{' '}
+        <b className="text-base font-bold">Fixed -</b> The{' '}
         <TextLink href="https://en.wikipedia.org/wiki/William_Bengen">
-          this guideline
-        </TextLink>
-        , if you withdraw a fixed 4% of your starting portfolio, adjusted for
+          4% rule
+        </TextLink>{' '}
+        is a popular guideline to start with. According to this guideline , if
+        you withdraw a fixed 4% of your starting portfolio, adjusted for
         inflation, you have a high chance of success across a range of
         scenarios. So, if your starting portfolio is $1M, you would withdrawl
         $40,000 inflation-adjusted dollars annually for the duration of your
@@ -219,7 +285,7 @@ export default function About() {
       <p>
         This withdrawal method is the the safest - you won't find a single
         failure in any scenario! This is because you can only ever spend a
-        fraction of your portfolio! You also have the potential to spend the
+        fraction of your portfolio. You also have the potential to spend the
         most with this method - as your portfolio grows, so does your spending.
         However, if you have no way to support very low spend years, this method
         isn't as practical.
@@ -239,9 +305,25 @@ export default function About() {
         of failure as well as reducing the odds of having an enormous nest egg
         late in your life.
       </p>
-      <h3 className="text-lg font-semibold mb-2">
-        Withdrawal Delays and Deposits
-      </h3>
+      <p>
+        If you're not happy with your portfolio health, try tinkering with your
+        minimum spend to get a feel for how much spending flexibility can help.
+        Even small reductions in the minimum can cause dramatic improvements.
+        See the difference a{' '}
+        <TextLink
+          href={`${baseUrl}/simulator?equitiesRatio=0.9&investmentExpenseRatio=0.0025&simulationMethod=Historical%20Data&simulationYearsLength=60&startBalance=1000000&withdrawalCeiling=60000&withdrawalFloor=40000&withdrawalMethod=3&withdrawalPercent=0.04&withdrawalStartIdx=1`}
+        >
+          $40,000
+        </TextLink>{' '}
+        and a{' '}
+        <TextLink
+          href={`${baseUrl}/simulator?equitiesRatio=0.9&investmentExpenseRatio=0.0025&simulationMethod=Historical%20Data&simulationYearsLength=60&startBalance=1000000&withdrawalCeiling=60000&withdrawalFloor=30000&withdrawalMethod=3&withdrawalPercent=0.04&withdrawalStartIdx=1`}
+        >
+          $30,000
+        </TextLink>{' '}
+        minimum spend can have? Neat!
+      </p>
+      {getLinkHeader(8)}
       <p>
         You can further fine tune your inputs by specifying a period to delay
         withdrawls. If you are nearing retirement and are not happy with your
@@ -252,17 +334,21 @@ export default function About() {
         Additionally, you can account for deposits you know you'll be making the
         future. Perhaps you're expecting to collect Social Security 10 years
         into your retirement, or perhaps you know you'll have some income from a
-        side-gig.
+        side-gig or part-time work.
       </p>
       <p>
         If you want to have a bit of fun, you can even use it as an investment
         calculator by{' '}
-        <TextLink href="http://fiportfoliodoc.com/simulator?deposits=%5B%7B%22amount%22%3A2400%2C%22startYearIdx%22%3A1%2C%22endYearIdx%22%3A60%7D%5D&equitiesRatio=0.9&investmentExpenseRatio=0.0025&simulationMethod=Historical%20Data&simulationYearsLength=60&startBalance=100000&withdrawalMethod=1&withdrawalStartIdx=100&withdrawalStaticAmount=40000">
+        <TextLink
+          href={`${baseUrl}/simulator?deposits=%5B%7B%22amount%22%3A2400%2C%22startYearIdx%22%3A1%2C%22endYearIdx%22%3A60%7D%5D&equitiesRatio=0.9&investmentExpenseRatio=0.0025&simulationMethod=Historical%20Data&simulationYearsLength=60&startBalance=100000&withdrawalMethod=1&withdrawalStartIdx=100&withdrawalStaticAmount=40000`}
+        >
           delaying withdrawals indefinitely and setting periodic
         </TextLink>{' '}
-        deposits instead!
+        deposits instead! This gives you a more realistic range of possible
+        results based on historical data rather than the static percent most
+        investment calculators use.
       </p>
-      <h3 className="text-lg font-semibold mb-2">Results</h3>
+      {getLinkHeader(9)}
       <p>
         On the right, you'll see the results of your current simulation, which
         includes a graph and various statistics.
@@ -270,8 +356,8 @@ export default function About() {
       <p>
         <b className="text-base font-bold">All Cycles View -</b> In this view,
         you'll see detailed lines in the graph which show each simulated cycle's
-        portfolio ending balance based on your inputs. However and click around
-        on the graph to view the details of each cycle and year.
+        portfolio ending balance based on your inputs. Hover and click around on
+        the graph to view the details of each cycle and year.
       </p>
       <p>
         A table with the selected cycle's view shows up below the graph, which
@@ -311,7 +397,7 @@ export default function About() {
         use your money during your lifespan, you can consider being more liberal
         with your spending.
       </p>
-      <h2>Share, Save, Download</h2>
+      {getLinkHeader(10)}
       <p>
         You can share, save, and download all of your results right from the
         results screen.
@@ -319,15 +405,15 @@ export default function About() {
       <p>
         Press the share button to generate a link which contains all of your
         input parameters. You can either share this with anyone else to show off
-        your portfolio run, or you can save the link for future reference and
-        rerun it any time by pasting it into the browser.
+        your portfolio run, or you can save the link or bookmark it for future
+        reference and rerun it any time by clicking the link or pasting it into
+        the browser.
       </p>
       <p>
         If you want to see the details behind the cycles and calculations made
         in the simulation, you can click download, which returns a CSV file with
         all of the data.
       </p>
-      <h2>What about...</h2>
     </div>
   );
 }
