@@ -2,6 +2,7 @@ import React from 'react';
 import SEO from '../components/seo';
 import TextLink from '../components/text-link';
 import { baseUrl } from '../utilities/constants';
+import { clsx } from '../utilities/util';
 
 // TODO: create a nav section for this page and a way to link to each (so I can link from simulator too)
 
@@ -21,8 +22,9 @@ const aboutContents = [
 function getTitleLink(title: string) {
   title = title.split(' ').join('-');
   title = title.split(',').join('');
-  return title;
+  return title.toLowerCase();
 }
+// TODO: align shit and lowercase letters in link
 export default function About() {
   function tableOfContents() {
     return aboutContents.map((item) => {
@@ -31,7 +33,10 @@ export default function About() {
         <a
           key={item.text}
           href={`${baseUrl}/about#${getTitleLink(item.text)}`}
-          className={depthClass}
+          className={clsx(
+            depthClass,
+            'text-base text-gray-900 hover:text-green-500 hover:border-transparent transition duration-200 ease-in-out mt-2'
+          )}
         >
           {item.text}
         </a>
@@ -48,14 +53,12 @@ export default function About() {
       </h3>
     );
   }
-  function headerLink() {}
   return (
     <div>
       <SEO
         title="About - FI Portfolio Doctor"
         description="An app for projecting portfolio performance"
       />
-      <div className="inline-flex flex-col">{tableOfContents()}</div>
       <h1 className="mt-20 text-center">About FI Portfolio Doctor</h1>
       <p className="mt-14">
         Hi! I'm <TextLink href="https://dlibin.net/">Danny Libin</TextLink>, and
@@ -78,6 +81,14 @@ export default function About() {
         healthy portfolio should be able to weather most of the worst case
         scenarios experienced in the history of the market.
       </p>
+      <div className="flex">
+        <nav className="inline-flex flex-col items-start mx-auto border border-gray-500 p-10 rounded-sm">
+          <h3 className="font-semibold uppercase text-base tracking-wider mb-2">
+            Table of Contents
+          </h3>
+          {tableOfContents()}
+        </nav>
+      </div>
       {getLinkHeader(0)}
       <blockquote className="mx-4 py-2 px-4 border-l-4 border-green-500 mb-6">
         <p className="mb-4">
