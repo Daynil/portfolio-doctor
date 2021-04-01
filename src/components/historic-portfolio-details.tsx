@@ -1,5 +1,6 @@
 import { format as numFormat } from 'd3';
 import FileSaver from 'file-saver';
+import Link from 'next/link';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   CycleStats,
@@ -19,6 +20,7 @@ import { HistoricCyclesChart } from './charts/historic-cycles-chart';
 import { QuantilesChart } from './charts/quantiles-chart';
 import CopyIcon from './svg/copy-icon';
 import DownloadIcon from './svg/dl-icon';
+import QuestionIcon from './svg/question-icon';
 import ShareIcon from './svg/share-icon';
 import TextLink from './text-link';
 
@@ -489,6 +491,9 @@ export function HistoricPortfolioDetails({
                 <div className="text-gray-900">
                   Share this portfolio run with this URL or just bookmark it for
                   future reference
+                  <Link href="/about#share-save-download">
+                    <QuestionIcon className="w-5 h-5 inline-block ml-1 text-gray-500 hover:text-gray-400 transition-colors duration-100 cursor-pointer" />
+                  </Link>
                 </div>
                 <div className="flex mt-2">
                   <input
@@ -532,8 +537,13 @@ export function HistoricPortfolioDetails({
           }}
           className="rounded-md pb-4 border-2 border-gray-300 m-6"
         >
-          <div className="bg-gray-300 text-gray-700 font-semibold py-1 text-center w-full">
-            Portfolio Health
+          <div className="flex items-top bg-gray-300">
+            <div className="text-gray-700 font-semibold py-1 text-center w-full">
+              Portfolio Health
+            </div>
+            <Link href="/about#results">
+              <QuestionIcon className="w-5 h-5 mr-1 mt-1 text-gray-500 hover:text-gray-400 transition-colors duration-100 cursor-pointer" />
+            </Link>
           </div>
           <div className="flex items-center justify-center px-2 text-center">
             <div className="text-center">

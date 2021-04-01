@@ -4,27 +4,27 @@ import TextLink from '../components/text-link';
 import { baseUrl } from '../utilities/constants';
 import { clsx } from '../utilities/util';
 
-// TODO: create a nav section for this page and a way to link to each (so I can link from simulator too)
-
 const aboutContents = [
   { depth: 1, text: 'How It Works' },
   { depth: 1, text: 'Portfolio Risk Management' },
   { depth: 1, text: 'What about Inflation' },
   { depth: 1, text: 'Historical Data Used' },
   { depth: 1, text: 'How to Use' },
+  { depth: 2, text: 'Stock Ratio' },
   { depth: 2, text: 'Expense Ratio' },
   { depth: 2, text: 'Simulation Length' },
   { depth: 2, text: 'Withdrawals' },
   { depth: 2, text: 'Withdrawal Delays and Deposits' },
   { depth: 2, text: 'Results' },
-  { depth: 1, text: 'Share, Save, Download' }
+  { depth: 1, text: 'Share, Save, Download' },
+  { depth: 1, text: 'Disclaimer' }
 ];
 function getTitleLink(title: string) {
   title = title.split(' ').join('-');
   title = title.split(',').join('');
   return title.toLowerCase();
 }
-// TODO: align shit and lowercase letters in link
+
 export default function About() {
   function tableOfContents() {
     return aboutContents.map((item) => {
@@ -246,6 +246,10 @@ export default function About() {
       </p>
       {getLinkHeader(5)}
       <p>
+        The stock ratio is the amount of stocks versus bonds in your portfolio.
+      </p>
+      {getLinkHeader(6)}
+      <p>
         The expense ratio of your portfolio may vary depending on the way you
         invest. If you're using mutual funds, it may be as high as 1%. If you're
         using straight{' '}
@@ -261,7 +265,7 @@ export default function About() {
         </TextLink>
         .
       </p>
-      {getLinkHeader(6)}
+      {getLinkHeader(7)}
       <p>
         Adjust this number for the planned length of your retirement. The longer
         the retirement length, the fewer cycles we can run against the available
@@ -269,7 +273,7 @@ export default function About() {
         something like 60 years, which allows for 90 different simulated cycles
         of retirement (as of 2021).
       </p>
-      {getLinkHeader(7)}
+      {getLinkHeader(8)}
       <p>
         Other than your starting balance, your withdrawal strategy can make the
         biggest impact on your portfolio's health, and there are many
@@ -334,7 +338,7 @@ export default function About() {
         </TextLink>{' '}
         minimum spend can have? Neat!
       </p>
-      {getLinkHeader(8)}
+      {getLinkHeader(9)}
       <p>
         You can further fine tune your inputs by specifying a period to delay
         withdrawls. If you are nearing retirement and are not happy with your
@@ -359,7 +363,7 @@ export default function About() {
         results based on historical data rather than the static percent most
         investment calculators use.
       </p>
-      {getLinkHeader(9)}
+      {getLinkHeader(10)}
       <p>
         On the right, you'll see the results of your current simulation, which
         includes a graph and various statistics.
@@ -408,7 +412,7 @@ export default function About() {
         use your money during your lifespan, you can consider being more liberal
         with your spending.
       </p>
-      {getLinkHeader(10)}
+      {getLinkHeader(11)}
       <p>
         You can share, save, and download all of your results right from the
         results screen.
@@ -424,6 +428,14 @@ export default function About() {
         If you want to see the details behind the cycles and calculations made
         in the simulation, you can click download, which returns a CSV file with
         all of the data.
+      </p>
+      {getLinkHeader(12)}
+      <p>
+        Using historical data to model future returns means we are assuming that
+        the future performance will look at least somewhat like the past. There
+        are no guarentees that will be the case, so plan accordingly. Use this
+        calculator to get a general idea of what a retirement may look like and
+        not as financial advice.
       </p>
     </div>
   );

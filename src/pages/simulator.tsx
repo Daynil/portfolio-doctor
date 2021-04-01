@@ -1,6 +1,7 @@
 import { format as numFormat } from 'd3-format';
 import cloneDeep from 'lodash.clonedeep';
 import isEqual from 'lodash.isequal';
+import Link from 'next/link';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import {
   HistoricPortfolioDetails,
@@ -9,6 +10,7 @@ import {
 import { MonteCarloPortfolioDetails } from '../components/monte-carlo-portfolio-details';
 import RadioInput from '../components/radio-input';
 import SEO from '../components/seo';
+import QuestionIcon from '../components/svg/question-icon';
 import TextInput from '../components/text-input';
 import {
   CyclePortfolio,
@@ -127,6 +129,11 @@ export default function Simulator() {
     // Always trigger calculation on landing once data is parsed
     if (marketData.length) calculatePortfolio();
   }, [marketData]);
+
+  useEffect(() => {
+    // Scroll back to top on recalcs to highlight chart
+    window.scrollTo(0, 0);
+  }, [portfolio]);
 
   function calculatePortfolio() {
     let newPortfolioOptions = { ...defaultPortfolioOptions };
@@ -541,9 +548,14 @@ export default function Simulator() {
               />
             </div>
             <div className="flex flex-col mt-4">
-              <label className="form-label" htmlFor="equitiesRatio">
-                Stock Ratio
-              </label>
+              <div className="flex items-top">
+                <label className="form-label" htmlFor="equitiesRatio">
+                  Stock Ratio
+                </label>
+                <Link href="/about#stock-ratio">
+                  <QuestionIcon className="w-5 h-5 text-gray-500 hover:text-gray-400 transition-colors duration-100 cursor-pointer" />
+                </Link>
+              </div>
               <TextInput
                 symbolSuffix="%"
                 className="w-full"
@@ -554,9 +566,14 @@ export default function Simulator() {
               />
             </div>
             <div className="flex flex-col mt-4">
-              <label className="form-label" htmlFor="expenseRatio">
-                Expense Ratio
-              </label>
+              <div className="flex items-top">
+                <label className="form-label" htmlFor="expenseRatio">
+                  Expense Ratio
+                </label>
+                <Link href="/about#expense-ratio">
+                  <QuestionIcon className="w-5 h-5 ml-1 text-gray-500 hover:text-gray-400 transition-colors duration-100 cursor-pointer" />
+                </Link>
+              </div>
               <TextInput
                 symbolSuffix="%"
                 className="w-full"
@@ -567,9 +584,14 @@ export default function Simulator() {
               />
             </div>
             <div className="flex flex-col mt-4">
-              <label className="form-label" htmlFor="simLength">
-                Simulation Length (years)
-              </label>
+              <div className="flex items-top">
+                <label className="form-label" htmlFor="simLength">
+                  Simulation Length (years)
+                </label>
+                <Link href="/about#simulation-length">
+                  <QuestionIcon className="w-5 h-5 ml-1 text-gray-500 hover:text-gray-400 transition-colors duration-100 cursor-pointer" />
+                </Link>
+              </div>
               <TextInput
                 name="simLength"
                 type="number"
@@ -579,9 +601,14 @@ export default function Simulator() {
                 ref={refSimLength}
               />
             </div>
-            <h3 className="text-base mt-6 tracking-wider text-gray-700 font-semibold border-solid border-b-2 border-gray-300">
-              Withdrawals
-            </h3>
+            <div className="flex items-top mt-6 border-solid border-b-2 border-gray-300">
+              <h3 className="text-base tracking-wider text-gray-700 font-semibold">
+                Withdrawals
+              </h3>
+              <Link href="/about#withdrawals">
+                <QuestionIcon className="w-5 h-5 ml-1 text-gray-500 hover:text-gray-400 transition-colors duration-100 cursor-pointer" />
+              </Link>
+            </div>
             <div className="text-gray-800 mt-2">
               <label className="form-label">Method</label>
               <div className="ml-2">
@@ -669,9 +696,14 @@ export default function Simulator() {
                 />
               </div>
             )}
-            <h3 className="text-base mt-6 tracking-wider text-gray-700 font-semibold border-solid border-b-2 border-gray-300">
-              Deposits
-            </h3>
+            <div className="flex items-top mt-6 border-solid border-b-2 border-gray-300">
+              <h3 className="text-base tracking-wider text-gray-700 font-semibold">
+                Deposits
+              </h3>
+              <Link href="/about#withdrawal-delays-and-deposits">
+                <QuestionIcon className="w-5 h-5 ml-1 text-gray-500 hover:text-gray-400 transition-colors duration-100 cursor-pointer" />
+              </Link>
+            </div>
             <div className="flex flex-col mt-3">
               {!deposits.length ? (
                 <div className="text-sm italic text-gray-400">No deposits</div>
