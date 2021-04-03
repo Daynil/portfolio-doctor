@@ -7,11 +7,11 @@ export default class MyDocument extends Document {
         <Head />
         <body>
           {/* Global site tag (gtag.js) - Google Analytics */}
-          {/* {process.env.NODE_ENV !== 'production' ? null : (
+          {process.env.NODE_ENV !== 'production' ? null : (
             <script
               async
-              src="https://www.googletagmanager.com/gtag/js?id=G-KEMRWMJM34"
-            />
+              src="https://www.googletagmanager.com/gtag/js?id=G-68XXSCNJ57"
+            ></script>
           )}
           {process.env.NODE_ENV !== 'production' ? null : (
             <script
@@ -21,11 +21,11 @@ export default class MyDocument extends Document {
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
 
-  gtag('config', 'G-KEMRWMJM34');
+  gtag('config', 'G-68XXSCNJ57');
           `
               }}
             />
-          )} */}
+          )}
           <Main />
           <NextScript />
         </body>

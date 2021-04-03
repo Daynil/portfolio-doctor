@@ -342,13 +342,13 @@ export default function About() {
         Even small reductions in the minimum can cause dramatic improvements.
         See the difference a{' '}
         <TextLink
-          href={`${baseUrl}/simulator?equitiesRatio=0.9&investmentExpenseRatio=0.0025&simulationMethod=Historical%20Data&simulationYearsLength=60&startBalance=1000000&withdrawalCeiling=60000&withdrawalFloor=40000&withdrawalMethod=3&withdrawalPercent=0.04&withdrawalStartIdx=1`}
+          href={`/simulator?equitiesRatio=0.9&investmentExpenseRatio=0.0025&simulationMethod=Historical%20Data&simulationYearsLength=60&startBalance=1000000&withdrawalCeiling=60000&withdrawalFloor=40000&withdrawalMethod=3&withdrawalPercent=0.04&withdrawalStartIdx=1`}
         >
           $40,000
         </TextLink>{' '}
         and a{' '}
         <TextLink
-          href={`${baseUrl}/simulator?equitiesRatio=0.9&investmentExpenseRatio=0.0025&simulationMethod=Historical%20Data&simulationYearsLength=60&startBalance=1000000&withdrawalCeiling=60000&withdrawalFloor=30000&withdrawalMethod=3&withdrawalPercent=0.04&withdrawalStartIdx=1`}
+          href={`/simulator?equitiesRatio=0.9&investmentExpenseRatio=0.0025&simulationMethod=Historical%20Data&simulationYearsLength=60&startBalance=1000000&withdrawalCeiling=60000&withdrawalFloor=30000&withdrawalMethod=3&withdrawalPercent=0.04&withdrawalStartIdx=1`}
         >
           $30,000
         </TextLink>{' '}
@@ -371,7 +371,7 @@ export default function About() {
         If you want to have a bit of fun, you can even use it as an investment
         calculator by{' '}
         <TextLink
-          href={`${baseUrl}/simulator?deposits=%5B%7B%22amount%22%3A2400%2C%22startYearIdx%22%3A1%2C%22endYearIdx%22%3A60%7D%5D&equitiesRatio=0.9&investmentExpenseRatio=0.0025&simulationMethod=Historical%20Data&simulationYearsLength=60&startBalance=100000&withdrawalMethod=1&withdrawalStartIdx=100&withdrawalStaticAmount=40000`}
+          href={`/simulator?deposits=%5B%7B%22amount%22%3A2400%2C%22startYearIdx%22%3A1%2C%22endYearIdx%22%3A60%7D%5D&equitiesRatio=0.9&investmentExpenseRatio=0.0025&simulationMethod=Historical%20Data&simulationYearsLength=60&startBalance=100000&withdrawalMethod=1&withdrawalStartIdx=100&withdrawalStaticAmount=40000`}
         >
           delaying withdrawals indefinitely and setting periodic
         </TextLink>{' '}
