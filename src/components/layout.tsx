@@ -32,8 +32,8 @@ const Layout = ({ children }: Props) => {
         >
           <main>{children}</main>
           <footer className="text-gray-600 mt-12 pb-12">
-            © {new Date().getFullYear()} Portfolio Doctor. All Rights Reserved.
-            Created by{' '}
+            © {new Date().getFullYear()} FI Portfolio Doctor. All Rights
+            Reserved. Created by{' '}
             <TextLink href="https://dlibin.net">Danny Libin</TextLink>.
           </footer>
         </div>

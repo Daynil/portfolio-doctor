@@ -106,7 +106,7 @@ export default function UploadData() {
 
   return (
     <div>
-      <SEO title="About - Portfolio Doctor" />
+      <SEO title="About - FI Portfolio Doctor" />
       <h1 className="mt-20 text-center">Upload Custom Market Data</h1>
       <p>
         You can upload your own market data from a CSV file. The first row

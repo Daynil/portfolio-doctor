@@ -63,10 +63,26 @@ export default function About() {
       <p className="mt-14">
         Hi! I'm <TextLink href="https://dlibin.net/">Danny Libin</TextLink>, and
         I built this app to help me understand the mechanics behind using a
-        portfolio to fund financial independence and retirement. I wanted clean,
-        interactive way to view my results, and the ability to iterate on
+        portfolio to fund financial independence and retirement. I wanted a
+        clean, interactive way to view my results, and the ability to iterate on
         various scenarios quickly and easily.
       </p>
+      <div className="bg-green-200 pl-6 pr-4 pt-6 pb-2 -mx-6 mb-6 rounded-l-sm rounded-r-md text-green-900 border-l-4 border-green-600">
+        <h3 className="text-lg font-semibold mb-2">
+          Support FI Portfolio Doctor
+        </h3>
+        <p>
+          If you found FI Portfolio doctor helpful and you want to support me,
+          you can{' '}
+          <TextLink
+            className="text-green-900"
+            href="https://www.buymeacoffee.com/fiportfoliodoc"
+          >
+            buy me a coffee ☕
+          </TextLink>
+          !
+        </p>
+      </div>
       <p>
         Financial independence (FI) is the point at which your current annual
         expenditure can reasonably be supported by your current savings nest egg

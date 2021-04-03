@@ -1,10 +1,8 @@
 import React from 'react';
 
-type Props = {
-  className: string;
-};
+type Props = React.PropsWithRef<JSX.IntrinsicElements['svg']>;
 
-const LogoIcon = ({ className }: Props) => {
+const LogoIcon = ({ className, ...delegated }: Props) => {
   return (
     <svg
       width="44"
@@ -13,6 +11,7 @@ const LogoIcon = ({ className }: Props) => {
       className={className}
       id="svg3826"
       version="1.1"
+      {...delegated}
     >
       <g id="layer1" transform="translate(0,-1008.3622)">
         <path

@@ -42,10 +42,6 @@ export default function Header({ menuOpen, handleMenuOpen }: Props) {
             <Link href="/simulator">
               <a className="px-3 py-2 rounded-md text-3xl font-medium text-gray-900">
                 <span className="flex flex-row items-center">
-                  {/* <img
-                    src="/images/logo-large.png"
-                    alt="Portfolio Doctor logo"
-                  /> */}
                   <LogoIcon className="text-green-500" />
                   <span className="ml-2 hidden sm:inline-block">
                     {' '}

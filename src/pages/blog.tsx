@@ -4,7 +4,7 @@ import SEO from '../components/seo';
 export default function Blog() {
   return (
     <div>
-      <SEO title="Blog - Portfolio Doctor" />
+      <SEO title="Blog - FI Portfolio Doctor" />
       <div>No posts yet</div>
     </div>
   );

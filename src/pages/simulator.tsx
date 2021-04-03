@@ -451,7 +451,7 @@ export default function Simulator() {
     <div>
       <SEO
         title="FI Portfolio Doctor Simulator"
-        description="An app for projecting portfolio performance"
+        description="An app for projecting portfolio performance for financial independence and retirement"
       />
       <div
         className={
