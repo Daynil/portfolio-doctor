@@ -4,7 +4,7 @@ import TextLink from '../components/text-link';
 
 export default function NotFoundPage() {
   return (
-    <div>
+    <div className="md:max-w-3xl m-auto">
       <SEO title="404: Not found" />
       <h1 className="mt-20">Oh no, couldn't find this page!</h1>
       <TextLink href="/">Back to safety</TextLink>

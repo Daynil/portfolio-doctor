@@ -26,14 +26,12 @@ const Layout = ({ children }: Props) => {
       <div className="min-h-screen transition duration-200 ease-in-out border-t-4 border-green-500">
         <Header menuOpen={menuOpen} handleMenuOpen={handleMenuOpen} />
         <div
-          className={`m-auto text-gray-900 text-lg px-6 transition duration-200 ease-in-out ${
-            router.asPath !== '/simulator' ? ' md:max-w-3xl' : ''
-          }`}
+          className={`m-auto text-gray-900 text-lg px-6 transition duration-200 ease-in-out`}
         >
           <main>{children}</main>
-          <footer className="text-gray-600 mt-12 pb-12">
-            © {new Date().getFullYear()} FI Portfolio Doctor. All Rights
-            Reserved. Created by{' '}
+          <footer className="text-gray-600 mt-12 pb-12 md:max-w-3xl">
+            © {new Date().getFullYear()} Portfolio Doctor. All Rights Reserved.
+            Created by{' '}
             <TextLink href="https://dlibin.net">Danny Libin</TextLink>.
           </footer>
         </div>

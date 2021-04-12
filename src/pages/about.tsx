@@ -54,7 +54,7 @@ export default function About() {
     );
   }
   return (
-    <div>
+    <div className="md:max-w-3xl m-auto">
       <SEO
         title="About - FI Portfolio Doctor"
         description="An app for projecting portfolio performance"
