@@ -38,15 +38,8 @@ export default function SEO({
       <meta name="twitter:creator" content="Danny Libin" />
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={metaDescription} />
-      {featuredImagePath && (
-        <meta property="og:image" content={`${baseUrl}/${featuredImagePath}`} />
-      )}
-      {featuredImagePath && (
-        <meta
-          name="twitter:image"
-          content={`${baseUrl}/${featuredImagePath}`}
-        />
-      )}
+      <meta property="og:image" content={`${baseUrl}/${featuredImagePath}`} />
+      <meta name="twitter:image" content={`${baseUrl}/${featuredImagePath}`} />
     </Head>
   );
 }
