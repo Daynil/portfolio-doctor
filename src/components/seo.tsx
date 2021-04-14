@@ -26,6 +26,7 @@ export default function SEO({
     description || 'An app for projecting portfolio performance';
 
   if (!featuredImagePath) featuredImagePath = `${baseUrl}/featured-default.png`;
+  else featuredImagePath = `${baseUrl}/${featuredImagePath}`;
 
   return (
     <Head>
@@ -38,8 +39,8 @@ export default function SEO({
       <meta name="twitter:creator" content="Danny Libin" />
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={metaDescription} />
-      <meta property="og:image" content={`${baseUrl}/${featuredImagePath}`} />
-      <meta name="twitter:image" content={`${baseUrl}/${featuredImagePath}`} />
+      <meta property="og:image" content={featuredImagePath} />
+      <meta name="twitter:image" content={featuredImagePath} />
     </Head>
   );
 }
