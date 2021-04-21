@@ -67,7 +67,7 @@ export default function About() {
         clean, interactive way to view my results, and the ability to iterate on
         various scenarios quickly and easily.
       </p>
-      <div className="bg-green-200 pl-6 pr-4 pt-6 pb-2 -mx-6 mb-6 rounded-l-sm rounded-r-md text-green-900 border-l-4 border-green-600">
+      {/* <div className="bg-green-200 pl-6 pr-4 pt-6 pb-2 -mx-6 mb-6 rounded-l-sm rounded-r-md text-green-900 border-l-4 border-green-600">
         <h3 className="text-lg font-semibold mb-2">
           Support FI Portfolio Doctor
         </h3>
@@ -82,7 +82,7 @@ export default function About() {
           </TextLink>
           !
         </p>
-      </div>
+      </div> */}
       <p>
         Financial independence (FI) is the point at which your current annual
         expenditure can reasonably be supported by your current savings nest egg
