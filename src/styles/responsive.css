@@ -13,7 +13,10 @@
     width: 100%;
   }
   .lifecycle-options {
-    margin-left: 0;
+    margin: 0 !important;
+  }
+  .lifecycle-options .flex {
+    width: 100%;
   }
   .lifecycle-options .btn {
     margin-left: 0;
@@ -32,6 +35,96 @@
     width: 100%;
     margin: 0 !important;
   }
+  .portfolio-health-container {
+    width: 100%;
+  }
+  .portfolio-health-content {
+    justify-content: space-around;
+  }
+  .portfolio-stats-wrapper,
+  .portfolio-stats-table,
+  .cycle-details-wrapper,
+  .cycle-details-table {
+    width: 100%;
+  }
+}
+
+@media screen and (max-width: 992px) {
+  /* Responsive Table Styles */
+  table {
+    table-layout: auto;
+    border: 0;
+  }
+  table th,
+  table td {
+    border-left: 0 !important;
+    border-right: 0 !important;
+    border-top: 0 !important;
+  }
+  table thead,
+  .portfolio-stats-table thead tr {
+    border: none;
+    clip: rect(0 0 0 0);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    width: 1px;
+  }
+  table tr {
+    border-bottom: 3px solid #cccccc;
+    display: block;
+    padding: 0.5em;
+  }
+  table td {
+    border-bottom: 1px solid #cccccc;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-align: right !important;
+    margin-left: auto !important;
+    min-height: 30px;
+  }
+  table td::before {
+    content: attr(data-label);
+    float: left;
+    font-weight: bold;
+    padding-right: 1rem;
+  }
+  table td:last-child {
+    border-bottom: 0;
+  }
+  .portfolio-stats-table .portfolio-stats-header::before {
+    content: attr(header-label);
+  }
+  .portfolio-stats-header {
+    text-align: center;
+    width: 100%;
+    margin: 0;
+  }
+  .portfolio-stats-table td {
+    justify-content: center;
+  }
+  .portfolio-stats-table td::before {
+    padding: 0;
+  }
+  .portfolio-stats-table tbody tr:first-child {
+    height: 0;
+    padding: 0;
+    margin: 0;
+  }
+  .portfolio-stats-table td {
+    padding: 0;
+  }
+  .portfolio-stats-table thead,
+  .portfolio-stats-table thead tr.portfolio-stats-header-mobile {
+    clip: unset !important;
+    height: unset;
+    margin: unset;
+    position: unset;
+    width: unset;
+  }
 }
 
 @media screen and (max-width: 768px) {
@@ -41,9 +134,6 @@
 }
 
 @media screen and (max-width: 576px) {
-  .portfolio-health-container {
-    width: 100%;
-  }
   .portfolio-health-content {
     flex-direction: column;
   }

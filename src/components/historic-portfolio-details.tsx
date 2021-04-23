@@ -311,6 +311,7 @@ export function HistoricPortfolioDetails({
               'group-hover:bg-green-200 duration-200 text-right py-2 px-6' +
               (rowSelected ? ' bg-green-200' : '')
             }
+            data-label="Year"
           >
             {yearData.cycleYear}
           </td>
@@ -319,6 +320,7 @@ export function HistoricPortfolioDetails({
               'group-hover:bg-green-200 duration-200 text-right py-2 px-6' +
               (rowSelected ? ' bg-green-200' : '')
             }
+            data-label="Ending Balance"
           >
             {numFormat('$,.2f')(
               adjInflation ? yearData.balanceInfAdjEnd : yearData.balanceEnd
@@ -329,6 +331,7 @@ export function HistoricPortfolioDetails({
               'group-hover:bg-green-200 duration-200 text-right py-2 px-6' +
               (rowSelected ? ' bg-green-200' : '')
             }
+            data-label="Withdrawal"
           >
             {numFormat('$,.2f')(
               adjInflation ? yearData.withdrawalInfAdjust : yearData.withdrawal
@@ -339,6 +342,7 @@ export function HistoricPortfolioDetails({
               'group-hover:bg-green-200 duration-200 text-right py-2 px-6' +
               (rowSelected ? ' bg-green-200' : '')
             }
+            data-label="Deposit"
           >
             {numFormat('$,.2f')(
               adjInflation ? yearData.depositInfAdjust : yearData.deposit
@@ -349,6 +353,7 @@ export function HistoricPortfolioDetails({
               'group-hover:bg-green-200 duration-200 text-right py-2 px-6' +
               (rowSelected ? ' bg-green-200' : '')
             }
+            data-label="Notable Events"
           >
             <TextLink href={marketYearInfo.eventLink}>
               {marketYearInfo.event}
@@ -598,19 +603,18 @@ export function HistoricPortfolioDetails({
             </div>
           </div>
         </div>
-        <div className="rounded-md overflow-hidden border-2 m-6 self-center">
-          <table>
+        <div className="rounded-md overflow-hidden border-2 m-6 self-center portfolio-stats-wrapper">
+          <table className="portfolio-stats-table">
             <thead>
-              <tr>
+              <tr className="portfolio-stats-header-mobile">
                 <td className="p-0" colSpan={4}>
-                  <div className="pt-1 bg-gray-300"></div>
+                  <div className="pt-1 bg-gray-300 portfolio-stats-header" header-label="Portfolio Stats"></div>
                 </td>
               </tr>
               <tr>
                 <th
                   colSpan={3}
                   className="text-center text-gray-700 bg-gray-300 font-semibold"
-                  style={{ width: '14rem' }}
                 >
                   Portfolio Stats
                 </th>
@@ -739,27 +743,25 @@ export function HistoricPortfolioDetails({
           </table>
         </div>
       </div>
-      <div className="ml-6">
-        <div className="m-6">
-          <div className="font-bold bg-gray-300 text-gray-700 w-full text-center rounded-t-md py-2">
-            {cycleDetailsTitle()}
-          </div>
-          <div className="rounded-b-md overflow-hidden border-2">
-            <table className="border-collapse">
-              <thead>
-                <tr className="bg-green-500 text-white">
-                  <th className="p-2">Year</th>
-                  <th className="p-2">Ending Balance</th>
-                  <th className="p-2">Withdrawal</th>
-                  {displayMode === 'Full' && <th className="p-2">Deposit</th>}
-                  {displayMode === 'Full' && (
-                    <th className="p-2">Notable Events</th>
-                  )}
-                </tr>
-              </thead>
-              {getTableBody()}
-            </table>
-          </div>
+      <div className="m-6 cycle-details-wrapper">
+        <div className="font-bold bg-gray-300 text-gray-700 w-full text-center rounded-t-md py-2">
+          {cycleDetailsTitle()}
+        </div>
+        <div className="rounded-b-md overflow-hidden border-2">
+          <table className="border-collapse cycle-details-table">
+            <thead>
+              <tr className="bg-green-500 text-white">
+                <th className="p-2">Year</th>
+                <th className="p-2">Ending Balance</th>
+                <th className="p-2">Withdrawal</th>
+                {displayMode === 'Full' && <th className="p-2">Deposit</th>}
+                {displayMode === 'Full' && (
+                  <th className="p-2">Notable Events</th>
+                )}
+              </tr>
+            </thead>
+            {getTableBody()}
+          </table>
         </div>
       </div>
     </div>
