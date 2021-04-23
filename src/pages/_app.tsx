@@ -3,6 +3,7 @@ import Head from 'next/head';
 import Layout from '../components/layout';
 import DatasetContextProvider from '../data/data-context';
 import '../styles/global.css';
+import '../styles/responsive.css';
 
 export default function App({ Component, pageProps }: AppProps) {
   return (

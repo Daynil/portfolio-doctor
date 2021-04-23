@@ -1,0 +1,54 @@
+@media screen and (max-width: 1200px) {
+  .sim-container {
+    flex-direction: column;
+  }
+  .entry-form {
+    position: relative;
+    margin-bottom: 3rem;
+  }
+  .add-deposit-btn {
+    width: 100%;
+  }
+  .calculate-btn {
+    width: 100%;
+  }
+  .lifecycle-options {
+    margin-left: 0;
+  }
+  .lifecycle-options .btn {
+    margin-left: 0;
+    width: 100%;
+    margin: 0.5rem;
+  }
+  .inflation-adjusted-checkbox {
+    width: 100%;
+  }
+  .action-btn-container {
+    flex-direction: column;
+    width: 100%;
+  }
+  .action-btn-container .download-btn,
+  .action-btn-container .share-btn {
+    width: 100%;
+    margin: 0 !important;
+  }
+}
+
+@media screen and (max-width: 768px) {
+    .quantiles-chart-legend {
+      flex-direction: column;
+    }
+}
+
+@media screen and (max-width: 576px) {
+  .portfolio-health-container {
+    width: 100%;
+  }
+  .portfolio-health-content {
+    flex-direction: column;
+  }
+  .portfolio-health-content .bg-gray-500 {
+    transform: rotate(90deg);
+    transform-origin: center;
+  }
+}

@@ -420,7 +420,7 @@ export function HistoricPortfolioDetails({
         <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
       </div>
       <div className="flex flex-wrap w-full">
-        <div className="flex flex-row w-full justify-between ml-20 flex-wrap">
+        <div className="flex flex-row w-full justify-between ml-20 flex-wrap lifecycle-options">
           <div className="flex flex-row flex-wrap">
             <button
               className={clsx(
@@ -450,7 +450,7 @@ export function HistoricPortfolioDetails({
             >
               Quantiles
             </button>
-            <div className="flex flex-row items-center ml-6 w-40">
+            <div className="flex flex-row items-center ml-6 w-40 inflation-adjusted-checkbox">
               <input
                 type="checkbox"
                 id="adjInflation"
@@ -463,8 +463,8 @@ export function HistoricPortfolioDetails({
               </label>
             </div>
           </div>
-          <div className="flex mt-6 xl:mt-0">
-            <div className="flex justify-center relative">
+          <div className="flex mt-6 xl:mt-0 action-btn-container">
+            <div className="flex justify-center relative download-btn">
               <button
                 className="btn btn-green-2 flex items-center text-sm"
                 onClick={downloadResults}
@@ -473,7 +473,7 @@ export function HistoricPortfolioDetails({
                 <span className="ml-2">Download</span>
               </button>
             </div>
-            <div className="flex justify-center relative ml-6 mr-12">
+            <div className="flex justify-center relative ml-6 mr-12 share-btn">
               <button
                 className="btn btn-green-2 flex items-center text-sm"
                 onClick={shareResults}
@@ -535,7 +535,7 @@ export function HistoricPortfolioDetails({
           style={{
             height: 'fit-content'
           }}
-          className="rounded-md pb-4 border-2 border-gray-300 m-6"
+          className="rounded-md pb-4 border-2 border-gray-300 m-6 portfolio-health-container"
         >
           <div className="flex items-top bg-gray-300">
             <div className="text-gray-700 font-semibold py-1 text-center w-full">
@@ -545,7 +545,7 @@ export function HistoricPortfolioDetails({
               <QuestionIcon className="w-5 h-5 mr-1 mt-1 text-gray-500 hover:text-gray-400 transition-colors duration-100 cursor-pointer" />
             </Link>
           </div>
-          <div className="flex items-center justify-center px-2 text-center">
+          <div className="flex items-center justify-center px-2 text-center portfolio-health-content">
             <div className="text-center">
               <div className="flex flex-col pt-2 mx-4">
                 <label className="text-gray-600 font-semibold tracking-wide block">
