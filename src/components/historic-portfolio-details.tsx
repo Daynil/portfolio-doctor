@@ -608,7 +608,10 @@ export function HistoricPortfolioDetails({
             <thead>
               <tr className="portfolio-stats-header-mobile">
                 <td className="p-0" colSpan={4}>
-                  <div className="pt-1 bg-gray-300 portfolio-stats-header" header-label="Portfolio Stats"></div>
+                  <div
+                    className="pt-1 bg-gray-300 portfolio-stats-header"
+                    header-label="Portfolio Stats"
+                  ></div>
                 </td>
               </tr>
               <tr>

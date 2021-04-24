@@ -697,10 +697,10 @@ export class CyclePortfolio {
       ? { actual: 0, infAdj: 0 }
       : this.calculateWithdrawal(startingBalance, cumulativeInflation);
 
-    const inflationAdjustedDeposit = depositAmount * cumulativeInflation;
+    const depositActual = depositAmount * cumulativeInflation;
 
     const yearStartSubtotal =
-      startingBalance - withdrawalData.actual + inflationAdjustedDeposit;
+      startingBalance - withdrawalData.actual + depositActual;
 
     const equities = yearStartSubtotal * this.options.equitiesRatio;
     const equitiesGrowth =
@@ -727,8 +727,8 @@ export class CyclePortfolio {
       balanceInfAdjStart: startingBalance / cumulativeInflation,
       withdrawal: withdrawalData.actual,
       withdrawalInfAdjust: withdrawalData.infAdj,
-      deposit: depositAmount,
-      depositInfAdjust: inflationAdjustedDeposit,
+      deposit: depositActual,
+      depositInfAdjust: depositAmount,
       startSubtotal: startingBalance - withdrawalData.actual,
       equities,
       equitiesGrowth,
