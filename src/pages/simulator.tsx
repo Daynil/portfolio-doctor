@@ -464,9 +464,9 @@ export default function Simulator() {
         <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
       </div>
       <div className="mt-10">
-        <div className="flex justify-around">
+        <div className="flex justify-around sim-container">
           <div
-            className="overflow-y-auto overflow-x-auto max-h-screen p-4 sticky top-0 border-r-2"
+            className="overflow-y-auto overflow-x-auto max-h-screen p-4 sticky top-0 border-r-2 entry-form"
             style={{ minWidth: '300px' }}
           >
             <h2 className="text-lg text-gray-700 font-semibold tracking-wider border-solid border-b-2 border-green-500 mt-0">
@@ -731,7 +731,7 @@ export default function Simulator() {
             </div>
             <div className="flex w-full justify-between mt-5">
               <button
-                className="btn btn-gray text-sm tracking-wide"
+                className="btn btn-gray text-sm tracking-wide add-deposit-btn"
                 onClick={() => setDepositModalActive(true)}
               >
                 Add Deposit
@@ -739,7 +739,7 @@ export default function Simulator() {
             </div>
             <div className="flex w-full justify-between mt-12">
               <button
-                className="btn btn-green tracking-wide"
+                className="btn btn-green tracking-wide calculate-btn"
                 onClick={calculatePortfolio}
                 disabled={!marketData.length}
               >

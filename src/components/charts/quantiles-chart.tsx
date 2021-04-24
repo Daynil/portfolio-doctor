@@ -298,7 +298,7 @@ export function QuantilesChart({
             </g>
           </Chart>
         </div>
-        <div className="flex flex-row justify-center">
+        <div className="flex flex-row justify-center quantiles-chart-legend">
           <div className="flex flex-row items-center ml-8">
             <div
               style={{
