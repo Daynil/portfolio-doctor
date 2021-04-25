@@ -1,6 +1,7 @@
+import { Dialog, Transition } from '@headlessui/react';
 import { format as numFormat } from 'd3';
 import FileSaver from 'file-saver';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { Fragment, useEffect, useRef, useState } from 'react';
 import {
   CycleStats,
   CycleYearData,
@@ -418,14 +419,106 @@ export function HistoricPortfolioDetails({
 
   return !lifecyclesData ? null : (
     <div className="flex flex-row flex-wrap">
-      <div
-        className={
-          copyModalActive ? 'fixed inset-0 transition-opacity z-10' : 'hidden'
-        }
-        onClick={closeCopyModal}
-      >
-        <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
-      </div>
+      {/* Copy Modal */}
+      <Transition show={copyModalActive} as={Fragment}>
+        <Dialog
+          as="div"
+          className="fixed inset-0 z-10 overflow-y-auto"
+          static
+          open={copyModalActive}
+          onClose={closeCopyModal}
+        >
+          <div className="min-h-screen px-4 text-center">
+            <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0"
+              enterTo="opacity-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100"
+              leaveTo="opacity-0"
+            >
+              <Dialog.Overlay className="fixed inset-0 bg-black opacity-30" />
+            </Transition.Child>
+
+            {/* This element is to trick the browser into centering the modal contents. */}
+            <span
+              className="inline-block h-screen align-middle"
+              aria-hidden="true"
+            >
+              &#8203;
+            </span>
+            <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0 scale-95"
+              enterTo="opacity-100 scale-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100 scale-100"
+              leaveTo="opacity-0 scale-95"
+            >
+              <div className="inline-block w-full max-w-md p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-2xl">
+                <Dialog.Title
+                  as="h3"
+                  className="text-lg font-medium leading-6 text-gray-900"
+                >
+                  Share or Save
+                </Dialog.Title>
+                <div className="mt-2 mb-6">
+                  <p className="text-sm text-gray-500">
+                    Share this portfolio run with this URL or just bookmark it
+                    for future reference
+                    <a
+                      href={`${baseUrl}/about#share-save-download`}
+                      target="_blank"
+                      className="focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-green-500 rounded-md"
+                    >
+                      <QuestionIcon className="w-5 h-5 inline-block ml-1 text-gray-500 hover:text-gray-400 transition-colors duration-100 cursor-pointer" />
+                    </a>
+                  </p>
+                  <div className="flex mt-2">
+                    <input
+                      type="text"
+                      className="form-input w-full"
+                      value={`${baseUrl}/simulator?${portfolioOptionsToQueryString(
+                        options
+                      )}`}
+                      readOnly
+                      ref={refCopyURL}
+                    />
+                    <button
+                      className="btn btn-green ml-2 flex items-center"
+                      onClick={copyURL}
+                    >
+                      <CopyIcon className="text-white w-4" />
+                      <span className="ml-2">Copy</span>
+                    </button>
+                  </div>
+                  {!copyComplete ? null : (
+                    <div
+                      className="bg-green-100 border-l-4 border-green-500 text-green-700 py-2 px-4 mt-4"
+                      role="alert"
+                    >
+                      Copied to clipboard!
+                    </div>
+                  )}
+                </div>
+
+                <div className="mt-4">
+                  <button
+                    type="button"
+                    className="inline-flex justify-center px-4 py-2 text-sm font-medium text-green-900 bg-green-200 border border-transparent rounded-md hover:bg-green-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-green-500"
+                    // ref={cancelButtonRef}
+                    onClick={closeCopyModal}
+                  >
+                    Okay
+                  </button>
+                </div>
+              </div>
+            </Transition.Child>
+          </div>
+        </Dialog>
+      </Transition>
       <div className="flex flex-wrap w-full">
         <div className="flex flex-row w-full justify-between ml-20 flex-wrap lifecycle-options">
           <div className="flex flex-row flex-wrap">
@@ -488,7 +581,7 @@ export function HistoricPortfolioDetails({
                 <ShareIcon className="text-green-700 w-4" />
                 <span className="ml-2">Share</span>
               </button>
-              <div
+              {/* <div
                 className={
                   copyModalActive
                     ? 'absolute bg-white shadow-lg rounded-md mt-14 mr-64 text-base p-4 w-96 flex flex-col z-20'
@@ -529,7 +622,7 @@ export function HistoricPortfolioDetails({
                     Copied to clipboard!
                   </div>
                 )}
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
