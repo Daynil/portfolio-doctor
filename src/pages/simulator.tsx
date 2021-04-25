@@ -1,7 +1,14 @@
+import { Dialog, Transition } from '@headlessui/react';
 import { format as numFormat } from 'd3-format';
 import cloneDeep from 'lodash.clonedeep';
 import isEqual from 'lodash.isequal';
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, {
+  Fragment,
+  useContext,
+  useEffect,
+  useRef,
+  useState
+} from 'react';
 import {
   HistoricPortfolioDetails,
   PortfolioData
@@ -482,16 +489,6 @@ export default function Simulator() {
         closeModal={() => setDialogModalOpen(false)}
         {...dialogOptions}
       />
-      <div
-        className={
-          depositModalActive
-            ? 'fixed inset-0 transition-opacity z-10'
-            : 'hidden'
-        }
-        onClick={() => setDepositModalActive(false)}
-      >
-        <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
-      </div>
       <div className="mt-10">
         <div className="flex justify-around sim-container">
           <div
@@ -779,7 +776,114 @@ export default function Simulator() {
               </button>
             </div>
           </div>
-          <div
+          {/* Deposit Modal */}
+          <Transition show={depositModalActive} as={Fragment}>
+            <Dialog
+              as="div"
+              className="fixed inset-0 z-10 overflow-y-auto"
+              static
+              open={depositModalActive}
+              onClose={() => setDepositModalActive(false)}
+            >
+              <div className="min-h-screen px-4 text-center">
+                <Transition.Child
+                  as={Fragment}
+                  enter="ease-out duration-300"
+                  enterFrom="opacity-0"
+                  enterTo="opacity-100"
+                  leave="ease-in duration-200"
+                  leaveFrom="opacity-100"
+                  leaveTo="opacity-0"
+                >
+                  <Dialog.Overlay className="fixed inset-0 bg-black opacity-30" />
+                </Transition.Child>
+
+                {/* This element is to trick the browser into centering the modal contents. */}
+                <span
+                  className="inline-block h-screen align-middle"
+                  aria-hidden="true"
+                >
+                  &#8203;
+                </span>
+                <Transition.Child
+                  as={Fragment}
+                  enter="ease-out duration-300"
+                  enterFrom="opacity-0 scale-95"
+                  enterTo="opacity-100 scale-100"
+                  leave="ease-in duration-200"
+                  leaveFrom="opacity-100 scale-100"
+                  leaveTo="opacity-0 scale-95"
+                >
+                  <div className="inline-block w-full max-w-md p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-2xl">
+                    <Dialog.Title as="h1" className="text-2xl text-gray-600">
+                      Deposit
+                    </Dialog.Title>
+                    <div className="h-px w-full -mt-5 mb-6 bg-gray-500"></div>
+                    {depositInputErr ? (
+                      <div
+                        className="bg-red-100 border-l-4 border-red-500 text-red-700 py-2 px-4 my-2"
+                        role="alert"
+                      >
+                        <p className="font-bold">Input Error</p>
+                        <p className="text-sm">{depositInputErr}</p>
+                      </div>
+                    ) : null}
+
+                    <div className="flex flex-col">
+                      <label className="form-label" htmlFor="depositAmount">
+                        Amount
+                      </label>
+                      <TextInput
+                        symbolPrefix="$"
+                        className="pl-8 w-full"
+                        name="depositAmount"
+                        type="text"
+                        defaultValue={numFormat(',')(1000)}
+                        ref={refDepositAmount}
+                        onBlur={(e) =>
+                          handleIntegerInputChange(e, refDepositAmount)
+                        }
+                      />
+                    </div>
+                    <div className="flex flex-col mt-4">
+                      <label className="form-label" htmlFor="startDeposits">
+                        Start On (year)
+                      </label>
+                      <TextInput
+                        name="startDeposits"
+                        type="number"
+                        defaultValue={1}
+                        min={1}
+                        ref={refDepositStart}
+                      />
+                    </div>
+                    <div className="flex flex-col mt-4">
+                      <label className="form-label" htmlFor="endDeposits">
+                        Stop On (year)
+                      </label>
+                      <TextInput
+                        name="endDeposits"
+                        type="number"
+                        defaultValue={5}
+                        min={1}
+                        ref={refDepositEnd}
+                      />
+                    </div>
+                    <div className="flex w-full justify-between mt-6">
+                      <button
+                        className="btn btn-green tracking-wide"
+                        onClick={() => addDeposit()}
+                      >
+                        Save
+                      </button>
+                    </div>
+                  </div>
+                </Transition.Child>
+              </div>
+            </Dialog>
+          </Transition>
+
+          {/* <div
             className={
               depositModalActive
                 ? 'absolute bg-white shadow-lg rounded-md text-base p-6 w-96 flex flex-col z-20'
@@ -843,7 +947,7 @@ export default function Simulator() {
                 Save
               </button>
             </div>
-          </div>
+          </div> */}
           <div className="w-full">{getPortfolioChart()}</div>
         </div>
       </div>
