@@ -491,10 +491,7 @@ export default function Simulator() {
       />
       <div className="mt-10">
         <div className="flex justify-around sim-container">
-          <div
-            className="overflow-y-auto overflow-x-auto max-h-screen p-4 sticky top-0 border-r-2 entry-form"
-            style={{ minWidth: '300px' }}
-          >
+          <div className="overflow-y-auto min-w-[300px] overflow-x-auto p-4 sticky top-0 border-r-2 entry-form">
             <h2 className="text-lg text-gray-700 font-semibold tracking-wider border-solid border-b-2 border-green-500 mt-0">
               Portfolio Info
             </h2>
