@@ -581,48 +581,6 @@ export function HistoricPortfolioDetails({
                 <ShareIcon className="text-green-700 w-4" />
                 <span className="ml-2">Share</span>
               </button>
-              {/* <div
-                className={
-                  copyModalActive
-                    ? 'absolute bg-white shadow-lg rounded-md mt-14 mr-64 text-base p-4 w-96 flex flex-col z-20'
-                    : 'hidden'
-                }
-              >
-                <div className="text-gray-900">
-                  Share this portfolio run with this URL or just bookmark it for
-                  future reference
-                  <QuestionIcon
-                    onClick={() => createModal('share-save-download')}
-                    className="w-5 h-5 inline-block ml-1 text-gray-500 hover:text-gray-400 transition-colors duration-100 cursor-pointer"
-                  />
-                </div>
-                <div className="flex mt-2">
-                  <input
-                    type="text"
-                    className="form-input w-full"
-                    value={`${baseUrl}/simulator?${portfolioOptionsToQueryString(
-                      options
-                    )}`}
-                    readOnly
-                    ref={refCopyURL}
-                  />
-                  <button
-                    className="btn btn-green ml-2 flex items-center"
-                    onClick={copyURL}
-                  >
-                    <CopyIcon className="text-white w-4" />
-                    <span className="ml-2">Copy</span>
-                  </button>
-                </div>
-                {!copyComplete ? null : (
-                  <div
-                    className="bg-green-100 border-l-4 border-green-500 text-green-700 py-2 px-4 mt-4"
-                    role="alert"
-                  >
-                    Copied to clipboard!
-                  </div>
-                )}
-              </div> */}
             </div>
           </div>
         </div>
