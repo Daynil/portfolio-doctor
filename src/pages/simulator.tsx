@@ -1,17 +1,18 @@
 import { format as numFormat } from 'd3-format';
 import cloneDeep from 'lodash.clonedeep';
 import isEqual from 'lodash.isequal';
-import Link from 'next/link';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import {
   HistoricPortfolioDetails,
   PortfolioData
 } from '../components/historic-portfolio-details';
+import ModalDialog, { DialogContentProps } from '../components/modal-dialog';
 import { MonteCarloPortfolioDetails } from '../components/monte-carlo-portfolio-details';
 import RadioInput from '../components/radio-input';
 import SEO from '../components/seo';
 import QuestionIcon from '../components/svg/question-icon';
 import TextInput from '../components/text-input';
+import TextLink from '../components/text-link';
 import {
   CyclePortfolio,
   CycleYearData,
@@ -32,11 +33,13 @@ import {
   getQuantileStats,
   parseCSVStringToJSON
 } from '../data/data-helpers';
+import { baseUrl } from '../utilities/constants';
 import { parseStringyNum } from '../utilities/format';
 import {
   defaultPortfolioOptions,
   queryStringToPortfolioOptions
 } from '../utilities/util';
+import { aboutContents, AboutSectionTitles } from './about';
 
 export default function Simulator() {
   const [depositModalActive, setDepositModalActive] = useState(false);
@@ -47,6 +50,9 @@ export default function Simulator() {
   const [marketDataStats, setMarketDataStats] = useState<MarketDataStats>(null);
   const [inputErr, setInputErr] = useState('');
   const [depositInputErr, setDepositInputErr] = useState('');
+
+  const [dialogModalOpen, setDialogModalOpen] = useState(false);
+  const [dialogOptions, setDialogOptions] = useState<DialogContentProps>(null);
 
   const refStartingBalance = useRef<HTMLInputElement>(null);
   const refStockRatio = useRef<HTMLInputElement>(null);
@@ -257,7 +263,8 @@ export default function Simulator() {
         quantiles: quantileLines,
         quantileStats: getQuantileStats(quantileLines),
         options: curPortfolio.options,
-        marketData
+        marketData,
+        createModal
       });
     } else {
       const simsPerMarketData = getMaxSimulationCycles(
@@ -447,11 +454,33 @@ export default function Simulator() {
       );
   }
 
+  function createModal(modalType: AboutSectionTitles) {
+    setDialogOptions({
+      title: aboutContents[modalType].text,
+      body: (
+        <div className="text-sm">
+          <div className="text-gray-500 mb-2">
+            {aboutContents[modalType].contents}
+          </div>
+          <TextLink href={`${baseUrl}/about#${modalType}`}>
+            See full help information
+          </TextLink>
+        </div>
+      )
+    });
+    setDialogModalOpen(true);
+  }
+
   return (
     <div>
       <SEO
         title="FI Portfolio Doctor Simulator"
         description="An app for projecting portfolio performance for financial independence and retirement"
+      />
+      <ModalDialog
+        open={dialogModalOpen}
+        closeModal={() => setDialogModalOpen(false)}
+        {...dialogOptions}
       />
       <div
         className={
@@ -552,9 +581,10 @@ export default function Simulator() {
                 <label className="form-label" htmlFor="equitiesRatio">
                   Stock Ratio
                 </label>
-                <Link href="/about#stock-ratio">
-                  <QuestionIcon className="w-5 h-5 text-gray-500 hover:text-gray-400 transition-colors duration-100 cursor-pointer" />
-                </Link>
+                <QuestionIcon
+                  onClick={() => createModal('stock-ratio')}
+                  className="w-5 h-5 text-gray-500 hover:text-gray-400 transition-colors duration-100 cursor-pointer"
+                />
               </div>
               <TextInput
                 symbolSuffix="%"
@@ -570,9 +600,10 @@ export default function Simulator() {
                 <label className="form-label" htmlFor="expenseRatio">
                   Expense Ratio
                 </label>
-                <Link href="/about#expense-ratio">
-                  <QuestionIcon className="w-5 h-5 ml-1 text-gray-500 hover:text-gray-400 transition-colors duration-100 cursor-pointer" />
-                </Link>
+                <QuestionIcon
+                  onClick={() => createModal('expense-ratio')}
+                  className="w-5 h-5 ml-1 text-gray-500 hover:text-gray-400 transition-colors duration-100 cursor-pointer"
+                />
               </div>
               <TextInput
                 symbolSuffix="%"
@@ -588,9 +619,10 @@ export default function Simulator() {
                 <label className="form-label" htmlFor="simLength">
                   Simulation Length (years)
                 </label>
-                <Link href="/about#simulation-length">
-                  <QuestionIcon className="w-5 h-5 ml-1 text-gray-500 hover:text-gray-400 transition-colors duration-100 cursor-pointer" />
-                </Link>
+                <QuestionIcon
+                  onClick={() => createModal('simulation-length')}
+                  className="w-5 h-5 ml-1 text-gray-500 hover:text-gray-400 transition-colors duration-100 cursor-pointer"
+                />
               </div>
               <TextInput
                 name="simLength"
@@ -605,9 +637,10 @@ export default function Simulator() {
               <h3 className="text-base tracking-wider text-gray-700 font-semibold">
                 Withdrawals
               </h3>
-              <Link href="/about#withdrawals">
-                <QuestionIcon className="w-5 h-5 ml-1 text-gray-500 hover:text-gray-400 transition-colors duration-100 cursor-pointer" />
-              </Link>
+              <QuestionIcon
+                onClick={() => createModal('withdrawals')}
+                className="w-5 h-5 ml-1 text-gray-500 hover:text-gray-400 transition-colors duration-100 cursor-pointer"
+              />
             </div>
             <div className="text-gray-800 mt-2">
               <label className="form-label">Method</label>
@@ -700,9 +733,10 @@ export default function Simulator() {
               <h3 className="text-base tracking-wider text-gray-700 font-semibold">
                 Deposits
               </h3>
-              <Link href="/about#withdrawal-delays-and-deposits">
-                <QuestionIcon className="w-5 h-5 ml-1 text-gray-500 hover:text-gray-400 transition-colors duration-100 cursor-pointer" />
-              </Link>
+              <QuestionIcon
+                onClick={() => createModal('withdrawal-delays-and-deposits')}
+                className="w-5 h-5 ml-1 text-gray-500 hover:text-gray-400 transition-colors duration-100 cursor-pointer"
+              />
             </div>
             <div className="flex flex-col mt-3">
               {!deposits.length ? (

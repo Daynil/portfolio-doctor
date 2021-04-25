@@ -5,6 +5,7 @@
   "version": "0.1.0",
   "author": "Danny Libin <dlibinrx@gmail.com>",
   "dependencies": {
+    "@headlessui/react": "^1.0.0",
     "@juggle/resize-observer": "^3.2.0",
     "@tailwindcss/forms": "^0.2.1",
     "@types/d3": "^6.3.0",
@@ -13,15 +14,17 @@
     "cssnano": "^4.1.10",
     "d3": "^6.5.0",
     "file-saver": "^2.0.2",
+    "focus-visible": "^5.2.0",
     "lodash.clonedeep": "^4.5.0",
     "lodash.isequal": "^4.5.0",
     "next": "^10.0.1",
     "postcss": "^8.1.10",
+    "postcss-focus-visible": "^5.0.0",
     "postcss-import": "^13.0.0",
     "query-string": "^6.13.7",
     "react": "^16.14.0",
     "react-dom": "^16.14.0",
-    "tailwindcss": "^2.0.1",
+    "tailwindcss": "^2.1.2",
     "ts-node": "^9.1.1"
   },
   "devDependencies": {

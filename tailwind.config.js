@@ -2,14 +2,10 @@ const defaultTheme = require('tailwindcss/defaultTheme');
 const colors = require('tailwindcss/colors');
 
 module.exports = {
+  mode: 'jit',
   purge: {
     layers: ['utilities'],
     content: ['./src/**/*.tsx', './src/**/*.ts', './src/**/*.css']
-  },
-  variants: {
-    extend: {
-      backgroundColor: ['even']
-    }
   },
   theme: {
     colors: {

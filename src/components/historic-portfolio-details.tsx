@@ -1,6 +1,5 @@
 import { format as numFormat } from 'd3';
 import FileSaver from 'file-saver';
-import Link from 'next/link';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   CycleStats,
@@ -13,6 +12,7 @@ import {
   QuantileStats
 } from '../data/calc/portfolio-calc';
 import { lifecyclesToCSV } from '../data/data-helpers';
+import { AboutSectionTitles } from '../pages/about';
 import { baseUrl } from '../utilities/constants';
 import { numToCurrency } from '../utilities/format';
 import { clsx, portfolioOptionsToQueryString } from '../utilities/util';
@@ -32,6 +32,7 @@ export interface PortfolioData {
   quantileStats: QuantileStats[];
   options: PortfolioOptions;
   marketData: MarketYearData[];
+  createModal: (modalType: AboutSectionTitles) => void;
 }
 
 export interface Point {
@@ -48,7 +49,8 @@ export function HistoricPortfolioDetails({
   quantiles,
   quantileStats,
   options,
-  marketData
+  marketData,
+  createModal
 }: PortfolioData) {
   const refCopyURL = useRef<HTMLInputElement>(null);
   const [selectedPoint, setSelectedPoint] = useState<Point>(null);
@@ -496,9 +498,10 @@ export function HistoricPortfolioDetails({
                 <div className="text-gray-900">
                   Share this portfolio run with this URL or just bookmark it for
                   future reference
-                  <Link href="/about#share-save-download">
-                    <QuestionIcon className="w-5 h-5 inline-block ml-1 text-gray-500 hover:text-gray-400 transition-colors duration-100 cursor-pointer" />
-                  </Link>
+                  <QuestionIcon
+                    onClick={() => createModal('share-save-download')}
+                    className="w-5 h-5 inline-block ml-1 text-gray-500 hover:text-gray-400 transition-colors duration-100 cursor-pointer"
+                  />
                 </div>
                 <div className="flex mt-2">
                   <input
@@ -546,9 +549,10 @@ export function HistoricPortfolioDetails({
             <div className="text-gray-700 font-semibold py-1 text-center w-full">
               Portfolio Health
             </div>
-            <Link href="/about#results">
-              <QuestionIcon className="w-5 h-5 mr-1 mt-1 text-gray-500 hover:text-gray-400 transition-colors duration-100 cursor-pointer" />
-            </Link>
+            <QuestionIcon
+              onClick={() => createModal('results')}
+              className="w-5 h-5 mr-1 mt-1 text-gray-500 hover:text-gray-400 transition-colors duration-100 cursor-pointer"
+            />
           </div>
           <div className="flex items-center justify-center px-2 text-center portfolio-health-content">
             <div className="text-center">

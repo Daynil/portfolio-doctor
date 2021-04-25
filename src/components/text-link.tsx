@@ -24,7 +24,13 @@ export default function TextLink({
 
   const link =
     external || internalImage ? (
-      <a href={href} rel={rel} target={target} {...delegated}>
+      <a
+        className="focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-green-500 rounded-md"
+        href={href}
+        rel={rel}
+        target={target}
+        {...delegated}
+      >
         {children}
       </a>
     ) : (
@@ -32,7 +38,7 @@ export default function TextLink({
     );
 
   return (
-    <span className="border-b-2 border-green-500 text-gray-900 hover:text-green-500 hover:border-transparent transition duration-200 ease-in-out">
+    <span className="border-b-2 border-green-500 text-gray-900 hover:text-green-500 hover:border-transparent transition duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-green-500 focus-visible:rounded-md">
       {link}
     </span>
   );
