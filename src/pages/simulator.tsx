@@ -310,7 +310,7 @@ export default function Simulator() {
                 portfolioOptions.withdrawal.staticAmount
               )}
               ref={refWithdrawalAmount}
-              onChange={(e) => handleIntegerInputChange(e, refWithdrawalAmount)}
+              onBlur={(e) => handleIntegerInputChange(e, refWithdrawalAmount)}
             />
           </div>
         );
@@ -360,7 +360,7 @@ export default function Simulator() {
                 type="text"
                 defaultValue={numFormat(',')(portfolioOptions.withdrawal.floor)}
                 ref={refWithdrawalMin}
-                onChange={(e) => handleIntegerInputChange(e, refWithdrawalMin)}
+                onBlur={(e) => handleIntegerInputChange(e, refWithdrawalMin)}
               />
             </div>
             <div className="flex flex-col mt-4">
@@ -376,7 +376,7 @@ export default function Simulator() {
                   portfolioOptions.withdrawal.ceiling
                 )}
                 ref={refWithdrawalMax}
-                onChange={(e) => handleIntegerInputChange(e, refWithdrawalMax)}
+                onBlur={(e) => handleIntegerInputChange(e, refWithdrawalMax)}
               />
             </div>
           </div>
@@ -571,9 +571,7 @@ export default function Simulator() {
                 type="text"
                 defaultValue={numFormat(',')(portfolioOptions.startBalance)}
                 ref={refStartingBalance}
-                onChange={(e) =>
-                  handleIntegerInputChange(e, refStartingBalance)
-                }
+                onBlur={(e) => handleIntegerInputChange(e, refStartingBalance)}
               />
             </div>
             <div className="flex flex-col mt-4">
@@ -810,7 +808,7 @@ export default function Simulator() {
                 type="text"
                 defaultValue={numFormat(',')(1000)}
                 ref={refDepositAmount}
-                onChange={(e) => handleIntegerInputChange(e, refDepositAmount)}
+                onBlur={(e) => handleIntegerInputChange(e, refDepositAmount)}
               />
             </div>
             <div className="flex flex-col mt-4">
