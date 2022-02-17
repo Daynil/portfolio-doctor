@@ -17,7 +17,7 @@
     "focus-visible": "^5.2.0",
     "lodash.clonedeep": "^4.5.0",
     "lodash.isequal": "^4.5.0",
-    "next": "^10.0.1",
+    "next": "^12.1.0",
     "postcss": "^8.1.10",
     "postcss-focus-visible": "^5.0.0",
     "postcss-import": "^13.0.0",
